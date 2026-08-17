@@ -1,0 +1,208 @@
+openapi: 3.1.0
+info:
+  title: Memo Bank Marketplace
+  description: "The Memo Bank Marketplace allows third-party developers to build integrations\
+    \ for Memo Bank customers. \n\nMarketplace applications use the same API as our\
+    \ customers, with an OAuth2 layer on top to access resources on their behalf.\n\
+    \nThis documentation only covers the marketplace-specific concerns. For the remaining\
+    \ API reference, see the [Memo Bank API documentation](https://docs.api.memo.bank).\n"
+  version: "1.0"
+servers:
+- url: https://api.memo.bank
+  description: Production
+- url: https://api.sandbox.memo.bank
+  description: Sandbox
+tags:
+- name: OAuth2
+  description: |
+    OAuth2 token management endpoints.
+paths:
+  /oauth2/token:
+    post:
+      tags:
+      - OAuth2
+      summary: Create an access token
+      operationId: createToken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              discriminator:
+                propertyName: grant_type
+                mapping:
+                  authorization_code: "#/components/schemas/AuthorizationCodeGrant"
+                  refresh_token: "#/components/schemas/RefreshTokenGrant"
+              oneOf:
+              - $ref: "#/components/schemas/AuthorizationCodeGrant"
+              - $ref: "#/components/schemas/RefreshTokenGrant"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OAuth2Token"
+      security:
+      - JWT: []
+components:
+  schemas:
+    OAuth2Token:
+      required:
+      - access_token
+      - connection_id
+      - expires_in
+      - refresh_token
+      - scope
+      - token_type
+      type: object
+      properties:
+        access_token:
+          type: string
+          description: The access token.
+        token_type:
+          type: string
+          description: The token type.
+          example: bearer
+        expires_in:
+          type: integer
+          description: The lifetime of the access token in seconds.
+          format: int64
+          example: 3600
+        refresh_token:
+          type: string
+          description: The refresh token.
+        scope:
+          type: string
+          description: Space-separated list of granted scopes.
+        connection_id:
+          type: string
+          description: ID of the connection this token is linked to.
+          format: uuid
+    AuthorizationCodeGrant:
+      required:
+      - client_id
+      - client_secret
+      - code
+      - redirect_uri
+      type: object
+      allOf:
+      - $ref: "#/components/schemas/CreateOauth2TokenDTODiscriminator"
+      - type: object
+        properties:
+          code:
+            type: string
+            description: Authorization code received from the authorization endpoint.
+          redirect_uri:
+            type: string
+            description: Redirect URI used in the authorization request.
+          client_id:
+            type: string
+            description: OAuth2 client identifier.
+          client_secret:
+            type: string
+            description: OAuth2 client secret.
+    CreateOauth2TokenDTO:
+      type: object
+      discriminator:
+        propertyName: grant_type
+        mapping:
+          authorization_code: "#/components/schemas/AuthorizationCodeGrant"
+          refresh_token: "#/components/schemas/RefreshTokenGrant"
+      oneOf:
+      - $ref: "#/components/schemas/AuthorizationCodeGrant"
+      - $ref: "#/components/schemas/RefreshTokenGrant"
+    RefreshTokenGrant:
+      required:
+      - client_id
+      - client_secret
+      - refresh_token
+      type: object
+      allOf:
+      - $ref: "#/components/schemas/CreateOauth2TokenDTODiscriminator"
+      - type: object
+        properties:
+          refresh_token:
+            type: string
+            description: Refresh token received from a previous token request.
+          client_id:
+            type: string
+            description: OAuth2 client identifier.
+          client_secret:
+            type: string
+            description: OAuth2 client secret.
+          scope:
+            type: string
+            description: Space-separated list of scopes. Must be a subset of original
+              scopes.
+    CreateOauth2TokenDTODiscriminator:
+      required:
+      - grant_type
+      type: object
+      properties:
+        grant_type:
+          type: string
+x-topics:
+- title: Getting started
+  content: |
+    [Contact us](mailto:openbanking@memo.bank) to apply for a marketplace application registration.
+
+    To register, you'll need:
+    - A **private key** to sign the JWT to authenticate your requests;
+    - A set of **scopes** your application will have access to;
+    - One or more **redirect URIs** to be used during the OAuth2 flow.
+
+
+    Upon registration, you'll receive the following pieces of information:
+    - A **certificate** and its SHA256 thumbprint to identify your application;
+    - A **secret code** to include in the JWT to authenticate your requests;
+    - A **client ID** to identify your application when using the OAuth2 flow;
+    - A **client secret** to authenticate your OAuth2 token requests;
+    - A **token** to authenticate our requests to your webhook.
+
+    Keep your secrets secure and never expose them in client-side code.
+- title: Authorization flow
+  content: "Marketplace applications make use of the standard OAuth2 Authorization\
+    \ Code flow:\n\n**1. Redirect the user to the authorization page**\n\nRedirect\
+    \ the user's browser to `https://client.memo.bank/authorize` with the following\
+    \ query parameters:\n- `client_id` — your application's client ID;\n- `redirect_uri`\
+    \ — one of your registered redirect URIs;\n- `scope` — space-separated list of\
+    \ requested scopes;\n- `state` — an opaque value to maintain state between the\
+    \ request and callback.\n\n**2. User approves access**\n\nThe user reviews the\
+    \ requested permissions and approves. They are then redirected to your `redirect_uri`\
+    \ with a `code` in the query parameters.\n\nIf the user denies the access or if\
+    \ an error occurs, they are redirected to your `redirect_uri` with an `error`\
+    \ and optionally an `error_description` in the query parameters. \n\n**3. Exchange\
+    \ the code with a token**\n\nMake a `POST` request to `/oauth2/token` using the\
+    \ `authorization_code` grant type, along with the `code` you received during the\
+    \ previous step, as well as your `redirect_uri`, `client_id` and `client_secret`.\n\
+    \nSee the API reference for the [OAuth2 token endpoint](#operation-createtoken)\
+    \ below for more details.\n\n**4. Refresh your access tokens**\n\nUse the `refresh_token`\
+    \ grant type to obtain new access and refresh tokens without requiring the user\
+    \ to re-authorize your  application.\n\n**Token lifetimes:**\n- Access token:\
+    \ **2 hours**.\n- Refresh token: **14 days** (single use).\n- Authorization code:\
+    \ **5 minutes** (single use).\n"
+- title: Connection lifecycle
+  content: |
+    A connection represents the link between your application and a user on a specific Memo Bank workspace. A single connection can exist for a user/workspace pair at a given time.
+
+    The ID of the connection can be retrieved from the [OAuth2 token endpoint](#operation-createtoken) and will be sent along events to the application's webhooks.
+
+    When a user deactivates a connection, requests to the API will fail with an `inactive_connection` error code.
+- title: Authentication
+  content: |
+    Marketplace applications authenticate themselves using the same JWT scheme as described in the [Memo Bank API documentation](https://docs.api.memo.bank/#doc-authentication). The only difference being that the JWT must be sent in the `X-Memo-Signature` header, while the `Authorization` header must be used to send the OAuth2 access token.
+
+    In addition to the standard JWT claims, the JWT payload must include an `oat#S256` claim containing the base64url-encoded SHA-256 hash of the OAuth2 access token (`base64url(sha256(access_token))`, see [`base64url`](https://datatracker.ietf.org/doc/html/rfc7515#appendix-C)), This binds the signature to the specific access token used in the request.
+
+    Your application can only access resources that fall within the granted scopes and the specific accounts the user has authorized. Attempting to access resources outside of scope will result in an error.
+
+    For the full list of available API endpoints and their required scopes, please refer to the [Memo Bank API documentation](https://docs.api.memo.bank).
+- title: Webhooks
+  content: |
+    Marketplace applications can receive webhook events when something happens on a connected user's workspace. The setup and configuration of webhooks, event types, payload format, delivery behavior and retry policy are the same as described in the [Memo Bank API documentation](https://docs.api.memo.bank/group/webhook-webhook).
+
+    When sending an event to a marketplace application, we'll include a **`X-Memo-Connection-Id`** header. This header identifies which connection is linked to the event, allowing your application to route events to the correct context.
+
+    When using the [Webhooks endpoints](https://docs.api.memo.bank/group/endpoint-webhooks), managed webhooks will be tied to the connection linked to the OAuth2 access token when making the call. This allows you to configure a  different URL for each connection. We can also configure a global  webhook tied to your application if you only need one URL or do not want to use these endpoints.

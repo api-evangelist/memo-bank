@@ -1,0 +1,117 @@
+generated: '2026-08-17'
+method: probed
+source: live GET of /.well-known/* on every apis.yml and OpenAPI servers[] host
+note: >-
+  Memo Bank serves no security.txt, OIDC discovery document, api-catalog or ai-plugin.json on any host: all
+  eight standard paths return 404 on all seven hosts probed. The single real document found is an RFC 9728
+  OAuth 2.0 Protected Resource Metadata file, which is served at the path-suffixed location for the MCP
+  server resource (/.well-known/oauth-protected-resource/api/apps/mcp/server) rather than at the bare
+  /.well-known/oauth-protected-resource root, which 404s. That document was discovered from the
+  WWW-Authenticate challenge the MCP endpoint returns, not by guessing a path. Note also that
+  https://memo.bank/security.txt answers HTTP 200 with the Next.js single-page-app shell (it parses the
+  filename as a locale, emitting <html lang="security.txt">) and is NOT a security.txt - it is recorded
+  below as a soft-200 miss.
+hosts_probed:
+- https://memo.bank
+- https://api.memo.bank
+- https://api.sandbox.memo.bank
+- https://docs.api.memo.bank
+- https://docs-marketplace.api.memo.bank
+- https://docs-nextgenpsd2.api.memo.bank
+- https://client.memo.bank
+documents:
+- host: https://api.memo.bank
+  path: /.well-known/oauth-protected-resource/api/apps/mcp/server
+  status: 200
+  content_type: application/json
+  spec: RFC 9728 OAuth 2.0 Protected Resource Metadata
+  file: memo-bank-mcp-oauth-protected-resource.json
+  discovered_via: >-
+    WWW-Authenticate: Bearer resource_metadata="..." header returned by POST
+    https://api.memo.bank/api/apps/mcp/server
+- host: https://api.memo.bank
+  path: /.well-known/oauth-protected-resource
+  status: 404
+- host: https://api.memo.bank
+  path: /.well-known/oauth-authorization-server
+  status: 404
+  note: >-
+    The protected-resource document names https://api.memo.bank/api/apps/mcp/server as its own
+    authorization_servers[0], but no RFC 8414 authorization-server metadata document is served at that URL
+    or at the /.well-known root, so an MCP client cannot complete anonymous discovery of the authorize and
+    token endpoints. Those are documented in prose instead (see scopes/memo-bank-scopes.yml).
+- host: https://api.memo.bank
+  path: /.well-known/security.txt
+  status: 404
+- host: https://api.memo.bank
+  path: /.well-known/openid-configuration
+  status: 404
+- host: https://api.memo.bank
+  path: /.well-known/api-catalog
+  status: 404
+- host: https://api.memo.bank
+  path: /.well-known/ai-plugin.json
+  status: 404
+- host: https://api.memo.bank
+  path: /.well-known/agent-card.json
+  status: 404
+- host: https://api.memo.bank
+  path: /.well-known/agent.json
+  status: 404
+- host: https://memo.bank
+  path: /.well-known/security.txt
+  status: 404
+- host: https://memo.bank
+  path: /security.txt
+  status: 200
+  soft_404: true
+  content_type: text/html
+  note: >-
+    Not a document. HTTP 200 returning the site's Next.js SPA shell with lang="security.txt" - the
+    catch-all route, not RFC 9116 content. Treated as a miss.
+- host: https://memo.bank
+  path: /.well-known/openid-configuration
+  status: 404
+- host: https://memo.bank
+  path: /.well-known/oauth-authorization-server
+  status: 404
+- host: https://memo.bank
+  path: /.well-known/api-catalog
+  status: 404
+- host: https://memo.bank
+  path: /.well-known/ai-plugin.json
+  status: 404
+- host: https://memo.bank
+  path: /.well-known/agent-card.json
+  status: 404
+- host: https://memo.bank
+  path: /.well-known/agent.json
+  status: 404
+- host: https://api.sandbox.memo.bank
+  path: /.well-known/security.txt
+  status: 404
+  note: All eight standard paths return 404 on this host.
+- host: https://docs.api.memo.bank
+  path: /.well-known/security.txt
+  status: 404
+  note: All eight standard paths return the Bump.sh 404 HTML page on this host.
+- host: https://docs-marketplace.api.memo.bank
+  path: /.well-known/security.txt
+  status: 404
+  note: All eight standard paths return the Bump.sh 404 HTML page on this host.
+- host: https://docs-nextgenpsd2.api.memo.bank
+  path: /.well-known/security.txt
+  status: 404
+  note: All eight standard paths return the Bump.sh 404 HTML page on this host.
+- host: https://client.memo.bank
+  path: /.well-known/security.txt
+  status: 404
+  note: All eight standard paths return 404 on this host.
+gaps:
+- >-
+  No /.well-known/security.txt (RFC 9116) on any host, despite a security@memo.bank contact being published
+  in the memo.bank DNS CAA iodef record - see security/memo-bank-vulnerability-disclosure.yml.
+- >-
+  No RFC 8414 authorization-server metadata, so the OAuth 2.0 endpoints used by both the Marketplace API and
+  the MCP connector are discoverable only from prose documentation.
+- No /.well-known/api-catalog (RFC 9727) pointing at the three published OpenAPI documents.

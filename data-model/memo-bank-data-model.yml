@@ -1,0 +1,569 @@
+generated: '2026-08-17'
+method: derived
+source: openapi/memo-bank-premium-bank-api-openapi.yml
+note: >-
+  Entity-relationship graph derived from the 119 schemas in the Premium Bank API OpenAPI - $ref links and
+  id-reference fields (account_id, transaction_id, batch_id, resource_id, return_transaction_id). Memo Bank
+  publishes no separate object reference page, so identifier conventions below are read off the spec's
+  declared formats rather than from prose. Every entity, field and relationship named here exists verbatim
+  in the spec.
+identifiers:
+  scheme: UUID
+  prefixed_ids: false
+  note: >-
+    All primary keys are bare RFC 4122 UUIDs (format: uuid) with no type prefix, so an identifier is not
+    self-describing - unlike Stripe-style prefixed ids, a bare UUID gives no clue which endpoint to call.
+    Callers must track the type alongside the id, which is exactly why the webhook Event carries an explicit
+    resource_type next to resource_id.
+  business_identifiers:
+  - field: reference
+    type: uuid
+    entities:
+    - Transaction
+    - Transfer
+    - TransferV2
+    - WireTransfer
+    - Collection
+    purpose: >-
+      Correlates an initiated payment with the resulting transaction. The key that joins the instruction side
+      of the model to the ledger side.
+  - field: end_to_end_id
+    entities:
+    - TransferV2
+    - Collection
+    purpose: SEPA end-to-end identification carried on the payment itself.
+  - field: uetr
+    entities:
+    - WireTransfer
+    purpose: SWIFT Unique End-to-end Transaction Reference.
+  - field: custom_id
+    entities:
+    - Transaction
+    - TransferV2
+    - WireTransfer
+    - Collection
+    purpose: >-
+      Caller-supplied reconciliation key, explicitly NOT transmitted on the payment - the intended join key
+      back to the integrator's own system.
+  - field: mandate.reference
+    entities:
+    - CollectionMandate
+    purpose: >-
+      Unique SEPA mandate reference. Natural-keyed rather than UUID: reusing a reference with a different
+      IBAN fails with mandate_iban_mismatch.
+money_representation:
+  amount: integer, minor units (smallest unit of the currency)
+  currency: ISO 4217 string
+  note: >-
+    Integer minor units throughout - no floats anywhere in the model, which is correct and worth recording as
+    a positive finding for a banking API. WireTransfer uses instructed_amount / instructed_currency to
+    distinguish the instructed currency from the settlement currency.
+dates:
+  format: ISO 8601
+  transaction_dates:
+  - field: request_date
+    meaning: When the transaction was requested.
+  - field: execution_date
+    meaning: When processing started or will start.
+  - field: accounting_date
+    meaning: When the transaction was confirmed.
+  note: >-
+    A three-date model on Transaction, which is what makes value-date accounting possible; most API-first
+    banking products expose only one timestamp.
+entities:
+- name: Account
+  root: true
+  id: id (uuid)
+  fields:
+  - id
+  - name
+  - status
+  - balance
+  - currency
+  - iban
+  - type
+  - is_main
+  status_values:
+  - active
+  - closed
+  types:
+  - current_account
+  - ring_fenced_account
+  - ring_fenced_credit_servicer_account
+  - settlement_account
+  - specially_dedicated_account
+  - trust_account
+  - meal_voucher_account
+  - booster_account
+  - dedicated_liquidity_account
+  - dedicated_recovery_account
+  - line_item_sub_account
+  note: >-
+    Eleven account types, and the set is revealing about the customer base: ring-fenced, trust, settlement,
+    specially-dedicated and credit-servicer accounts are safeguarding and client-money structures, which is
+    the regulated-fintech and asset-management segment rather than a generic SME. booster_account is Memo
+    Bank's savings product.
+  operations:
+  - listAccounts
+  - getAccount
+- name: Iban
+  id: id (uuid)
+  fields:
+  - id
+  - account_id
+  - iban
+  - name
+  - status
+  - type
+  - allow_collections
+  - is_deleted
+  types:
+  - main
+  - virtual
+  status_values:
+  - active
+  - inactive
+  soft_delete: true
+  note: >-
+    The virtual IBAN is the pivot of the whole reconciliation story - one per customer, transaction or
+    department, bi-directional, with allow_collections controlling whether it can be debited by direct debit.
+    is_deleted marks soft deletion, and include_deleted is available as a query parameter.
+  operations:
+  - listIbans
+  - getIban
+  - createIban
+  - updateIban
+  - deleteIban
+- name: Transaction
+  id: id (uuid)
+  fields:
+  - id
+  - link
+  - reference
+  - account_id
+  - amount
+  - local_iban
+  - currency
+  - direction
+  - request_date
+  - execution_date
+  - accounting_date
+  - counterparty_name
+  - internal_note
+  - status
+  - batch_id
+  - custom_id
+  - custom_metadata
+  - attachment_count
+  - source
+  status_values:
+  - scheduled
+  - authorized
+  - confirmed
+  - rejected
+  - canceled
+  note: >-
+    The ledger entry - the convergence point of every rail. Its polymorphic source discriminator has 44
+    variants, which is the most informative single field in the model.
+  operations:
+  - listTransactions
+  - getTransaction
+- name: TransactionSource
+  polymorphic: true
+  discriminator: type
+  variant_count: 44
+  domains:
+    payments:
+    - transfer_incoming
+    - transfer_outgoing
+    - transfer_incoming_return
+    - transfer_outgoing_return
+    - wire_transfer_incoming
+    - wire_transfer_outgoing
+    - wire_transfer_outgoing_return
+    - rtgs_transfer_incoming
+    - rtgs_transfer_outgoing
+    - rtgs_transfer_incoming_return
+    - rtgs_transfer_outgoing_return
+    - sweep_transfer_incoming
+    - sweep_transfer_outgoing
+    - maintenance_transfer
+    - maintenance_wire_transfer
+    collections:
+    - collection_incoming
+    - collection_outgoing
+    - collection_incoming_return
+    - collection_outgoing_return
+    - collection_outgoing_return_fees
+    cards:
+    - card_debit
+    - card_credit
+    - card_deferred
+    - card_withdrawal
+    lending:
+    - loan_disbursement
+    - loan_repayment
+    - loan_reimbursement
+    - loan_application_fees
+    - loan_guarantee_fee
+    - overdraft_agios
+    - overdraft_application_fees
+    - debt_purchase_disbursement
+    - debt_purchase_repayment
+    - debt_purchase_interests
+    - debt_purchase_application_fees
+    investments:
+    - investment_subscription_order
+    - investment_redemption_order
+    - term_deposit_creation
+    - term_deposit_closure
+    - term_deposit_interest_payment
+    - term_deposit_withdrawal
+    - bank_account_remuneration
+    other:
+    - subscription
+    - diverse_operation
+  note: >-
+    This enum is the clearest evidence in the repo that Memo Bank is a full-service bank rather than a
+    payments API: the transaction ledger types cover lending (loans, overdrafts, receivables purchase),
+    investments (term deposits, fund subscription and redemption) and cards, none of which have write
+    endpoints in the API. Those products exist in the bank and appear in the ledger read-only.
+- name: Transfer
+  id: id (uuid)
+  status: superseded
+  note: >-
+    The v1 transfer shape, still defined in the components but with no operation creating it -
+    createTransferV2 is the live entry point. Retained for the older CreateTransfer schema.
+- name: TransferV2
+  id: id (uuid)
+  status_values:
+  - pending
+  - scheduled
+  - authorized
+  - confirmed
+  - returned
+  - canceled
+  - failed
+  transfer_types:
+  - standard
+  - instant
+  type_strategies:
+  - standard_only
+  - instant_only
+  - instant_if_available
+  - rtgs_only
+  failure_codes: 22
+  note: >-
+    type_strategy is a good piece of API design worth calling out: rather than forcing the caller to
+    pre-check whether the beneficiary can receive instant payments, instant_if_available lets the bank
+    downgrade gracefully and report the rail actually used in transfer_type.
+  operations:
+  - createTransferV2
+  - getTransfer
+  - cancelTransfer
+  - getProofOfTransfer
+- name: WireTransfer
+  id: id (uuid)
+  status_values:
+  - pending
+  - pending_attachment_required
+  - authorized
+  - confirmed
+  - returned
+  - failed
+  failure_codes: 28
+  note: >-
+    pending_attachment_required encodes a compliance hold directly in the state machine - the bank is
+    blocking on supporting documentation, resolvable via createWireTransferAttachment and signalled by the
+    wire_transfer_attachment_required event.
+  operations:
+  - createWireTransfer
+  - getWireTransfer
+  - createWireTransferAttachment
+  - getProofOfWireTransfer
+- name: AccountIdentifier
+  polymorphic: true
+  discriminator: type
+  variants:
+  - iban_and_bic
+  - account_number_and_bic
+  - account_number_and_routing_code
+  note: >-
+    Used for wire-transfer beneficiaries, correctly modelling non-IBAN geographies (US routing codes,
+    account-number-plus-BIC) instead of assuming IBAN everywhere.
+- name: Collection
+  id: id (uuid)
+  status_values:
+  - pending
+  - scheduled
+  - confirmed
+  - returned
+  - canceled
+  - failed
+  failure_codes: 21
+  operations:
+  - createCollection
+  - getCollection
+  - cancelCollection
+- name: CollectionMandate
+  id: reference (natural key)
+  fields:
+  - reference
+  - scheme
+  schemes:
+  - core
+  - b2b
+  embedded_in: Collection
+  note: >-
+    Embedded value object rather than a first-class resource - there is no listMandates or getMandate
+    operation. A signed mandate becomes addressable only through the MandateSignatureRequest that produced
+    it, which is a notable modelling gap for anyone auditing mandate coverage.
+- name: MandateSignatureRequest
+  polymorphic: true
+  discriminator: mode
+  variants:
+  - email
+  - redirect
+  note: >-
+    redirect mode was added 2026-07-03 as a breaking change, letting the integrator host the signature
+    journey instead of Memo Bank emailing the debtor.
+  operations:
+  - listMandateSignatureRequests
+  - createMandateSignatureRequest
+  - getMandateSignatureRequest
+  - deleteMandateSignatureRequest
+  - renewMandateSignatureRequest
+- name: Attachment
+  id: id (uuid)
+  fields:
+  - id
+  - transaction_id
+  - filename
+  - size
+  - mime_type
+  - date
+  - is_deleted
+  soft_delete: true
+  operations:
+  - listAttachments
+  - getAttachment
+  - createAttachment
+  - deleteAttachment
+- name: AccountAssessment
+  polymorphic: true
+  discriminator: status
+  variants:
+  - pending
+  - completed
+  - failed
+  identification_types:
+  - LeiIdentification
+  - SirenIdentification
+  - NameIdentification
+  match_types:
+  - IdentificationMatch
+  - LeiIdentificationMatch
+  - SirenIdentificationMatch
+  - NameIdentificationMatch
+  note: >-
+    IBAN and account-holder verification. SIREN is the French company register identifier and LEI the global
+    legal-entity identifier, so verification is entity-based rather than just name matching - stronger than
+    a plain Confirmation of Payee.
+  operations:
+  - createAccountAssessment
+  - getAccountAssessment
+- name: BulkTransfers
+  id: id (uuid)
+  fields:
+  - id
+  - transfers_total
+  - transfers_confirmed
+  - transfers_canceled
+  - transfers_failed
+  - status
+  status_values:
+  - pending
+  - completed
+  operations:
+  - createTransfersBulk
+  - getTransfersBulk
+  - getTransfersBulkItems
+- name: BulkCollections
+  id: id (uuid)
+  fields:
+  - id
+  - collections_total
+  - collections_confirmed
+  - collections_canceled
+  - collections_failed
+  - status
+  status_values:
+  - pending
+  - completed
+  operations:
+  - createCollectionsBulk
+  - getCollectionsBulk
+  - getCollectionsBulkItems
+- name: Webhook
+  id: id (uuid)
+  fields:
+  - id
+  - name
+  - url
+  - bearer_token
+  operations:
+  - listWebhooks
+  - createWebhook
+  - getWebhook
+  - deleteWebhook
+- name: Event
+  id: id (uuid)
+  fields:
+  - id
+  - date
+  - event_type
+  - resource_type
+  - resource_id
+  event_types: 34
+  resource_types: 11
+  detail: asyncapi/memo-bank-webhooks.yml
+relationships:
+- from: Account
+  to: Iban
+  type: has_many
+  via: Iban.account_id
+- from: Iban
+  to: Account
+  type: belongs_to
+  via: account_id
+- from: Account
+  to: Transaction
+  type: has_many
+  via: Transaction.account_id
+- from: Transaction
+  to: Account
+  type: belongs_to
+  via: account_id
+- from: Transaction
+  to: Iban
+  type: references
+  via: local_iban
+  note: Joined by IBAN string value, not by Iban.id - a soft reference.
+- from: Transaction
+  to: TransactionSource
+  type: has_one
+  via: source
+  polymorphic: true
+- from: Transaction
+  to: Attachment
+  type: has_many
+  via: Attachment.transaction_id
+  denormalized_count: Transaction.attachment_count
+- from: Attachment
+  to: Transaction
+  type: belongs_to
+  via: transaction_id
+- from: Transaction
+  to: BulkTransfers
+  type: belongs_to
+  via: batch_id
+  optional: true
+- from: TransferV2
+  to: Account
+  type: belongs_to
+  via: account_id
+  optional: true
+  note: Documented as possibly missing.
+- from: TransferV2
+  to: Transaction
+  type: produces
+  via: reference
+  note: The transfer's reference correlates it with the resulting transaction.
+- from: TransferV2
+  to: Transaction
+  type: has_one
+  via: return_transaction_id
+  optional: true
+  note: On return, points at the compensating credit transaction.
+- from: Collection
+  to: Transaction
+  type: has_one
+  via: return_transaction_id
+  optional: true
+  note: On return, points at the compensating debit transaction.
+- from: Collection
+  to: CollectionMandate
+  type: has_one
+  via: mandate
+  embedded: true
+- from: Collection
+  to: Account
+  type: belongs_to
+  via: account_id
+  optional: true
+- from: Collection
+  to: Iban
+  type: references
+  via: local_iban
+  constraint: The IBAN must have allow_collections true.
+- from: WireTransfer
+  to: Account
+  type: belongs_to
+  via: account_id
+  optional: true
+- from: WireTransfer
+  to: AccountIdentifier
+  type: has_one
+  via: beneficiary_account_identifier
+  polymorphic: true
+- from: WireTransfer
+  to: Attachment
+  type: has_many
+  via: createWireTransferAttachment
+  note: Compliance documents attached to the wire itself, distinct from transaction attachments.
+- from: BulkTransfers
+  to: TransferV2
+  type: has_many
+  via: getTransfersBulkItems
+- from: BulkCollections
+  to: Collection
+  type: has_many
+  via: getCollectionsBulkItems
+- from: MandateSignatureRequest
+  to: CollectionMandate
+  type: produces
+  note: A completed signature request yields a usable mandate; the linkage field is not exposed.
+- from: Event
+  to: '*'
+  type: references
+  via: resource_id + resource_type
+  polymorphic: true
+  note: >-
+    The only place in the model where a polymorphic reference is properly type-tagged, which it must be
+    because ids are bare UUIDs.
+- from: Webhook
+  to: Event
+  type: delivers
+graph_summary:
+  entities: 22
+  core_entities: 14
+  polymorphic_entities: 5
+  relationships: 25
+  root: Account
+  spine: >-
+    Account -> Iban -> Transaction is the read spine, and every instruction type (TransferV2, WireTransfer,
+    Collection) converges on Transaction via reference. An integrator reconciling money movement can treat
+    Transaction as the single source of truth and use custom_id to join back to their own records.
+gaps:
+- >-
+  Mandates are embedded value objects with no list/get operation, so there is no way to enumerate or audit
+  active mandates.
+- >-
+  No Users entity despite a declared Users tag and a coming-soon list_users MCP tool.
+- >-
+  Transaction references its IBAN by string value rather than by Iban.id, so joins are on the IBAN literal.
+- >-
+  Bare UUIDs with no type prefix mean identifiers are not self-describing outside the webhook envelope.
+- >-
+  Lending, card and investment products appear as 20+ TransactionSource variants but have no resources or
+  operations - they are read-only ledger artefacts.

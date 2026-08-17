@@ -1,0 +1,193 @@
+generated: '2026-08-17'
+method: derived
+source:
+- mcp/memo-bank-mcp.yml
+- openapi/memo-bank-premium-bank-api-openapi.yml
+note: >-
+  Binds each Memo Bank MCP connector tool to the Premium Bank API operation that backs it. The connector's
+  live tools/list is OAuth-gated (HTTP 401), so bindings are made by name and documented semantics against
+  operationIds verified verbatim in the OpenAPI, and confidence is set accordingly - high where the tool
+  name and the operation are an exact one-to-one match on the same resource, medium where the tool's
+  documented filter set is richer or narrower than the operation's parameters. No tool or operation here is
+  invented; every operationId was grepped out of
+  openapi/memo-bank-premium-bank-api-openapi.yml. The documentation-portal MCP server
+  (docs.api.memo.bank/mcp) is excluded from the crosswalk: its five tools read documentation pages, not the
+  banking API, so they have no REST counterpart by design and would distort the coverage counts.
+surfaces:
+  openapi:
+    file: openapi/memo-bank-premium-bank-api-openapi.yml
+    version: 3.1.0
+    operations: 43
+    gated: false
+  mcp:
+    url: https://api.memo.bank/api/apps/mcp/server
+    gated: true
+    gate: OAuth 2.0 - tools/list returns 401 with an RFC 9728 WWW-Authenticate challenge
+    tools_documented: 9
+    tools_available: 7
+    tools_coming_soon: 2
+  graphql: null
+crosswalk:
+- tool: list_accounts
+  category: accounts
+  rest:
+  - listAccounts
+  binding: rest
+  confidence: high
+- tool: list_ibans
+  category: ibans
+  rest:
+  - listIbans
+  binding: rest
+  confidence: high
+  note: >-
+    Both the tool and the REST operation support filtering by account (account_id query parameter on
+    listIbans).
+- tool: list_transactions
+  category: transactions
+  rest:
+  - listTransactions
+  binding: rest
+  confidence: high
+  note: >-
+    listTransactions publishes exactly the filter set the tool advertises - account_id, start_date,
+    end_date, reference, local_iban, batch_id, custom_id, plus order_by and page_token pagination.
+- tool: list_attachments
+  category: attachments
+  rest:
+  - listAttachments
+  binding: rest
+  confidence: high
+- tool: get_attachment
+  category: attachments
+  rest:
+  - getAttachment
+  binding: rest
+  confidence: high
+  note: >-
+    The tool is documented as returning a pre-signed download URL; the REST operation is the same
+    single-attachment read.
+- tool: create_attachment
+  category: attachments
+  rest:
+  - createAttachment
+  binding: rest
+  confidence: medium
+  note: >-
+    The only write in the connector. createAttachment is the matching REST operation, but the connector is
+    documented as attaching to an EXISTING transaction only, which is a narrower contract than the REST
+    operation exposes.
+- tool: list_workspaces
+  category: identity
+  rest: []
+  binding: none
+  confidence: high
+  note: >-
+    Confidently MCP-only, not a low-confidence guess: the Premium Bank API has no workspace resource at all.
+    See mcp_only[] below.
+mcp_only:
+- tool: list_workspaces
+  reason: >-
+    No workspace resource exists in the Premium Bank API OpenAPI. The connector needs it because a single
+    OAuth grant can cover several Memo Bank workspaces and the agent must choose one; a JWT-authenticated
+    REST client is already scoped to one workspace by its certificate, so the concept has no REST analogue.
+- tool: list_users
+  reason: >-
+    Coming soon per Memo Bank's docs. The OpenAPI declares a Users tag but publishes zero operations under
+    it, so there is no REST operation to bind to yet.
+- tool: prepare_transfers
+  reason: >-
+    Coming soon, and by design not a binding to createTransferV2 - Memo Bank states the connector cannot
+    initiate payments. It would be a human-in-the-loop preparation step with no public REST equivalent.
+rest_only:
+- capability: SEPA credit transfers
+  operations:
+  - createTransferV2
+  - getTransfer
+  - cancelTransfer
+  - createTransfersBulk
+  - getTransfersBulk
+  - getTransfersBulkItems
+  - getProofOfTransfer
+  reason: >-
+    Payment initiation is deliberately excluded from the agent surface. Memo Bank states the connector
+    cannot initiate payments or move money.
+- capability: SWIFT / RTGS wire transfers
+  operations:
+  - createWireTransfer
+  - getWireTransfer
+  - createWireTransferAttachment
+  - getProofOfWireTransfer
+  reason: Payment initiation - excluded from the agent surface.
+- capability: SEPA Direct Debit collections
+  operations:
+  - createCollection
+  - getCollection
+  - cancelCollection
+  - createCollectionsBulk
+  - getCollectionsBulk
+  - getCollectionsBulkItems
+  reason: Money movement - excluded from the agent surface.
+- capability: Mandate signature requests
+  operations:
+  - listMandateSignatureRequests
+  - createMandateSignatureRequest
+  - getMandateSignatureRequest
+  - deleteMandateSignatureRequest
+  - renewMandateSignatureRequest
+  reason: No MCP tool published for the mandate lifecycle.
+- capability: IBAN lifecycle management
+  operations:
+  - createIban
+  - updateIban
+  - deleteIban
+  reason: >-
+    The connector reads IBANs (list_ibans) but cannot create, update or delete them - a read/write split
+    within the same resource.
+- capability: Account assessments (IBAN and name verification)
+  operations:
+  - createAccountAssessment
+  - getAccountAssessment
+  reason: No MCP tool published.
+- capability: Single-account read
+  operations:
+  - getAccount
+  reason: >-
+    The connector exposes list_accounts but no get-one-account tool; an agent must list and filter client
+    side.
+- capability: Single-transaction read
+  operations:
+  - getTransaction
+  reason: The connector exposes list_transactions but no get-one-transaction tool.
+- capability: Attachment deletion
+  operations:
+  - deleteAttachment
+  reason: The connector can create and read attachments but not delete them.
+- capability: Webhook management
+  operations:
+  - listWebhooks
+  - createWebhook
+  - getWebhook
+  - deleteWebhook
+  reason: Integration configuration, not an agent task.
+- capability: Sandbox simulation
+  operations:
+  - createIncomingCollection
+  - createIncomingTransfer
+  reason: Sandbox-only endpoints; no MCP tool.
+coverage:
+  tools_named: 9
+  tools_available: 7
+  tools_bound_to_rest: 6
+  mcp_only: 3
+  rest_operations_total: 43
+  rest_operations_with_a_tool: 6
+  rest_operations_without_a_tool: 37
+  rest_coverage_pct: 14
+  write_tools: 1
+  read_tools: 6
+  assessment: >-
+    Narrow but coherent. The agent surface covers 14% of REST operations and is almost entirely read-only:
+    six read bindings plus one additive write (attach a document). Every uncovered capability that moves
+    money is excluded on purpose and Memo Bank says so in its documentation, so the low percentage is a
+    stated safety posture rather than an incomplete integration.

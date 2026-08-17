@@ -1,0 +1,33 @@
+generated: '2026-08-17'
+method: probed
+source: live DNS/TLS/HTTP probes of apis.yml + OpenAPI hosts
+hosts:
+- host: memo.bank
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Feb  5 23:59:59 2027 GMT
+  hsts: false
+- host: docs.api.memo.bank
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Oct 17 21:41:19 2026 GMT
+  hsts: true
+  hsts_max_age: 0
+- host: api.memo.bank
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Nov 12 15:23:01 2026 GMT
+  hsts: null
+domains:
+- domain: memo.bank
+  dnssec: true
+  caa:
+  - 0 issuewild "letsencrypt.org"
+  - 0 issuewild "pki.goog; cansignhttpexchanges=yes"
+  - 0 issuewild "ssl.com"
+  - 0 iodef "mailto:security@memo.bank"
+  - 0 issue "amazon.com"
+  - 0 issue "certainly.com"
+  spf: true
+  dmarc: true
+  dmarc_policy: reject

@@ -1,0 +1,92 @@
+generated: '2026-08-17'
+method: searched
+source: https://memo.bank/en/pricing/
+docs: https://memo.bank/en/pricing/
+plan_count: 2
+currency: EUR
+note: >-
+  Memo Bank publishes two named payment plans with a visible entry price, which is more than most banks do,
+  but the plans are sales-gated in practice: both are quoted "from EUR 449 excl. VAT per month", the
+  transaction fee schedule lives in a separate PDF rather than on the page, and the call to action is
+  "Contact us" rather than a self-serve checkout. API access specifically is not a purchasable line item -
+  Memo Bank's own getting-started topic says a banker must activate the API feature on the workspace first.
+  No per-call or per-API pricing is published.
+billing:
+  period: monthly
+  vat: prices are quoted excluding VAT
+  self_serve: false
+  gate: >-
+    Contact sales. API activation additionally requires a Memo Bank banker to enable the feature on the
+    workspace (https://docs.api.memo.bank/topic/topic-getting-started).
+plans:
+- name: Payments Core
+  price: 449
+  price_display: From EUR 449 excl. VAT per month
+  price_qualifier: from
+  currency: EUR
+  period: month
+  commitment: none
+  included:
+  - Competitive pricing on SEPA transactions
+  - Next-day payment collection
+  - API-first payment infrastructure access
+  - IBAN verification
+  - Bi-directional virtual IBANs
+  - Sandbox environment
+  - Dedicated relationship manager
+  quota: not published
+  overage: not published
+  sla: not published on this tier
+- name: Payments Scale
+  price: 449
+  price_display: From EUR 449 excl. VAT per month
+  price_qualifier: from
+  currency: EUR
+  period: month
+  commitment: annual
+  included:
+  - Volume-based pricing - fees decrease as transaction volume increases
+  - Next-day payment collection
+  - API-first payment infrastructure access
+  - IBAN verification
+  - Bi-directional virtual IBANs
+  - Sandbox environment
+  - Dedicated relationship manager
+  - EUR and USD savings and investments
+  - 99.99% SLA
+  quota: not published
+  overage: >-
+    Volume-based tiering is stated but the tier boundaries and per-transaction fees are not published on the
+    pricing page.
+  sla: 99.99%
+fee_schedule:
+  published: true
+  format: PDF
+  url: https://assets.memo.bank/documents/convention-de-services/conditions-tarifaires.pdf
+  note: >-
+    The per-transaction fee schedule ("conditions tarifaires") is published only as a PDF attached to the
+    service agreement, so the actual unit economics are not machine-readable.
+api_pricing:
+  metered: false
+  per_call_pricing: none published
+  note: >-
+    The API is positioned as included capability on both plans rather than a metered product. There is no
+    published request-based pricing, no free tier and no developer sandbox self-signup - sandbox access is
+    also arranged through a banker.
+sla:
+  published: true
+  values:
+  - plan: Payments Scale
+    uptime_target: 99.99%
+    source: https://memo.bank/en/pricing/
+  - context: API product page
+    uptime_target: 99.9%
+    source: https://memo.bank/en/product/api/
+    note: >-
+      The API product page advertises a 99.9% contractual SLA while the pricing page's Payments Scale tier
+      states 99.99%. Both figures are recorded as published; Memo Bank does not reconcile them.
+gaps:
+- Both tiers show the same entry price, so the page does not differentiate them on cost.
+- Transaction fees are PDF-only and not on the pricing page.
+- No self-serve signup or free trial for the API; a banker must activate it.
+- Two different uptime targets are published for the same service (99.9% and 99.99%).

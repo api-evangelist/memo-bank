@@ -1,0 +1,316 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for Memo Bank Premium Bank API
+  version: 1.0.0
+x-generated: '2026-08-17'
+x-method: generated
+x-source: openapi/memo-bank-premium-bank-api-openapi.yml
+x-note: >-
+  Non-destructive enhancements over the spec Memo Bank publishes at https://docs.api.memo.bank/source.yaml.
+  The original is preserved byte-for-byte in openapi/_original/. Every action below documents something Memo
+  Bank states in its own prose documentation but omitted from the machine-readable contract - most
+  importantly the JWT security scheme that all 43 operations reference but which is never defined, and the
+  Idempotency-Key header that makes retrying a payment safe. Nothing here invents behaviour: each action's
+  x-source-doc names the Memo Bank page it came from.
+actions:
+- target: $.info
+  update:
+    x-apievangelist-profile: https://apis.io/provider/memo-bank/
+    x-apievangelist-reviewed: '2026-08-17'
+    x-api-evangelist-note: >-
+      Enhanced by API Evangelist. Original published by Memo Bank at
+      https://docs.api.memo.bank/source.yaml.
+- target: $.info
+  update:
+    contact:
+      name: Memo Bank API support
+      url: https://aide.memo.bank/category/349-api
+    x-source-doc: https://aide.memo.bank/category/349-api
+    x-source-note: >-
+      The published spec has no info.contact block. Populated from Memo Bank's own API help centre category.
+- target: $.components
+  update:
+    securitySchemes:
+      JWT:
+        type: http
+        scheme: bearer
+        bearerFormat: JWT
+        description: >-
+          Per-request RS256-signed JWT (RFC 7519 / RFC 7515) sent as Authorization: Bearer <token>. The JWT
+          header carries alg (RS256), typ (JWT) and x5t#S256 (the SHA-256 thumbprint of the certificate). The
+          payload carries sub (the request method, a space, then the full path including query parameters),
+          aud (the target domain, e.g. api.memo.bank), iat (creation timestamp, tolerating only 5 seconds of
+          clock skew), jti (a unique UUID per request), sec (the secret code from setup) and, when the request
+          has a body, dig#S256 (base64url(sha256(body))). Signed with the RSA private key generated during
+          setup. Because sub and dig#S256 bind the token to one exact request, tokens are not reusable.
+        x-source-doc: https://docs.api.memo.bank/authentication
+        x-api-evangelist-rationale: >-
+          THE most important action in this overlay. All 43 operations declare security: [{JWT: []}] but the
+          published document has no components.securitySchemes at all, so the requirement dangles - any
+          generated client, validator or scanner sees an undefined scheme and concludes the API is
+          unauthenticated. This definition is transcribed from Memo Bank's own authentication page.
+- target: $
+  update:
+    security:
+    - JWT: []
+    x-source-doc: https://docs.api.memo.bank/authentication
+    x-api-evangelist-rationale: >-
+      Adds the top-level default so the requirement holds even for operations added later without an explicit
+      security block.
+- target: $.components
+  update:
+    parameters:
+      IdempotencyKey:
+        name: Idempotency-Key
+        in: header
+        required: false
+        description: >-
+          Idempotency key for safely retrying a mutating request. Memo Bank recommends a V4 UUID. Retry with
+          the SAME key on a network error or a 5XX, 409 or 429 response; do not retry on other 4XX codes, as
+          the same result is always returned. A replayed response carries the Idempotent-Replayed: true
+          header. Reusing a key while the original request is still in flight returns 409 Conflict (itself
+          safe to retry); reusing a key with a different body returns 422 Unprocessable Entity. Not supported
+          on GET or DELETE, which are inherently idempotent.
+        schema:
+          type: string
+          format: uuid
+        example: 19b390d1-e7d4-4e27-abe2-49cac9b41ba1
+        x-source-doc: https://docs.api.memo.bank/topic/topic-idempotent-requests
+      RateLimitLimit:
+        name: RateLimit-Limit
+        in: header
+        description: Total number of available requests between two quota resets.
+        schema:
+          type: integer
+        x-source-doc: https://docs.api.memo.bank/topic/topic-rate-limiting
+    schemas:
+      Error:
+        type: object
+        description: >-
+          Memo Bank's unified error envelope. Errors are distinguished by the code key; message is a plain
+          English explanation. Note this is NOT RFC 9457 problem+json.
+        required:
+        - code
+        - message
+        properties:
+          code:
+            type: string
+            description: Machine-readable error code.
+            example: not_found
+          message:
+            type: string
+            description: Plain English explanation of the problem.
+            example: Not found.
+        x-source-doc: https://docs.api.memo.bank/topic/topic-errors
+    responses:
+      TooManyRequests:
+        description: >-
+          Rate limit exhausted. RateLimit-Limit, RateLimit-Remaining and RateLimit-Reset are returned on every
+          response, so a client can anticipate this. Safe to retry with the same Idempotency-Key after
+          RateLimit-Reset seconds.
+        headers:
+          RateLimit-Limit:
+            description: Total number of available requests between two quota resets.
+            schema:
+              type: integer
+          RateLimit-Remaining:
+            description: Number of available requests until the quota is reset.
+            schema:
+              type: integer
+          RateLimit-Reset:
+            description: Time remaining in seconds until the quota is reset.
+            schema:
+              type: integer
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+        x-source-doc: https://docs.api.memo.bank/topic/topic-rate-limiting
+      Unauthorized:
+        description: >-
+          Missing, malformed, expired or replayed request JWT. Common causes are client clock drift beyond the
+          5-second iat window, a sub claim that does not exactly match the method and full path including
+          query string, or a missing dig#S256 on a request with a body.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+        x-source-doc: https://docs.api.memo.bank/authentication
+      Conflict:
+        description: >-
+          An Idempotency-Key was reused while the original request is still being processed. Safe to retry
+          with the same key.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+        x-source-doc: https://docs.api.memo.bank/topic/topic-idempotent-requests
+      UnprocessableEntity:
+        description: >-
+          An Idempotency-Key was reused with a request body that differs from the original. Do not retry;
+          use a new key or send the original payload.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+        x-source-doc: https://docs.api.memo.bank/topic/topic-idempotent-requests
+    x-api-evangelist-rationale: >-
+      The published spec declares only 200, 201 and 204 across all 43 operations - there is no error schema
+      and no 4xx/5xx response anywhere in it, despite Memo Bank documenting an error envelope, an
+      idempotency contract with specific 409/422 semantics, and a 429 rate-limit response. These reusable
+      components make that documented contract addressable.
+- target: $.paths['/v2/transfers'].post
+  update:
+    x-idempotent: true
+    x-idempotency-header: Idempotency-Key
+    x-agentic-access:
+      action-class: acting
+      consequence: physical
+      audit: required
+      purpose-required: true
+    x-api-evangelist-note: >-
+      Initiates a real SEPA credit transfer - irreversible once confirmed. Memo Bank's idempotency guidance
+      names transfer creation as its own worked example, and its MCP connector deliberately excludes payment
+      initiation.
+    x-source-doc: https://docs.api.memo.bank/topic/topic-idempotent-requests
+- target: $.paths['/v2/transfers/bulks'].post
+  update:
+    x-idempotent: true
+    x-idempotency-header: Idempotency-Key
+    x-agentic-access:
+      action-class: acting
+      consequence: physical
+      audit: required
+      purpose-required: true
+    x-api-evangelist-note: >-
+      Bulk payment initiation. Per-item failures surface asynchronously as TransferV2.failure_code rather than
+      as HTTP errors - see errors/memo-bank-decline-codes.yml for the bulk-versus-single divergence.
+- target: $.paths['/v2/wire_transfers'].post
+  update:
+    x-idempotent: true
+    x-idempotency-header: Idempotency-Key
+    x-agentic-access:
+      action-class: acting
+      consequence: physical
+      audit: required
+      purpose-required: true
+    x-api-evangelist-note: >-
+      Cross-border SWIFT/RTGS transfer. May enter pending_attachment_required, a compliance hold resolved via
+      createWireTransferAttachment and signalled by the wire_transfer_attachment_required event.
+- target: $.paths['/v2/collections'].post
+  update:
+    x-idempotent: true
+    x-idempotency-header: Idempotency-Key
+    x-agentic-access:
+      action-class: acting
+      consequence: physical
+      audit: required
+      purpose-required: true
+    x-api-evangelist-note: >-
+      Schedules a SEPA Direct Debit collection - debits a third party under a signed mandate. Requires a
+      SEPA creditor identifier provisioned by a banker and an IBAN with allow_collections true.
+- target: $.paths['/v2/collections/bulks'].post
+  update:
+    x-idempotent: true
+    x-idempotency-header: Idempotency-Key
+    x-agentic-access:
+      action-class: acting
+      consequence: physical
+      audit: required
+      purpose-required: true
+- target: $.paths['/v2/ibans'].post
+  update:
+    x-idempotent: true
+    x-idempotency-header: Idempotency-Key
+    x-agentic-access:
+      action-class: acting
+      consequence: write
+      audit: required
+    x-api-evangelist-note: Creates a virtual IBAN - the reconciliation primitive of the platform.
+- target: $.paths['/v2/account_assessments'].post
+  update:
+    x-idempotent: true
+    x-idempotency-header: Idempotency-Key
+    x-agentic-access:
+      action-class: acting
+      consequence: write
+    x-api-evangelist-note: >-
+      IBAN and account-holder verification. Worth calling BEFORE initiating a transfer to pre-empt the
+      invalid_beneficiary_iban and beneficiary_bank_invalid_bank_details failure codes.
+- target: $.paths['/v2/webhooks'].post
+  update:
+    x-agentic-access:
+      action-class: acting
+      consequence: write
+      audit: required
+    x-api-evangelist-note: >-
+      The response contains bearer_token, the shared secret Memo Bank sends on every delivery to this
+      endpoint. Treat the response as a secret. There is no update operation - changing a URL means delete
+      and re-create, which rotates the token.
+- target: $.paths['/v2/accounts'].get
+  update:
+    x-agentic-access:
+      action-class: connected
+      consequence: read
+    x-mcp-tool: list_accounts
+    x-source-doc: https://memo.bank/en/product/mcp/
+- target: $.paths['/v2/transactions'].get
+  update:
+    x-agentic-access:
+      action-class: connected
+      consequence: read
+    x-mcp-tool: list_transactions
+    x-api-evangelist-note: >-
+      Pagination migrated to page_token on 2026-05-13; the page parameter is deprecated but still present and
+      carries no published sunset date.
+    x-source-doc: https://docs.api.memo.bank/changes
+- target: $.paths['/v2/ibans'].get
+  update:
+    x-agentic-access:
+      action-class: connected
+      consequence: read
+    x-mcp-tool: list_ibans
+- target: $.paths['/v2/attachments'].get
+  update:
+    x-agentic-access:
+      action-class: connected
+      consequence: read
+    x-mcp-tool: list_attachments
+- target: $.paths['/v2/attachments'].post
+  update:
+    x-agentic-access:
+      action-class: acting
+      consequence: write
+      audit: required
+    x-mcp-tool: create_attachment
+    x-api-evangelist-note: >-
+      The only write operation Memo Bank exposes through its MCP connector.
+- target: $.paths['/v2/sandbox/incoming_transfers'].post
+  update:
+    x-sandbox-only: true
+    x-agentic-access:
+      action-class: acting
+      consequence: write
+    x-api-evangelist-note: >-
+      Sandbox host only (https://api.sandbox.memo.bank). Behaviour against production is not documented.
+    x-source-doc: https://docs.api.memo.bank/topic/topic-sandbox
+- target: $.paths['/v2/sandbox/incoming_collections'].post
+  update:
+    x-sandbox-only: true
+    x-agentic-access:
+      action-class: acting
+      consequence: write
+    x-api-evangelist-note: Sandbox host only (https://api.sandbox.memo.bank).
+    x-source-doc: https://docs.api.memo.bank/topic/topic-sandbox
+- target: $.components.schemas.WireTransfer.properties.failure_code
+  update:
+    x-api-evangelist-gap: >-
+      28 enum values with no per-code documentation, unlike the TransferV2 and Collection failure_code
+      properties which document every code inline. See errors/memo-bank-decline-codes.yml.
+- target: $.webhooks.event.post
+  update:
+    x-api-evangelist-note: >-
+      Deliveries are authenticated with the static bearer_token from the Webhook resource, sent in the
+      Authorization header. There is no HMAC body signature and no timestamp header, so replay cannot be
+      detected. Event.id is the deduplication key. See asyncapi/memo-bank-webhooks.yml.
+    x-source-doc: https://docs.api.memo.bank/group/webhook-webhook

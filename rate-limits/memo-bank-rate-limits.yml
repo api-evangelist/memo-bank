@@ -1,0 +1,59 @@
+generated: '2026-08-17'
+method: searched
+source: https://docs.api.memo.bank/topic/topic-rate-limiting
+docs: https://docs.api.memo.bank/topic/topic-rate-limiting
+limit_count: 0
+note: >-
+  Memo Bank documents the rate-limiting MECHANISM in full but publishes no NUMBERS. There is a dedicated
+  rate-limiting topic that names the exhaustion status and all three response headers, yet states no
+  requests-per-window figure, no burst allowance and no per-plan differentiation - so limit_count is 0 while
+  the runtime signal an agent actually needs is fully specified. This is the better half of the trade to be
+  on: a client that reads RateLimit-Remaining does not need the documented number, whereas a client given
+  only a number and no headers cannot adapt. Recorded honestly rather than inferred.
+signaling:
+  documented: true
+  headers_on_every_response: true
+  headers:
+  - name: RateLimit-Limit
+    meaning: Total number of available requests between two quota resets.
+  - name: RateLimit-Remaining
+    meaning: Number of available requests until the quota is reset.
+  - name: RateLimit-Reset
+    meaning: Time remaining, in seconds, until the quota is reset.
+  header_style: >-
+    IETF draft RateLimit-* naming without the X- prefix, matching draft-ietf-httpapi-ratelimit-headers.
+  retry_after: false
+  retry_after_note: >-
+    No Retry-After header is documented; clients are expected to use RateLimit-Reset instead.
+exhaustion:
+  status: 429
+  reason_phrase: Too Many Requests
+  body: Standard Memo Bank error envelope ({code, message}) - see errors/memo-bank-problem-types.yml.
+  retry_guidance: >-
+    Memo Bank lists 429 among the responses on which a caller should retry using the same Idempotency-Key,
+    so a rate-limited mutating request is safe to re-send once the quota resets.
+limits: []
+limits_note: >-
+  No published limit values. Memo Bank states only that "we enforce a rate limit on the number of HTTP
+  requests that can be made in a given period" without quantifying the period or the count.
+scope: not published
+scope_note: >-
+  The documentation does not say whether the quota is per application, per certificate, per workspace or per
+  endpoint. Since credentials are issued per application (certificate + secret + private key) and IP
+  allow-lists are configured per application, per-application is the most likely granularity, but Memo Bank
+  does not state it and it is not recorded as fact here.
+verification:
+  probed: false
+  reason: >-
+    The API rejects all unauthenticated requests, and credentials are only issued by a Memo Bank banker to
+    existing customers, so the headers could not be observed on a live 2xx response without an account.
+    Recorded from documentation only.
+gaps:
+- No numeric limit, window or burst figure published anywhere in the API documentation.
+- No statement of the rate-limit scope (per application / per workspace / per endpoint).
+- No Retry-After header.
+- Rate-limit headers are not described in the OpenAPI, only in the prose topic.
+cross_links:
+  conventions: conventions/memo-bank-conventions.yml
+  errors: errors/memo-bank-problem-types.yml
+  plans: plans/memo-bank-plans-pricing.yml

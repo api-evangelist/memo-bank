@@ -1,0 +1,161 @@
+generated: '2026-08-17'
+method: generated
+source:
+- openapi/memo-bank-premium-bank-api-openapi.yml
+- conventions/memo-bank-conventions.yml
+- errors/memo-bank-decline-codes.yml
+- asyncapi/memo-bank-webhooks.yml
+- sandbox/memo-bank-sandbox.yml
+note: >-
+  Packaged agent skills for the Memo Bank Premium Bank API, one per marquee flow. Every operationId
+  referenced was verified verbatim against openapi/memo-bank-premium-bank-api-openapi.yml - none is invented.
+  Each skill folds in the cross-cutting rules captured elsewhere in this repo: the per-request JWT signing
+  scheme, the Idempotency-Key retry contract, the bulk-versus-single error divergence, and the webhook
+  deduplication requirement. Memo Bank publishes no AGENTS.md or first-party skill files (searched
+  2026-08-17), so these are generated rather than harvested.
+prerequisite_skill: memo-bank-authenticate-a-request.md
+prerequisite_note: >-
+  Read the authentication skill first. Memo Bank signs every request with a per-request RS256 JWT bound to the
+  method, path and body digest, and there is no SDK, so every other skill depends on getting that right.
+skills:
+- file: memo-bank-authenticate-a-request.md
+  name: Authenticate a Memo Bank API request
+  api: openapi/memo-bank-premium-bank-api-openapi.yml
+  operations:
+  - listAccounts
+  topics:
+  - jwt
+  - jws
+  - rs256
+  - authentication
+- file: memo-bank-initiate-a-sepa-transfer.md
+  name: Initiate and track a SEPA transfer
+  api: openapi/memo-bank-premium-bank-api-openapi.yml
+  operations:
+  - listAccounts
+  - listIbans
+  - createAccountAssessment
+  - getAccountAssessment
+  - createTransferV2
+  - getTransfer
+  - cancelTransfer
+  - getProofOfTransfer
+  topics:
+  - sepa
+  - payments
+  - idempotency
+  - instant-transfers
+- file: memo-bank-collect-by-sepa-direct-debit.md
+  name: Collect by SEPA Direct Debit with a signed mandate
+  api: openapi/memo-bank-premium-bank-api-openapi.yml
+  operations:
+  - listAccounts
+  - listIbans
+  - createMandateSignatureRequest
+  - getMandateSignatureRequest
+  - listMandateSignatureRequests
+  - renewMandateSignatureRequest
+  - deleteMandateSignatureRequest
+  - createCollection
+  - getCollection
+  - cancelCollection
+  - createCollectionsBulk
+  - getCollectionsBulk
+  - getCollectionsBulkItems
+  topics:
+  - sepa-direct-debit
+  - mandates
+  - collections
+  - returns
+- file: memo-bank-reconcile-with-virtual-ibans.md
+  name: Reconcile incoming payments with virtual IBANs
+  api: openapi/memo-bank-premium-bank-api-openapi.yml
+  operations:
+  - listAccounts
+  - createIban
+  - listIbans
+  - getIban
+  - updateIban
+  - deleteIban
+  - listTransactions
+  - getTransaction
+  - createWebhook
+  - listAttachments
+  - createAttachment
+  - getAttachment
+  topics:
+  - virtual-iban
+  - reconciliation
+  - attachments
+- file: memo-bank-send-a-wire-transfer.md
+  name: Send a cross-border wire transfer
+  api: openapi/memo-bank-premium-bank-api-openapi.yml
+  operations:
+  - listAccounts
+  - listIbans
+  - createWireTransfer
+  - getWireTransfer
+  - createWireTransferAttachment
+  - getProofOfWireTransfer
+  - createWebhook
+  topics:
+  - swift
+  - rtgs
+  - cross-border
+  - compliance-hold
+- file: memo-bank-run-a-bulk-payment-batch.md
+  name: Run a bulk payment batch
+  api: openapi/memo-bank-premium-bank-api-openapi.yml
+  operations:
+  - listAccounts
+  - listIbans
+  - createTransfersBulk
+  - getTransfersBulk
+  - getTransfersBulkItems
+  - createCollectionsBulk
+  - getCollectionsBulk
+  - getCollectionsBulkItems
+  - createWebhook
+  - getTransfer
+  - getCollection
+  topics:
+  - bulk-payments
+  - payroll
+  - billing-runs
+  - error-handling
+- file: memo-bank-handle-webhook-events.md
+  name: Handle Memo Bank webhook events
+  api: openapi/memo-bank-premium-bank-api-openapi.yml
+  operations:
+  - createWebhook
+  - listWebhooks
+  - getWebhook
+  - deleteWebhook
+  - getTransaction
+  - getTransfer
+  - getWireTransfer
+  - getCollection
+  - getAccount
+  - getIban
+  - getAttachment
+  - getMandateSignatureRequest
+  - getAccountAssessment
+  - getTransfersBulk
+  - getCollectionsBulk
+  topics:
+  - webhooks
+  - events
+  - idempotency
+  - reconciliation
+coverage:
+  skills: 7
+  operations_covered: 36
+  operations_total: 43
+  uncovered:
+  - createIncomingTransfer
+  - createIncomingCollection
+  - createIban
+  uncovered_note: >-
+    The two sandbox simulation endpoints are referenced inside the testing sections of several skills rather
+    than given a skill of their own, and createIban is covered by the virtual-IBAN skill. No skill was written
+    for a flow Memo Bank does not ship.

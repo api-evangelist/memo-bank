@@ -1,0 +1,193 @@
+generated: '2026-08-17'
+method: searched
+status: published
+source: https://aide.memo.bank/article/425-mcp-server
+docs:
+- https://memo.bank/en/product/mcp/
+- https://aide.memo.bank/article/425-mcp-server
+note: >-
+  Memo Bank publishes TWO distinct remote MCP servers on its own hosts, and they are different products.
+  (1) The Memo Bank MCP connector at https://api.memo.bank/api/apps/mcp/server is the banking connector - a
+  read-mostly agent surface over real account data, gated by OAuth 2.0 with per-workspace consent. (2) The
+  documentation-portal MCP at https://docs.api.memo.bank/mcp is anonymous and serves documentation search
+  and retrieval only; it reaches no customer data. Both were probed live. The banking connector's tool list
+  is auth-gated (HTTP 401 with an RFC 9728 WWW-Authenticate challenge), so its tools are recorded from Memo
+  Bank's own published documentation, names and read/write classification verbatim - input schemas require
+  authenticated introspection and are NOT recorded here. The docs-portal tool list was retrieved live from
+  tools/list and is saved verbatim to memo-bank-docs-mcp-tools.json.
+deployment:
+  mode: remote
+  endpoint: https://api.memo.bank/api/apps/mcp/server
+  auth: oauth
+  verified: probed
+servers:
+- name: memobank
+  label: Memo Bank MCP connector
+  transport: http
+  url: https://api.memo.bank/api/apps/mcp/server
+  auth: oauth
+  scope: banking data (accounts, IBANs, transactions, attachments)
+  install: claude mcp add --transport http --scope user memobank https://api.memo.bank/api/apps/mcp/server
+  install_note: >-
+    Verbatim from Memo Bank's help article. This is a remote HTTP registration command, not a local stdio
+    package - there is no npx/pip package to install.
+  clients_documented:
+  - Claude
+  - ChatGPT
+  - Gemini
+  - Mistral Le Chat
+  x-evidence:
+    fetched: '2026-08-17'
+    url: https://api.memo.bank/api/apps/mcp/server
+    method: 'POST tools/list (jsonrpc 2.0)'
+    http_status: 401
+    body: '{"message":"Unauthorized","status":"401"}'
+    www_authenticate: >-
+      Bearer resource_metadata="https://api.memo.bank/.well-known/oauth-protected-resource/api/apps/mcp/server"
+    interpretation: >-
+      Endpoint exists and speaks the MCP authorization spec correctly - it advertises RFC 9728 protected
+      resource metadata, which resolves to a real 200 document. Tool schemas are gated behind OAuth.
+- name: memobank-docs
+  label: Memo Bank documentation portal MCP
+  transport: http
+  url: https://docs.api.memo.bank/mcp
+  auth: none
+  scope: documentation search and retrieval only - no customer or account data
+  server_info:
+    name: Documentation Portal API
+    version: 0.1.0
+    protocol_version: '2025-06-18'
+    vendor: Bump.sh (the documentation platform Memo Bank hosts its API reference on)
+  capabilities:
+  - tools
+  - prompts
+  - resources
+  - logging
+  required_header: 'portal-url: https://docs.api.memo.bank'
+  also_served_at:
+  - https://docs-marketplace.api.memo.bank/mcp
+  x-evidence:
+    fetched: '2026-08-17'
+    url: https://docs.api.memo.bank/mcp
+    method: 'POST tools/list (jsonrpc 2.0)'
+    http_status: 200
+    tools_returned: 5
+    file: memo-bank-docs-mcp-tools.json
+tools:
+- name: list_workspaces
+  description: Lists the Memo Bank workspaces you have authorized for this connector.
+  server: memobank
+  access: read
+  status: available
+  source_operation: null
+  source_note: No public REST equivalent - workspace enumeration is not in the Premium Bank API OpenAPI.
+- name: list_accounts
+  description: Returns all accounts in a workspace (current accounts, savings accounts) with balance, IBAN and status.
+  server: memobank
+  access: read
+  status: available
+  source_operation: openapi/memo-bank-premium-bank-api-openapi.yml#listAccounts
+- name: list_ibans
+  description: Lists virtual and standard IBANs, filterable by account.
+  server: memobank
+  access: read
+  status: available
+  source_operation: openapi/memo-bank-premium-bank-api-openapi.yml#listIbans
+- name: list_transactions
+  description: >-
+    Queries transaction history with filters on account, period, reference, IBAN, batch and custom
+    identifier.
+  server: memobank
+  access: read
+  status: available
+  source_operation: openapi/memo-bank-premium-bank-api-openapi.yml#listTransactions
+- name: list_attachments
+  description: Lists supporting documents attached to transactions.
+  server: memobank
+  access: read
+  status: available
+  source_operation: openapi/memo-bank-premium-bank-api-openapi.yml#listAttachments
+- name: get_attachment
+  description: Returns attachment metadata and a pre-signed secure download URL.
+  server: memobank
+  access: read
+  status: available
+  source_operation: openapi/memo-bank-premium-bank-api-openapi.yml#getAttachment
+- name: create_attachment
+  description: Attaches an invoice or receipt to an existing transaction from the AI assistant.
+  server: memobank
+  access: write
+  status: available
+  source_operation: openapi/memo-bank-premium-bank-api-openapi.yml#createAttachment
+- name: list_users
+  description: List workspace users.
+  server: memobank
+  access: read
+  status: coming-soon
+  source_operation: null
+  source_note: >-
+    Memo Bank's docs mark this Coming soon. The OpenAPI declares a "Users" tag but publishes no operations
+    under it, which corroborates an unreleased surface.
+- name: prepare_transfers
+  description: Prepare transfers for human review and approval.
+  server: memobank
+  access: write
+  status: coming-soon
+  source_operation: null
+  source_note: >-
+    Marked Coming soon. Would partially correspond to createTransferV2/createTransfersBulk, but Memo Bank
+    states the connector prepares only and cannot execute payments.
+- name: search
+  description: Search all documentation pages in the portal by keyword, optionally filtered by object type.
+  server: memobank-docs
+  access: read
+  status: available
+  source_operation: null
+- name: get_pages
+  description: Retrieve the full content of one or more documentation pages by URL.
+  server: memobank-docs
+  access: read
+  status: available
+  source_operation: null
+- name: list_pages
+  description: List all child pages under a given URL in the portal hierarchy.
+  server: memobank-docs
+  access: read
+  status: available
+  source_operation: null
+- name: list_changes
+  description: List visible documentation changes for a hub, API documentation or portal.
+  server: memobank-docs
+  access: read
+  status: available
+  source_operation: null
+- name: get_change
+  description: Retrieve a single visible documentation change by its identifier.
+  server: memobank-docs
+  access: read
+  status: available
+  source_operation: null
+authorization:
+  flow: OAuth 2.0 authorization code with per-workspace consent
+  steps:
+  - The AI tool redirects the browser to Memo Bank's authorization endpoint.
+  - The user signs in with Memo Bank credentials and completes two-factor authentication.
+  - The user picks which workspace(s) the connector is allowed to act on.
+  - >-
+    Memo Bank redirects back with a short-lived authorization code, exchanged for a refresh token and an
+    access token.
+  protected_resource_metadata: well-known/memo-bank-mcp-oauth-protected-resource.json
+  authorization_server_metadata: null
+  authorization_server_metadata_note: >-
+    The protected-resource document names the MCP server URL itself as its authorization server, but no
+    RFC 8414 metadata document is served there, so endpoint discovery is not fully automatic.
+constraints:
+  stated_by_provider: >-
+    The assistant can read banking data and attach supporting documents to transactions, but it cannot
+    initiate payments, move money, or modify existing transactions or account settings.
+  write_operations: 1
+  read_operations: 6
+  agentic_note: >-
+    A deliberately narrow agent surface for a bank: six read tools plus one additive write (attach a
+    document). Payment initiation stays in the JWT-authenticated Premium Bank API and is not exposed to
+    MCP clients.

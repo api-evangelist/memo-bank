@@ -1,0 +1,115 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for Memo Bank Marketplace API
+  version: 1.0.0
+x-generated: '2026-08-17'
+x-method: generated
+x-source: openapi/memo-bank-marketplace-api-openapi.yml
+x-note: >-
+  Non-destructive enhancements over the spec Memo Bank publishes at
+  https://docs-marketplace.api.memo.bank/source.yaml. The original is preserved in openapi/_original/. This
+  document carries a single operation (the OAuth 2.0 token endpoint) but the surrounding contract - the
+  authorization endpoint, token lifetimes, the dual-credential X-Memo-Signature scheme and the connection
+  lifecycle - is documented only in prose. These actions bring that into the machine-readable contract.
+actions:
+- target: $.info
+  update:
+    x-apievangelist-profile: https://apis.io/provider/memo-bank/
+    x-apievangelist-reviewed: '2026-08-17'
+    contact:
+      name: Memo Bank open banking team
+      email: openbanking@memo.bank
+    x-source-doc: https://docs-marketplace.api.memo.bank/topic/topic-getting-started
+    x-source-note: >-
+      openbanking@memo.bank is the address Memo Bank publishes for marketplace application registration. The
+      spec had no info.contact block.
+- target: $.components
+  update:
+    securitySchemes:
+      JWT:
+        type: apiKey
+        in: header
+        name: X-Memo-Signature
+        description: >-
+          The application's RS256-signed JWT. NOTE the difference from the Premium Bank API: for marketplace
+          requests the JWT travels in X-Memo-Signature while the Authorization header carries the OAuth 2.0
+          access token. The payload adds an oat#S256 claim holding base64url(sha256(access_token)), binding
+          the signature to that specific access token. Modelled as apiKey rather than http bearer because it
+          is a custom header, not an Authorization scheme.
+        x-source-doc: https://docs-marketplace.api.memo.bank/authentication
+      OAuth2:
+        type: oauth2
+        description: >-
+          Authorization code flow with per-workspace and per-account user consent. Access tokens live 2 hours;
+          refresh tokens live 14 days and are single-use, so each refresh rotates them; authorization codes
+          live 5 minutes and are single-use.
+        flows:
+          authorizationCode:
+            authorizationUrl: https://client.memo.bank/authorize
+            tokenUrl: https://api.memo.bank/oauth2/token
+            refreshUrl: https://api.memo.bank/oauth2/token
+            scopes: {}
+        x-scopes-note: >-
+          Left empty deliberately. Memo Bank requires applicants to declare the scopes they need at
+          registration and returns a granted scope string in the token response, but publishes NO scope names
+          anywhere. Populating this map would be fabrication. See scopes/memo-bank-scopes.yml.
+        x-source-doc: https://docs-marketplace.api.memo.bank/topic/topic-authorization-flow
+    x-api-evangelist-rationale: >-
+      The published document references a `JWT` security scheme on its only operation but defines no
+      securitySchemes at all, and never expresses the OAuth 2.0 flow it exists to serve as a scheme.
+- target: $.paths['/oauth2/token'].post
+  update:
+    x-token-lifetimes:
+      access_token: 2 hours
+      refresh_token: 14 days, single use
+      authorization_code: 5 minutes, single use
+    x-refresh-rotation: true
+    x-dual-credential: >-
+      This endpoint is itself JWT-protected - an application must sign the token request with X-Memo-Signature
+      in addition to supplying client_id and client_secret in the body.
+    x-agentic-access:
+      action-class: acting
+      consequence: write
+      audit: required
+    x-source-doc: https://docs-marketplace.api.memo.bank/topic/topic-authorization-flow
+- target: $.components.schemas.OAuth2Token.properties.connection_id
+  update:
+    x-api-evangelist-note: >-
+      The join key for multi-tenant integrations. The same value arrives on webhook deliveries in the
+      X-Memo-Connection-Id header, so an application routes events to the right customer by it. One connection
+      exists per user/workspace pair; once a user deactivates it, API calls fail with inactive_connection.
+    x-source-doc: https://docs-marketplace.api.memo.bank/topic/topic-connection-lifecycle
+- target: $.components
+  update:
+    schemas:
+      Error:
+        type: object
+        description: Memo Bank's unified error envelope. Not RFC 9457 problem+json.
+        required:
+        - code
+        - message
+        properties:
+          code:
+            type: string
+            example: inactive_connection
+          message:
+            type: string
+            example: The connection has been deactivated by the user.
+        x-source-doc: https://docs-marketplace.api.memo.bank/topic/topic-connection-lifecycle
+    x-api-evangelist-rationale: >-
+      The token operation declares only a 200 response. No error schema exists, yet the documentation names a
+      marketplace-specific inactive_connection code and an OAuth error/error_description redirect contract.
+- target: $
+  update:
+    x-authorization-endpoint: https://client.memo.bank/authorize
+    x-authorization-params:
+    - client_id
+    - redirect_uri
+    - scope
+    - state
+    x-pkce: not documented
+    x-api-evangelist-gap: >-
+      The authorization endpoint lives on client.memo.bank, a different host from the api.memo.bank server
+      declared in servers[], and is not represented in the document at all. No PKCE (RFC 7636) is documented,
+      and no RFC 8414 authorization-server metadata is served, so none of this is machine-discoverable.
+    x-source-doc: https://docs-marketplace.api.memo.bank/topic/topic-authorization-flow

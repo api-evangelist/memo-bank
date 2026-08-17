@@ -1,0 +1,119 @@
+generated: '2026-08-17'
+method: searched
+source:
+- https://registry.npmjs.org/-/v1/search
+- https://pypi.org/pypi/
+- https://rubygems.org/api/v1/gems/
+- https://crates.io/api/v1/crates
+- https://packagist.org/search.json
+- https://api.github.com/orgs/memobank/repos
+- https://docs.api.memo.bank/
+package_count: 0
+official_package_count: 0
+note: >-
+  Memo Bank publishes NO first-party client library in any package registry. Searched npm (queries
+  "memobank", "memo-bank", "memo.bank"), PyPI (memobank, memo-bank, memobank-api), RubyGems, crates.io and
+  Packagist on 2026-08-17: every candidate returned either 404 or unrelated third-party packages. The
+  documentation never references an SDK - it teaches integrators to construct and RS256-sign the JWT
+  themselves, pointing at jwt.io/libraries for the crypto rather than at a Memo Bank library. The
+  github.com/memobank organisation has 13 public repositories and none is an API client; the only
+  finance-adjacent one, swift-money, is a FORK of an upstream project with no tags or releases, so it is not
+  a Memo Bank SDK either. This is an honest zero, not an unsearched gap.
+packages: []
+registries_searched:
+- registry: npm
+  queries:
+  - memobank
+  - memo-bank
+  - memo.bank
+  first_party_hits: 0
+  note: >-
+    Matches returned are unrelated - memobank-cli and memo-bank-observer are AI coding-memory tools from
+    other publishers, not Memo Bank banking clients. Recording this explicitly because the name collision is
+    a trap for anyone re-running this search.
+- registry: pypi
+  queries:
+  - memobank
+  - memo-bank
+  - memobank-api
+  first_party_hits: 0
+  status: all 404
+- registry: rubygems
+  queries:
+  - memobank
+  - memo-bank
+  first_party_hits: 0
+  status: all 404
+- registry: crates.io
+  queries:
+  - memobank
+  first_party_hits: 0
+  status: 0 results
+- registry: packagist
+  queries:
+  - memobank
+  first_party_hits: 0
+  note: Only unrelated Monobank (Ukrainian bank) packages returned.
+- registry: maven-central
+  queries:
+  - memo.bank
+  first_party_hits: 0
+  note: >-
+    No Memo Bank group id, despite the API backend being Java (a 401 response body leaked
+    bank.memo.commons.jaxrs.jersey.JerseyApplication, so Java/Jersey is in use server-side only).
+- registry: nuget
+  first_party_hits: 0
+- registry: pkg.go.dev
+  first_party_hits: 0
+github_organization:
+  url: https://github.com/memobank
+  public_repos: 13
+  created: '2017-10-26'
+  first_party_api_client: false
+  assessment: >-
+    The organisation is used for forks of tooling the engineering team consumes (kong, commanded, mox,
+    react-datepicker, react-number-format, semantic-release-npm, multi-semantic-release) plus two data
+    repositories behind their published research (data, carbon-footprint) and a marketing site
+    (growth-guide). No repository implements or wraps the Memo Bank API.
+  notable_repos:
+  - name: memobank/swift-money
+    version: null
+    published: null
+    fork: true
+    language: Swift
+    license: MIT
+    last_push: '2024-10-08'
+    official: false
+    note: >-
+      A fork of an upstream monetary-amount library, not a Memo Bank product. No git tags and no GitHub
+      releases exist, so there is no version to record and it is not consumable as a pinned SwiftPM
+      dependency. Listed only to document that it was checked and rejected.
+  - name: memobank/data
+    version: null
+    published: null
+    fork: false
+    last_push: '2023-02-01'
+    official: true
+    note: >-
+      First-party, but it is the dataset behind Memo Bank's blog posts - not software and not an API client.
+integration_path:
+  documented_approach: >-
+    Hand-rolled HTTP with a self-constructed RS256 JWT per request. Memo Bank documents the exact header and
+    payload claims (alg, typ, x5t#S256, sub, aud, iat, jti, sec, dig#S256) and directs integrators to a
+    generic JWT library of their choice.
+  generic_libraries_referenced: https://jwt.io/libraries
+  api_recipes: https://aide.memo.bank/category/349-api
+  impact: >-
+    The auth scheme is the reason an SDK matters more here than for a typical API. Every request needs a
+    freshly minted token whose sub pins the method and full path with query string, whose iat must be within
+    5 seconds of server time, and whose dig#S256 is a base64url SHA-256 of the body. That is a substantial
+    amount of correct-by-construction code that every customer must write and maintain independently, and
+    each of those constraints is a distinct silent-failure mode. A first-party SDK in even one language
+    would remove the highest-friction part of onboarding.
+cli:
+  published: false
+  note: No first-party CLI. cli/ is intentionally absent rather than empty.
+gaps:
+- No official SDK in any language, for an API with an unusually demanding request-signing scheme.
+- No published Postman collection or workspace (searched Postman public API, no first-party result).
+- No OpenAPI-generated client offered for download from the documentation portal.

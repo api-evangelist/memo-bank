@@ -1,0 +1,200 @@
+generated: '2026-08-17'
+method: searched
+source:
+- https://docs.api.memo.bank/topic/topic-idempotent-requests
+- https://docs.api.memo.bank/topic/topic-errors
+- https://docs.api.memo.bank/topic/topic-rate-limiting
+- https://docs.api.memo.bank/topic/topic-versioning-and-backwards-compatibility
+- https://docs.api.memo.bank/authentication
+- openapi/memo-bank-premium-bank-api-openapi.yml
+docs: https://docs.api.memo.bank/
+note: >-
+  Cross-cutting runtime semantics for the Premium Bank API. Every rule below is published by Memo Bank in a
+  dedicated documentation topic; pagination and content negotiation are corroborated from the OpenAPI
+  parameters. One notable divergence is recorded: the idempotency and rate-limit contracts are documented in
+  prose only and do NOT appear in the OpenAPI - there is no Idempotency-Key parameter on any of the 43
+  operations - so a generated client built from the spec alone will silently omit the header that makes
+  retries safe on a payments API.
+authentication:
+  style: >-
+    Per-request signed JWT bearer token (RS256), not a static API key. The token is single-use in effect
+    because it binds the request method, path and body digest.
+  header: 'Authorization: Bearer <jwt>'
+  algorithm: RS256 (RSA-SHA256)
+  jwt_header_claims:
+    alg: must be RS256
+    typ: must be JWT
+    x5t#S256: SHA-256 thumbprint of the certificate, from the Memo Bank web interface
+  jwt_payload_claims:
+    sub: request method followed by a space and the full path including query parameters
+    aud: the domain being called, e.g. api.memo.bank
+    iat: token creation timestamp; only 5 seconds of clock skew is tolerated
+    jti: unique UUID per request
+    sec: secret code obtained during setup (custom claim, not in the JWT spec)
+    dig#S256: base64url(sha256(body)); required only when the request has a body
+  request_binding: >-
+    Because sub pins the method and path and dig#S256 pins the body, a captured token cannot be replayed
+    against a different request. This is a stronger scheme than bearer API keys and is closer to
+    HTTP message signatures in effect.
+  clock_skew_tolerance_seconds: 5
+  marketplace_variant: >-
+    Marketplace applications send the JWT in X-Memo-Signature and the OAuth 2.0 access token in
+    Authorization, and add an oat#S256 claim carrying base64url(sha256(access_token)) to bind the signature
+    to that specific access token.
+  detail: authentication/memo-bank-authentication.yml
+idempotency:
+  supported: true
+  header: Idempotency-Key
+  recommended_value: V4 UUID
+  scope: >-
+    Mutating requests only. Explicitly NOT supported on GET and DELETE, which Memo Bank describes as
+    inherently idempotent.
+  replay_indicator_header: 'Idempotent-Replayed: true'
+  retention: not published
+  retry_on:
+  - network error
+  - 5XX
+  - '409'
+  - '429'
+  no_retry_on: >-
+    Any other response code, especially other 4XX - Memo Bank states the same result will always be
+    returned, so retrying is pointless.
+  in_flight_behavior: >-
+    Reusing a key while the original request is still processing returns 409 Conflict, which is itself safe
+    to retry.
+  divergent_payload_behavior: >-
+    A subsequent request with the same key but a different body returns 422 Unprocessable Entity.
+  in_openapi: false
+  gap: >-
+    The Idempotency-Key header appears in no OpenAPI operation, so code generated from the spec will not
+    send it. For an API whose primary verbs create SEPA transfers and direct debit collections, this is the
+    single highest-value spec repair available.
+  example: |
+    curl --request POST \
+      --url https://api.memo.bank/v1/transfers \
+      --header 'Authorization: Bearer ***' \
+      --header 'Idempotency-Key: 19b390d1-e7d4-4e27-abe2-49cac9b41ba1' \
+      --header 'Content-Type: application/json' \
+      --data '{...}'
+  event_idempotency: >-
+    Webhook deliveries carry their own idempotency contract: Event.id is a UUID and Memo Bank documents that
+    an event with the same id may be delivered more than once but must only be processed once.
+pagination:
+  style: opaque cursor (page token), migrating away from page numbers
+  params:
+  - name: page_token
+    in: query
+    status: current
+    operations: 8
+  - name: page
+    in: query
+    status: deprecated
+    deprecated_on: '2026-05-13'
+    note: Deprecated in favour of page_token in the "Introduce page tokens" changelog entry.
+  - name: size
+    in: query
+    status: current
+    operations: 8
+  - name: order_by
+    in: query
+    status: current
+    operations: 1
+  response_envelope: >-
+    Dedicated *Page schemas per collection (AccountPage, TransactionPage, IbanPage, CollectionPage,
+    AttachmentPage, MandateSignatureRequestPage, WebhookPage, TransferV2Page).
+  paginated_operations:
+  - listAccounts
+  - listTransactions
+  - listIbans
+  - listAttachments
+  - listMandateSignatureRequests
+  - listWebhooks
+  - getTransfersBulkItems
+  - getCollectionsBulkItems
+error_envelope:
+  format: proprietary flat JSON - NOT RFC 9457 problem+json
+  content_type: application/json
+  fields:
+  - name: code
+    description: Machine-readable error code; the key that distinguishes error conditions.
+  - name: message
+    description: Plain English explanation of the problem.
+  example: |
+    {
+      "code": "error_code",
+      "message": "Example error message."
+    }
+  status_families: 2xx success; 4xx and 5xx errors, using standard HTTP semantics
+  detail: errors/memo-bank-problem-types.yml
+  gap: >-
+    No 4xx or 5xx response is declared on any of the 43 operations in the OpenAPI - only 200, 201 and 204
+    appear. The error contract exists in prose but is absent from the machine-readable contract.
+rate_limiting:
+  documented: true
+  exhaustion_status: 429
+  response_headers:
+  - RateLimit-Limit
+  - RateLimit-Remaining
+  - RateLimit-Reset
+  header_style: >-
+    IETF draft RateLimit-* naming (no X- prefix), sent on every response rather than only on 429.
+  detail: rate-limits/memo-bank-rate-limits.yml
+versioning:
+  scheme: uri-path
+  current: v2
+  pattern: /v2/...
+  policy_url: https://docs.api.memo.bank/topic/topic-versioning-and-backwards-compatibility
+  breaking_change_rule: The path version number is incremented for breaking changes.
+  non_breaking_changes_declared:
+  - Adding new API resources.
+  - Adding new optional request parameters to existing methods.
+  - Adding new properties to existing responses.
+  - Changing the order of properties in responses.
+  - Changing the length or format of opaque strings such as object IDs and error messages.
+  - Adding new EventType or ResourceType enum values for webhooks.
+  - Adding new TransactionSource enum values for transactions.
+  consumer_obligation: >-
+    Clients must tolerate unknown enum values - Memo Bank reserves the right to add EventType, ResourceType
+    and TransactionSource members without a version bump.
+  detail: lifecycle/memo-bank-lifecycle.yml
+content_negotiation:
+  default: application/json
+  vendor_media_type: application/vnd.memo-bank.v1+json
+  note: >-
+    Webhook deliveries accept either application/json or the versioned vendor media type
+    application/vnd.memo-bank.v1+json for the same Event schema, giving consumers a media-type versioning
+    lever alongside the URI path version.
+request_tracing:
+  request_id_header: x-correlation-id
+  method: probed
+  evidence: >-
+    Observed on a live 401 response from https://api.memo.bank/api/apps/mcp/server on 2026-08-17
+    (x-correlation-id: 2083df86-7584-4fcf-b519-ba0cad009be7). Not documented in the API reference.
+  documented: false
+security_headers:
+  method: probed
+  observed_on: https://api.memo.bank
+  headers:
+  - 'strict-transport-security: max-age=31536000 ; includeSubDomains ; preload'
+  - 'content-security-policy: default-src ''none''; frame-ancestors ''none'''
+  - 'x-content-type-options: nosniff'
+  - 'x-frame-options: DENY'
+  - 'cache-control: must-revalidate,no-cache,no-store'
+access_control:
+  ip_allow_list: >-
+    Applications support an IP allow-list, managed per application in the web interface alongside
+    certificates and webhooks.
+  granular_permissions: >-
+    Owners and administrators create applications and manage their permissions, and may invite
+    collaborators scoped to one application.
+  marketplace_scoping: >-
+    Marketplace applications can only reach resources inside the granted scopes AND the specific accounts
+    the user authorized; out-of-scope access returns an error.
+cross_links:
+  errors: errors/memo-bank-problem-types.yml
+  lifecycle: lifecycle/memo-bank-lifecycle.yml
+  authentication: authentication/memo-bank-authentication.yml
+  scopes: scopes/memo-bank-scopes.yml
+  rate_limits: rate-limits/memo-bank-rate-limits.yml
+  sandbox: sandbox/memo-bank-sandbox.yml
+  webhooks: asyncapi/memo-bank-webhooks.yml

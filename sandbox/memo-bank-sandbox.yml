@@ -1,0 +1,106 @@
+generated: '2026-08-17'
+method: searched
+source:
+- https://docs.api.memo.bank/topic/topic-sandbox
+- https://aide.memo.bank/article/398-api-sandbox
+- openapi/memo-bank-premium-bank-api-openapi.yml
+docs: https://docs.api.memo.bank/topic/topic-sandbox
+note: >-
+  Memo Bank runs a real, fully-featured sandbox on separate hostnames with its own web interface, and - the
+  part that matters most for a payments API - it ships two sandbox-only OPERATIONS in the same OpenAPI that
+  let an integrator simulate money arriving. That is a stronger sandbox than most banks publish. It is,
+  however, gated: access is provisioned by a Memo Bank banker, not by self-signup, so no test credentials or
+  magic values could be observed. No test IBANs, test card numbers or fixture tokens are published in the
+  public documentation, and none have been invented here.
+environments:
+- name: production
+  api_base_url: https://api.memo.bank
+  web_interface: https://client.memo.bank
+- name: sandbox
+  api_base_url: https://api.sandbox.memo.bank
+  web_interface: https://client.sandbox.memo.bank
+  parity: >-
+    Memo Bank states that all endpoints described in the specification can be used on the sandbox, plus the
+    sandbox-only simulation endpoints.
+- name: sandbox (NextGenPSD2)
+  api_base_url: https://api.beta.sandbox.memo.bank/nextgenpsd2
+  note: >-
+    The PSD2 surface uses a different, beta-prefixed sandbox host than the Premium Bank API, declared in the
+    NextGenPSD2 OpenAPI servers[] block.
+separation:
+  mechanism: separate hostname and separate web interface
+  key_prefixes: none
+  key_prefix_note: >-
+    Memo Bank does not use test/live key prefixes. Credentials are an X.509 certificate, a secret code and an
+    RSA private key issued per application, and environment selection is by base URL, so there is no
+    in-token signal distinguishing a sandbox credential from a production one. An integrator pointing a
+    sandbox certificate at api.memo.bank simply fails to authenticate rather than being warned.
+  test_mode_flag: none
+access:
+  self_serve: false
+  gate: >-
+    "Get in touch with your banker to create an access." Sandbox provisioning follows the same
+    banker-activated path as production API access.
+  credentials_published: false
+simulation_endpoints:
+- operationId: createIncomingTransfer
+  method: POST
+  path: /v2/sandbox/incoming_transfers
+  summary: Simulate an incoming SEPA transfer
+  purpose: >-
+    Lets an integrator generate inbound credit transfers so reconciliation logic and transfer_confirmed /
+    transaction_confirmed webhooks can be exercised without a real counterparty sending money.
+  source: openapi/memo-bank-premium-bank-api-openapi.yml
+- operationId: createIncomingCollection
+  method: POST
+  path: /v2/sandbox/incoming_collections
+  summary: Simulate an incoming SEPA collection
+  purpose: >-
+    Simulates an inbound SEPA Direct Debit collection, including its mandate and creditor, to exercise
+    collection_confirmed / collection_returned handling.
+  request_schemas:
+  - CreateIncomingCollection
+  - CreateIncomingCollectionMandate
+  - CreateIncomingCollectionMandateCreditor
+  source: openapi/memo-bank-premium-bank-api-openapi.yml
+sandbox_only_in_production:
+  behavior: not published
+  note: >-
+    Memo Bank does not state what the two /v2/sandbox/* endpoints return when called against
+    api.memo.bank. A client should assume they are unavailable in production.
+test_data:
+  magic_values: none published
+  test_ibans: none published
+  test_cards: none published
+  test_accounts: none published
+  note: >-
+    Sandbox accounts and IBANs are provisioned per integrator by Memo Bank rather than drawn from a published
+    set of magic values, which is why no verbatim test data appears in this artifact.
+time_simulation:
+  test_clocks: false
+  note: >-
+    No test-clock or time-travel facility is documented. For a product whose core flows are next-day
+    collections and SEPA settlement cycles, the absence of a documented clock-advance mechanism is a real
+    gap - an integrator cannot deterministically test a D+1 settlement transition.
+decline_simulation:
+  documented: false
+  note: >-
+    No published way to force a specific return reason, rejection or decline. The webhook event enum does
+    include the failure states an integrator would want to trigger (collection_returned, collection_failed,
+    transfer_returned, transfer_failed, wire_transfer_returned, wire_transfer_failed,
+    transaction_rejected, account_assessment_failed, mandate_signature_request_expired), so the states
+    exist; what is missing is a documented trigger for them.
+webhook_testing:
+  supported: true
+  mechanism: >-
+    Webhooks are managed through the API itself (createWebhook / listWebhooks / getWebhook / deleteWebhook),
+    so a sandbox integrator can register their own receiver URL and then drive events using the two
+    simulation endpoints. Combined, these give a complete closed loop for event testing without Memo Bank
+    involvement.
+  cross_link: asyncapi/memo-bank-webhooks.yml
+gaps:
+- No self-serve sandbox signup; a banker must provision access.
+- No published test IBANs, magic values or fixture data.
+- No test clocks or time simulation, on a product built around next-day settlement.
+- No documented triggers for return/decline/failure states, though the event types for them exist.
+- No test/live credential prefix, so environment mix-ups surface only as auth failures.

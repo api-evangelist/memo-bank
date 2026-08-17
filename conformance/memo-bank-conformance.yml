@@ -1,0 +1,240 @@
+generated: '2026-08-17'
+method: searched
+source:
+- openapi/memo-bank-nextgenpsd2-api-openapi.yml
+- openapi/memo-bank-premium-bank-api-openapi.yml
+- openapi/memo-bank-marketplace-api-openapi.yml
+- https://memo.bank/en/about/security-operations/
+- https://docs.api.memo.bank/topic/topic-errors
+- https://docs.api.memo.bank/topic/topic-idempotent-requests
+- https://docs.api.memo.bank/topic/topic-rate-limiting
+- security/memo-bank-domain-security.yml
+note: >-
+  Memo Bank's strongest conformance claim is explicit and verifiable: the NextGenPSD2 API states it follows
+  the Berlin Group NextGenPSD2 Implementation Guidelines version 1.3.11, and the spec's shape (AIS/PIS tags,
+  /v1/accounts and /v1/{payment-service}/{payment-product} paths, AIS+PIS scopes) corroborates it. Its
+  regulatory standing as an ECB-accredited credit institution supervised by the ACPR is also published.
+  What is NOT published is any independent security certification - no SOC 2, ISO 27001, PCI DSS or FedRAMP
+  claim appears anywhere on the site, and there is no trust centre. Those are recorded as conforms: false
+  with an explicit "not published" evidence note rather than left out.
+standards:
+- id: berlin-group-nextgenpsd2
+  conforms: true
+  version: Implementation Guidelines 1.3.11
+  evidence: >-
+    openapi/memo-bank-nextgenpsd2-api-openapi.yml info.description states "The API follows BerlinGroup
+    NextGenPSD2 Implementation Guidelines as of version 1.3.11". Corroborated by AIS/PIS tags, the
+    /v1/accounts and /v1/card-accounts resource families, and the /v1/{payment-service}/{payment-product}
+    payment path template.
+  api: Memo Bank NextGenPSD2 API
+- id: psd2
+  conforms: true
+  evidence: >-
+    A dedicated NextGenPSD2 XS2A API is published for licensed third-party providers, exposing Account
+    Information Service and Payment Initiation Service surfaces. Memo Bank's Premium Bank API documentation
+    explicitly redirects PSD2 third-party payment service providers to it.
+  api: Memo Bank NextGenPSD2 API
+- id: oauth2
+  conforms: true
+  evidence: >-
+    openapi/memo-bank-nextgenpsd2-api-openapi.yml declares a securityScheme of type oauth2 with an
+    authorizationCode flow and AIS/PIS scopes. The Marketplace API implements the same authorization-code
+    flow with authorization_code and refresh_token grants, single-use rotating refresh tokens, and a state
+    parameter.
+- id: oauth2-pkce
+  conforms: false
+  evidence: >-
+    No PKCE (RFC 7636) code_challenge is documented on either authorization-code flow.
+- id: rfc9728-oauth-protected-resource-metadata
+  conforms: true
+  evidence: >-
+    https://api.memo.bank/api/apps/mcp/server returns HTTP 401 with a WWW-Authenticate: Bearer
+    resource_metadata= challenge, and that URL resolves to a real 200 JSON document. Probed 2026-08-17;
+    saved as well-known/memo-bank-mcp-oauth-protected-resource.json.
+- id: rfc8414-oauth-authorization-server-metadata
+  conforms: false
+  evidence: >-
+    Probed /.well-known/oauth-authorization-server on api.memo.bank and at the authorization_servers[0] URL
+    named in the protected-resource document - both 404. Discovery cannot be completed anonymously.
+- id: rfc7519-jwt
+  conforms: true
+  evidence: >-
+    The Premium Bank API authentication scheme is an RS256 JWT, and Memo Bank cites RFC 7519 directly in its
+    authentication documentation.
+- id: rfc7515-jws
+  conforms: true
+  evidence: >-
+    Memo Bank cites RFC 7515 for the JWS signature and RFC 7515 Appendix C for the base64url encoding used
+    in its dig#S256 and oat#S256 claims.
+- id: mcp
+  conforms: true
+  version: '2025-06-18'
+  evidence: >-
+    Two MCP servers on Memo Bank hosts. The documentation portal server at https://docs.api.memo.bank/mcp
+    answered initialize with protocolVersion 2025-06-18 and tools/list with 5 tools (probed 2026-08-17). The
+    banking connector at https://api.memo.bank/api/apps/mcp/server enforces the MCP authorization spec.
+- id: rfc9457-problem-details
+  conforms: false
+  evidence: >-
+    Errors use a proprietary flat {code, message} JSON envelope served as application/json. No
+    application/problem+json representation and no type/title/detail/instance members. Three different error
+    shapes were observed live on api.memo.bank - see errors/memo-bank-problem-types.yml.
+- id: idempotency
+  conforms: true
+  evidence: >-
+    Idempotency-Key request header with V4 UUID recommendation, an Idempotent-Replayed: true response header
+    on replay, 409 for an in-flight duplicate and 422 for a key reused with a divergent payload. Documented
+    at https://docs.api.memo.bank/topic/topic-idempotent-requests. Note it is documented in prose only and
+    appears in no OpenAPI operation.
+- id: ietf-ratelimit-headers
+  conforms: true
+  evidence: >-
+    RateLimit-Limit, RateLimit-Remaining and RateLimit-Reset are sent on every response, using the
+    draft-ietf-httpapi-ratelimit-headers naming without an X- prefix. 429 on exhaustion. No Retry-After.
+- id: pagination
+  conforms: true
+  evidence: >-
+    Opaque cursor pagination via page_token + size across 8 list operations, with dedicated *Page response
+    schemas. The older page number parameter was deprecated 2026-05-13.
+- id: openapi-3-1
+  conforms: true
+  evidence: >-
+    The Premium Bank and Marketplace documents are OpenAPI 3.1.0, and the Premium Bank document uses the
+    3.1 top-level `webhooks` object to describe its event surface. The NextGenPSD2 document is OpenAPI 3.0.1.
+- id: asyncapi
+  conforms: false
+  evidence: >-
+    No AsyncAPI document published. Probed /asyncapi.yaml and /asyncapi.json on the docs and API hosts
+    (2026-08-17) - all 404. The event surface exists but is expressed via OpenAPI 3.1 webhooks instead.
+- id: sepa-credit-transfer
+  conforms: true
+  evidence: >-
+    SEPA credit transfers, including instant transfers, are a documented product of the Premium Bank API
+    (createTransferV2, createTransfersBulk) and of the bank itself.
+- id: sepa-direct-debit
+  conforms: true
+  evidence: >-
+    SEPA Direct Debit collections with a full mandate lifecycle - createCollection, createCollectionsBulk,
+    and five mandate signature request operations including SEPA mandate debtor and creditor schemas.
+- id: iso20022
+  conforms: unknown
+  evidence: >-
+    Not claimed by Memo Bank. SEPA and T2/RTGS rails are ISO 20022-based underneath, and the API surfaces
+    ISO-20022-shaped concepts (IBAN/BIC, mandate references, return reasons), but Memo Bank makes no ISO 20022
+    conformance statement and exposes no pain.001/camt.05x message interface, so this is recorded as unknown
+    rather than asserted.
+- id: iso8601
+  conforms: true
+  evidence: Event.date and transaction dates are declared as ISO 8601 date-time in the OpenAPI.
+- id: eidas
+  conforms: true
+  evidence: >-
+    Required by the Berlin Group NextGenPSD2 regime the PSD2 API declares conformance to; third-party
+    providers identify themselves with an eIDAS certificate.
+- id: gdpr
+  conforms: true
+  evidence: >-
+    GDPR compliance is stated on https://memo.bank/en/about/security-operations/ and a dedicated personal
+    data page is published at https://memo.bank/en/personal-data/. Data is hosted in Europe.
+- id: soc2
+  conforms: false
+  evidence: >-
+    Not published. No SOC 2 claim appears on the security-operations page or anywhere else on memo.bank, and
+    there is no trust centre. Probed trust.memo.bank and security.memo.bank - neither resolves as a trust
+    portal.
+- id: iso27001
+  conforms: false
+  evidence: Not published. No ISO 27001 claim found on any Memo Bank page.
+- id: pci-dss
+  conforms: false
+  evidence: >-
+    Not published. Memo Bank issues cards as a product but makes no PCI DSS statement, and the API exposes no
+    cardholder-data endpoints (card transaction sources appear only as read-only transaction types).
+- id: fapi
+  conforms: false
+  evidence: >-
+    No FAPI (Financial-grade API) profile claim. The Premium Bank JWT scheme achieves comparable
+    request-binding and proof-of-possession properties in a proprietary way, and the Marketplace flow binds
+    the JWT to the access token via oat#S256, but neither is presented as FAPI conformance.
+- id: fhir-r4
+  conforms: false
+  evidence: Not applicable - Memo Bank is a bank, not a healthcare provider.
+- id: scim
+  conforms: false
+  evidence: >-
+    No SCIM 2.0 user-provisioning surface. The OpenAPI declares a Users tag but publishes no operations under
+    it.
+- id: odata
+  conforms: false
+  evidence: Not an OData service.
+- id: json-api
+  conforms: false
+  evidence: >-
+    Plain JSON with per-collection *Page envelopes; no JSON:API media type, no data/included/links structure.
+- id: fdx
+  conforms: false
+  evidence: >-
+    Not applicable - FDX is the North American financial data-sharing standard. Memo Bank is a French bank and
+    implements the European PSD2/Berlin Group equivalent instead.
+- id: rfc8594-sunset-header
+  conforms: false
+  evidence: >-
+    A backwards-compatibility policy is published, but no Sunset or Deprecation response headers are
+    documented, and the one live deprecation (the page parameter) carries no sunset date.
+- id: rfc9116-security-txt
+  conforms: false
+  evidence: >-
+    No security.txt on any of the seven hosts probed. https://memo.bank/security.txt returns a soft 200
+    carrying the site's SPA shell, not RFC 9116 content.
+- id: dnssec
+  conforms: true
+  evidence: 'security/memo-bank-domain-security.yml: dnssec true on memo.bank (probed 2026-08-17).'
+- id: dmarc
+  conforms: true
+  evidence: 'security/memo-bank-domain-security.yml: DMARC present with policy reject - the strictest setting.'
+- id: caa
+  conforms: true
+  evidence: >-
+    security/memo-bank-domain-security.yml records six CAA records on memo.bank, including an iodef
+    mailto:security@memo.bank incident-reporting contact per RFC 8659.
+- id: hsts
+  conforms: partial
+  evidence: >-
+    api.memo.bank returns strict-transport-security: max-age=31536000 ; includeSubDomains ; preload on live
+    responses. The apex memo.bank host returned no HSTS header on probe, and docs.api.memo.bank returned HSTS
+    with max-age=0, so enforcement is inconsistent across hosts.
+regulatory:
+  regime: EU banking
+  licenses:
+  - authority: European Central Bank (ECB)
+    status: Accredited as a credit institution
+  - authority: Autorite de controle prudentiel et de resolution (ACPR)
+    status: Prudential supervisor
+    address: 4 place de Budapest, 75009 Paris
+  - authority: Autorite des marches financiers (AMF)
+    status: Investment services provided via a tied agent arrangement
+  source: https://memo.bank/en/about/security-operations/
+  significance: >-
+    A full ECB credit-institution licence is a materially higher bar than the electronic money institution or
+    payment institution licence most fintech "banking API" providers hold, and it is the reason the PSD2
+    obligation applies to Memo Bank as an account-servicing payment service provider.
+security_posture:
+  published_controls:
+  - Two-step authentication with mobile notifications
+  - TLS encryption in transit
+  - Multi-layer server-side encryption at rest
+  - Data hosted in Europe on Google Cloud Platform and Amazon Web Services
+  - Per-application IP allow-lists on the API
+  - Audited core banking platform (no certification named)
+  source: https://memo.bank/en/about/security-operations/
+summary:
+  conforms_true: 19
+  conforms_false: 15
+  conforms_partial: 1
+  conforms_unknown: 1
+  strongest: >-
+    Berlin Group NextGenPSD2 1.3.11 with a shipped XS2A API, ECB credit-institution licensing, RFC 9728 MCP
+    authorization, and an unusually rigorous request-signing scheme.
+  weakest: >-
+    No independent security certification of any kind is published (no SOC 2, ISO 27001 or PCI DSS), no
+    RFC 9457 error format, no RFC 9116 security.txt, and no AsyncAPI for a 34-event webhook surface.

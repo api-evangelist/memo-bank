@@ -1,0 +1,114 @@
+generated: '2026-08-17'
+method: searched
+source:
+- openapi/memo-bank-nextgenpsd2-api-openapi.yml
+- https://docs-marketplace.api.memo.bank/topic/topic-authorization-flow
+- https://docs-marketplace.api.memo.bank/authentication
+- https://docs-marketplace.api.memo.bank/topic/topic-getting-started
+docs: https://docs-marketplace.api.memo.bank/topic/topic-authorization-flow
+note: >-
+  Upgraded from the mechanical derive, which found only the two NextGenPSD2 scopes. Memo Bank operates TWO
+  separate OAuth 2.0 scope systems and only one of them has a published scope list. The NextGenPSD2 scopes
+  (AIS, PIS) are enumerated in that spec's securityScheme. The Marketplace scope system is real and
+  load-bearing - the authorization request takes a space-separated `scope` parameter, the token response
+  returns a granted `scope` string, and Memo Bank tells applicants they must state "a set of scopes your
+  application will have access to" at registration - but NO scope names are published anywhere. The
+  Marketplace authentication page defers to the main API documentation "for the full list of available API
+  endpoints and their required scopes", and the main API documentation does not publish scope names either.
+  That circular reference is recorded below as an unresolved gap rather than filled with guesses.
+scope_systems:
+- system: nextgenpsd2
+  published: true
+  scope_count: 2
+  granularity: one scope per PSD2 service role
+- system: marketplace
+  published: false
+  scope_count: 0
+  granularity: unknown
+schemes:
+- name: OAuth2
+  system: nextgenpsd2
+  source: openapi/memo-bank-nextgenpsd2-api-openapi.yml
+  flows:
+  - flow: authorizationCode
+    authorizationUrl: https://client.memo.bank/authorize
+    tokenUrl: /oauth2/token
+    refreshUrl: /oauth2/token
+- name: OAuth2
+  system: marketplace
+  source: https://docs-marketplace.api.memo.bank/topic/topic-authorization-flow
+  flows:
+  - flow: authorizationCode
+    authorizationUrl: https://client.memo.bank/authorize
+    tokenUrl: https://api.memo.bank/oauth2/token
+    refreshUrl: https://api.memo.bank/oauth2/token
+    grant_types:
+    - authorization_code
+    - refresh_token
+    scope_param: space-separated list of requested scopes
+    state_param: required, opaque value to maintain state between request and callback
+scopes:
+- scope: AIS
+  description: Account Information Service.
+  system: nextgenpsd2
+  flows:
+  - authorizationCode
+  operations:
+  - readAccountsList
+  - readAccountDetails
+  - readAccountBalance
+  - readAccountTransactionsList
+  - readAccountTransactionDetails
+  - readCardAccountsList
+  - readCardAccountDetails
+  - readCardAccountBalance
+  - readCardAccountTransactionsList
+  sources:
+  - openapi/memo-bank-nextgenpsd2-api-openapi.yml
+- scope: PIS
+  description: Payment Initiation Service.
+  system: nextgenpsd2
+  flows:
+  - authorizationCode
+  operations:
+  - initiatePayment
+  - getPaymentInformation
+  - getPaymentInitiationStatus
+  - cancelPayment
+  sources:
+  - openapi/memo-bank-nextgenpsd2-api-openapi.yml
+marketplace_scopes: []
+marketplace_scopes_note: >-
+  Deliberately empty. Memo Bank's Marketplace scope names are not published on any public page, and the MCP
+  connector - which uses this same OAuth system - documents its capability boundary in prose ("can read
+  banking data and attach supporting documents, cannot initiate payments") rather than as named scopes. The
+  connector's seven tools imply at least a read scope over accounts/IBANs/transactions/attachments and a
+  narrow attachment-write scope, but no scope STRING is published, so none is recorded. Inventing plausible
+  names such as "accounts:read" here would be fabrication.
+authorization_boundaries:
+  workspace_consent: >-
+    Beyond scopes, the user selects which workspace(s) an application or connector may act on during the
+    authorization flow.
+  account_consent: >-
+    Access is further limited to the specific accounts the user authorized; requesting resources outside
+    that set returns an error.
+  effective_model: >-
+    Three-dimensional - granted scopes AND authorized workspaces AND authorized accounts must all permit the
+    call. This is a stronger consent model than scopes alone, which is worth noting given the scope names
+    themselves are unpublished.
+gaps:
+- >-
+  No scopes or permissions reference page exists for the Marketplace/MCP OAuth system, despite applicants
+  being required to declare the scopes they need at registration.
+- >-
+  The Marketplace authentication page points at the main API documentation for "the full list of available
+  API endpoints and their required scopes", but the main API documentation contains no scope list and its 43
+  operations carry no per-operation OAuth scope requirements - the reference is circular.
+- >-
+  The NextGenPSD2 scopes are coarse: two scopes across 13 operations, with a single PIS scope covering both
+  payment initiation and cancellation.
+- No RFC 8414 authorization-server metadata to expose scopes_supported programmatically.
+cross_links:
+  authentication: authentication/memo-bank-authentication.yml
+  mcp: mcp/memo-bank-mcp.yml
+  well_known: well-known/memo-bank-well-known.yml

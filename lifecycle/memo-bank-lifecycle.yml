@@ -1,0 +1,114 @@
+generated: '2026-08-17'
+method: searched
+source:
+- https://docs.api.memo.bank/topic/topic-versioning-and-backwards-compatibility
+- https://docs.api.memo.bank/changes
+- https://memo.bank/en/pricing/
+- https://memo.bank/en/product/api/
+- openapi/memo-bank-premium-bank-api-openapi.yml
+versioning:
+  scheme: uri-path
+  current: v2
+  pattern: /v2/...
+  docs: https://docs.api.memo.bank/topic/topic-versioning-and-backwards-compatibility
+  documented_version_label: '2.0'
+  breaking_change_rule: >-
+    The path version number is incremented when a breaking change is introduced; backward-compatible changes
+    ship without a version bump.
+  media_type_versioning: >-
+    Webhook payloads additionally accept application/vnd.memo-bank.v1+json alongside application/json,
+    giving a second, media-type-based versioning lever.
+  note: >-
+    A live inconsistency worth flagging: the versioning topic and the idempotency example both still say
+    /v1/, and the NextGenPSD2 API is on /v1/, while every one of the 43 operations in the current Premium
+    Bank OpenAPI is under /v2/. The prose has not been updated to match the contract.
+  non_breaking_changes:
+  - Adding new API resources.
+  - Adding new optional request parameters to existing API methods.
+  - Adding new properties to existing API responses.
+  - Changing the order of properties in existing API responses.
+  - Changing the length or format of opaque strings such as object IDs and error messages.
+  - Adding new EventType or ResourceType enum values for webhooks.
+  - Adding new TransactionSource enum values for transactions.
+  consumer_obligation: >-
+    Clients must tolerate unknown enum values without failing, because Memo Bank reserves the right to add
+    EventType, ResourceType and TransactionSource members inside a version.
+deprecation:
+  policy_url: https://docs.api.memo.bank/topic/topic-versioning-and-backwards-compatibility
+  policy_published: true
+  sunset_header: false
+  deprecation_header: false
+  rfc8594_support: false
+  note: >-
+    Memo Bank publishes a real backwards-compatibility contract that enumerates exactly which changes are
+    non-breaking, and it demonstrably practises versioned deprecation - the page parameter was deprecated in
+    favour of page_token on 2026-05-13 and both remain available on all 8 paginated operations. What is
+    missing is the runtime signal: no Sunset or Deprecation response headers (RFC 8594) are documented, and
+    no sunset date is published for the deprecated page parameter, so a client learns about deprecation only
+    by reading the changelog.
+  observed_deprecations:
+  - item: page query parameter
+    superseded_by: page_token
+    announced: '2026-05-13'
+    still_available: true
+    sunset_date: not published
+    affected_operations: 8
+deprecated_operations: []
+deprecated_operations_note: >-
+  No operation in openapi/memo-bank-premium-bank-api-openapi.yml carries deprecated: true. The one live
+  deprecation (the page parameter) is documented in the changelog but is not marked deprecated in the spec
+  either, so the machine-readable contract carries no deprecation signal at all.
+sla:
+  published: true
+  uptime_targets:
+  - value: 99.99%
+    tier: Payments Scale
+    source: https://memo.bank/en/pricing/
+  - value: 99.9%
+    context: contractual SLA advertised on the API product page
+    source: https://memo.bank/en/product/api/
+  note: >-
+    Two different figures are published for the same service. Recorded as found; Memo Bank does not
+    reconcile them.
+  integration_commitment: >-
+    Memo Bank advertises API integration in under 15 days, stated as never exceeded.
+status_page: https://status.memo.bank/
+status_page_detail:
+  url: https://status.memo.bank/
+  method: probed
+  http_status: 302
+  redirects_to: https://aide.memo.bank/article/371-etat-api-incidents
+  final_status: 200
+  form: help-centre article, not a component-level status dashboard
+  note: >-
+    Memo Bank owns and serves a dedicated status.memo.bank hostname, which is a real commitment, but it
+    302s to an article in the help centre rather than to a hosted status platform. There is no per-component
+    uptime history, no incident feed and no machine-readable status endpoint (no /api/v2/status.json), so
+    automated monitoring cannot consume it.
+changelog:
+  url: https://docs.api.memo.bank/changes
+  detail: changelog/memo-bank-changelog.yml
+  cadence: irregular, roughly monthly to quarterly since October 2023
+  latest_entry: '2026-07-03'
+support:
+  help_centre: https://aide.memo.bank/
+  api_recipes: https://aide.memo.bank/category/349-api
+  model: >-
+    Dedicated technical support plus a named relationship manager on both published plans. API access itself
+    is provisioned by a banker rather than self-serve.
+  open_banking_contact: openbanking@memo.bank
+maturity:
+  api_first_since: '2023-10-19'
+  api_first_since_note: Date of the earliest entry in the published API changelog.
+  changelog_entries_published: 20
+  breaking_changes_recorded: 3
+  breaking_change_dates:
+  - '2026-07-03'
+  - '2024-02-07'
+  - '2023-12-18'
+gaps:
+- No Sunset or Deprecation headers (RFC 8594); deprecation is announced only in the changelog.
+- No sunset date for the deprecated page pagination parameter.
+- No deprecated:true markers in the OpenAPI despite an in-flight deprecation.
+- status.memo.bank redirects to a help article rather than a status dashboard, and exposes no status API.
+- Versioning prose still references /v1/ while the shipped contract is entirely /v2/.

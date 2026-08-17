@@ -1,0 +1,119 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for Memo Bank NextGenPSD2 API
+  version: 1.0.0
+x-generated: '2026-08-17'
+x-method: generated
+x-source: openapi/memo-bank-nextgenpsd2-api-openapi.yml
+x-note: >-
+  Non-destructive enhancements over the spec Memo Bank publishes at
+  https://docs-nextgenpsd2.api.memo.bank/source.yaml. The original is preserved in openapi/_original/. This
+  is the best-formed of Memo Bank's three specs - it is the only one that actually defines its
+  securitySchemes - so the actions here mostly record the regulatory regime and tighten the two ambiguities
+  in the document rather than repairing omissions.
+actions:
+- target: $.info
+  update:
+    x-apievangelist-profile: https://apis.io/provider/memo-bank/
+    x-apievangelist-reviewed: '2026-08-17'
+    contact:
+      name: Memo Bank open banking team
+      email: openbanking@memo.bank
+    x-standard: Berlin Group NextGenPSD2 XS2A
+    x-standard-version: Implementation Guidelines 1.3.11
+    x-regulatory-regime: PSD2
+    x-institution-role: ASPSP (account servicing payment service provider)
+    x-consumer-role: TPP (third-party provider) - AISP and/or PISP
+    x-source-doc: https://docs-nextgenpsd2.api.memo.bank/
+- target: $
+  update:
+    x-licensing:
+      credit_institution: European Central Bank
+      prudential_supervisor: Autorite de controle prudentiel et de resolution (ACPR)
+      investment_services: Autorite des marches financiers (AMF), via a tied agent arrangement
+      source: https://memo.bank/en/about/security-operations/
+    x-api-evangelist-note: >-
+      Memo Bank holds a full ECB credit-institution licence, which is what places it under the PSD2
+      account-servicing obligation this API discharges - a materially higher bar than the payment or
+      e-money institution licences most providers of a "banking API" hold.
+- target: $.components.securitySchemes.OAuth2.flows.authorizationCode
+  update:
+    tokenUrl: https://api.memo.bank/oauth2/token
+    refreshUrl: https://api.memo.bank/oauth2/token
+    x-api-evangelist-rationale: >-
+      The published document declares tokenUrl and refreshUrl as the bare relative path /oauth2/token. That
+      is ambiguous against the declared server base https://api.memo.bank/nextgenpsd2 - a client cannot tell
+      whether to resolve it to /nextgenpsd2/oauth2/token or /oauth2/token. Set to the absolute URL Memo Bank
+      publishes for the Marketplace API's token endpoint, which is the same OAuth 2.0 deployment.
+    x-uncertainty: >-
+      Recorded as a repair of an ambiguity, not a discovery. Memo Bank does not restate the PSD2 token URL
+      absolutely anywhere; if the PSD2 deployment uses a distinct token endpoint this action should be
+      corrected.
+- target: $.components.securitySchemes
+  update:
+    eIDAS:
+      type: mutualTLS
+      description: >-
+        Berlin Group NextGenPSD2 requires the third-party provider to identify itself with a qualified eIDAS
+        certificate (QWAC for transport, QSEALC for sealing), issued under the PSD2 regime. Not expressed as
+        a securityScheme in the published document.
+      x-source-doc: https://www.berlin-group.org/nextgenpsd2-downloads
+      x-api-evangelist-uncertainty: >-
+        Added because it is mandated by the Implementation Guidelines version the spec declares conformance
+        to, not because Memo Bank states it separately. It is a regime requirement, recorded as such.
+- target: $.paths['/v1/{payment-service}/{payment-product}'].post
+  update:
+    x-agentic-access:
+      action-class: acting
+      consequence: physical
+      audit: required
+      purpose-required: true
+      human-in-the-loop: required
+    x-api-evangelist-note: >-
+      Payment initiation on behalf of a bank customer under PSD2. Requires the PIS scope and strong customer
+      authentication of the payment service user.
+    x-scope-required: PIS
+- target: $.paths['/v1/{payment-service}/{payment-product}/{paymentId}'].delete
+  update:
+    x-agentic-access:
+      action-class: acting
+      consequence: physical
+      audit: required
+    x-scope-required: PIS
+- target: $.paths['/v1/accounts'].get
+  update:
+    x-agentic-access:
+      action-class: connected
+      consequence: read
+    x-scope-required: AIS
+- target: $.paths['/v1/accounts/{accountId}/transactions'].get
+  update:
+    x-agentic-access:
+      action-class: connected
+      consequence: read
+    x-scope-required: AIS
+- target: $.paths['/v1/accounts/{accountId}/balances'].get
+  update:
+    x-agentic-access:
+      action-class: connected
+      consequence: read
+    x-scope-required: AIS
+- target: $.components.securitySchemes.OAuth2.flows.authorizationCode.scopes
+  update:
+    AIS: >-
+      Account Information Service. Grants read access to account lists, details, balances and transactions,
+      including card-account equivalents. Required by all 9 AIS operations.
+    PIS: >-
+      Payment Initiation Service. Grants payment initiation, status retrieval and cancellation. Required by
+      all 4 PIS operations.
+    x-api-evangelist-note: >-
+      Enriched descriptions only - the scope names and their one-line meanings are Memo Bank's own. Note the
+      coarseness: a single PIS scope authorises both initiating and cancelling payments, with no read/write
+      split and no per-payment-product granularity.
+- target: $
+  update:
+    x-sandbox: https://api.beta.sandbox.memo.bank/nextgenpsd2
+    x-api-evangelist-gap: >-
+      The PSD2 sandbox sits on api.beta.sandbox.memo.bank, a different and beta-prefixed host from the
+      api.sandbox.memo.bank used by the Premium Bank API. An integrator working across both surfaces needs two
+      sandbox base URLs, and the beta prefix is not explained anywhere in the documentation.

@@ -1,0 +1,1359 @@
+openapi: 3.0.1
+info:
+  title: Memo Bank NextGenPSD2 API
+  description: |
+    **Memo Bank NextGenPSD2 API** allows Third Party Providers to access account information and initiate payments on behalf of customers.
+
+    The API follows [BerlinGroup NextGenPSD2 Implementation Guidelines](https://www.berlin-group.org/nextgenpsd2-downloads) as of version 1.3.11. This document describe our implementation choices and where we have drifted away from the guidelines.
+
+    All non-absolute paths described in this document are relatives to the base URL of the server (e.g. https://api.memo.bank/nextgenpsd2 for the production environment).
+  version: "1.0"
+servers:
+- url: https://api.memo.bank/nextgenpsd2
+  description: Production environment
+- url: https://api.beta.sandbox.memo.bank/nextgenpsd2
+  description: Sandbox environment
+tags:
+- name: AIS
+  description: "Account Information Service.\n\n\nConsent is given using the **OAuth2\
+    \ as a pre-step** authentication flow described in NextGenPSD2 specifications.\n\
+    This means you don't have to manage consents using the dedicated endpoints (which\
+    \ are not implemented), \nbut only to redirect the PSU to our authorisation page\
+    \ (using `AIS` as OAuth2 scope).\nAfter performing a strong customer authentication,\
+    \ the PSU will be redirected to your redirect URI with an \n**authorisation code**\
+    \ that you can then exchange for an **access token**.\n\n\nThis **access token**\
+    \ will let you authenticate at the XS2A interface to request the PSU accounts\
+    \ balances and \ntransactions history.\n"
+- name: PIS
+  description: "Payment Initiation Service.\n\n\nPayment initiation is done using\
+    \ the **integrated OAuth2** authentication flow described in NextGenPSD2\nspecifications.\n\
+    This means you first have to initiate a payment using the dedicated endpoint,\
+    \ then redirect the PSU to our \nauthorisation page following the link present\
+    \ in the response (using `PIS:{paymentId}` as OAuth2 scope).\nAfter performing\
+    \ a strong customer authentication, the PSU will be redirected to your redirect\
+    \ URI with an\n**authorisation code** that you can then exchange for an **access\
+    \ token**.\n\n\nThis **access token** is only needed to cancel a payment on behalf\
+    \ a PSU (this does not require a strong\ncustomer authentication). It is not needed\
+    \ to retrieve the current status of a payment.\n"
+paths:
+  /v1/accounts/{accountId}/balances:
+    get:
+      tags:
+      - AIS
+      summary: Read account balance
+      operationId: readAccountBalance
+      parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: Signature
+        in: header
+        schema:
+          type: string
+          example: $SIGNATURE
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountBalancesResponse"
+      security:
+      - OAuth2:
+        - AIS
+  /v1/accounts/{accountId}:
+    get:
+      tags:
+      - AIS
+      summary: Read account details
+      operationId: readAccountDetails
+      parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: withBalance
+        in: query
+        schema:
+          type: boolean
+      - name: Signature
+        in: header
+        schema:
+          type: string
+          example: $SIGNATURE
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountDetailsResponse"
+      security:
+      - OAuth2:
+        - AIS
+  /v1/accounts/{accountId}/transactions/{transactionId}:
+    get:
+      tags:
+      - AIS
+      summary: Read transaction details of an account
+      operationId: readAccountTransactionDetails
+      parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: transactionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: Signature
+        in: header
+        schema:
+          type: string
+          example: $SIGNATURE
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionDetailsResponse"
+      security:
+      - OAuth2:
+        - AIS
+  /v1/accounts/{accountId}/transactions:
+    get:
+      tags:
+      - AIS
+      summary: Read transactions list of an account
+      description: "You can retrieve the full transactions history of an account,\
+        \ it is not limited to 180 days."
+      operationId: readAccountTransactionsList
+      parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: bookingStatus
+        in: query
+        schema:
+          type: string
+          default: both
+          enum:
+          - booked
+          - pending
+          - both
+      - name: dateFrom
+        in: query
+        description: Filter transactions by booking date (inclusive greater than).
+        schema:
+          type: string
+          format: date
+      - name: dateTo
+        in: query
+        description: Filter transactions by booking date (exclusive lower than).
+        schema:
+          type: string
+          format: date
+      - name: withBalance
+        in: query
+        schema:
+          type: boolean
+          default: false
+      - name: orderBy
+        in: query
+        description: Values are `bookingDate` or `-bookingDate`.
+        schema:
+          type: string
+          default: bookingDate
+      - name: Signature
+        in: header
+        schema:
+          type: string
+          example: $SIGNATURE
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionListResponse"
+      security:
+      - OAuth2:
+        - AIS
+  /v1/accounts:
+    get:
+      tags:
+      - AIS
+      summary: Read accounts list
+      operationId: readAccountsList
+      parameters:
+      - name: withBalance
+        in: query
+        schema:
+          type: boolean
+      - name: Signature
+        in: header
+        schema:
+          type: string
+          example: $SIGNATURE
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountListResponse"
+      security:
+      - OAuth2:
+        - AIS
+  /v1/card-accounts/{accountId}/balances:
+    get:
+      tags:
+      - AIS
+      summary: Read card account balance
+      operationId: readCardAccountBalance
+      parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: Signature
+        in: header
+        schema:
+          type: string
+          example: $SIGNATURE
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CardAccountBalancesResponse"
+      security:
+      - OAuth2:
+        - AIS
+  /v1/card-accounts/{accountId}:
+    get:
+      tags:
+      - AIS
+      summary: Read card account details
+      operationId: readCardAccountDetails
+      parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: Signature
+        in: header
+        schema:
+          type: string
+          example: $SIGNATURE
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CardAccountDetailsResponse"
+      security:
+      - OAuth2:
+        - AIS
+  /v1/card-accounts/{accountId}/transactions:
+    get:
+      tags:
+      - AIS
+      summary: Read transactions list of a card account
+      operationId: readCardAccountTransactionsList
+      parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: bookingStatus
+        in: query
+        schema:
+          type: string
+          default: both
+          enum:
+          - booked
+          - pending
+          - both
+      - name: dateFrom
+        in: query
+        description: Filter transactions by transaction date (inclusive greater than).
+        schema:
+          type: string
+          format: date
+      - name: dateTo
+        in: query
+        description: Filter transactions by transaction date (exclusive lower than).
+        schema:
+          type: string
+          format: date
+      - name: orderBy
+        in: query
+        description: Values are `transactionDate` or `-transactionDate`.
+        schema:
+          type: string
+          default: transactionDate
+      - name: Signature
+        in: header
+        schema:
+          type: string
+          example: $SIGNATURE
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CardAccountTransactionListResponse"
+      security:
+      - OAuth2:
+        - AIS
+  /v1/card-accounts:
+    get:
+      tags:
+      - AIS
+      summary: Read card accounts list
+      operationId: readCardAccountsList
+      parameters:
+      - name: Signature
+        in: header
+        schema:
+          type: string
+          example: $SIGNATURE
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CardAccountListResponse"
+      security:
+      - OAuth2:
+        - AIS
+  /v1/{payment-service}/{payment-product}/{paymentId}:
+    get:
+      tags:
+      - PIS
+      summary: Get payment information
+      operationId: getPaymentInformation
+      parameters:
+      - name: payment-service
+        in: path
+        required: true
+        schema:
+          type: string
+          enum:
+          - payments
+          - bulk-payments
+      - name: payment-product
+        in: path
+        required: true
+        schema:
+          type: string
+          enum:
+          - sepa-credit-transfers
+          - instant-sepa-credit-transfers
+      - name: paymentId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: Signature
+        in: header
+        schema:
+          type: string
+          example: $SIGNATURE
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: "#/components/schemas/PaymentInitiationWithStatusResponse"
+                - $ref: "#/components/schemas/BulkPaymentInitiationWithStatusResponse"
+    delete:
+      tags:
+      - PIS
+      summary: Cancel a payment.
+      operationId: cancelPayment
+      parameters:
+      - name: payment-service
+        in: path
+        required: true
+        schema:
+          type: string
+          enum:
+          - payments
+          - bulk-payments
+      - name: payment-product
+        in: path
+        required: true
+        schema:
+          type: string
+          enum:
+          - sepa-credit-transfers
+          - instant-sepa-credit-transfers
+      - name: paymentId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: Signature
+        in: header
+        schema:
+          type: string
+          example: $SIGNATURE
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentInitiationCancelResponseMinus202"
+      security:
+      - OAuth2:
+        - PIS
+  /v1/{payment-service}/{payment-product}/{paymentId}/status:
+    get:
+      tags:
+      - PIS
+      summary: Get payment initiation status
+      operationId: getPaymentInitiationStatus
+      parameters:
+      - name: payment-service
+        in: path
+        required: true
+        schema:
+          type: string
+          enum:
+          - payments
+          - bulk-payments
+      - name: payment-product
+        in: path
+        required: true
+        schema:
+          type: string
+          enum:
+          - sepa-credit-transfers
+          - instant-sepa-credit-transfers
+      - name: paymentId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: Signature
+        in: header
+        schema:
+          type: string
+          example: $SIGNATURE
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentInitiationStatusResponseMinus200Json"
+  /v1/{payment-service}/{payment-product}:
+    post:
+      tags:
+      - PIS
+      summary: Initiate a payment
+      operationId: initiatePayment
+      parameters:
+      - name: payment-service
+        in: path
+        required: true
+        schema:
+          type: string
+          enum:
+          - payments
+          - bulk-payments
+      - name: payment-product
+        in: path
+        required: true
+        schema:
+          type: string
+          enum:
+          - sepa-credit-transfers
+          - instant-sepa-credit-transfers
+      - name: Signature
+        in: header
+        schema:
+          type: string
+          example: $SIGNATURE
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+              - $ref: "#/components/schemas/PaymentInitiationJson"
+              - $ref: "#/components/schemas/BulkPaymentInitiationJson"
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentInitationRequestResponseMinus201"
+components:
+  schemas:
+    AccountBalancesResponse:
+      required:
+      - balances
+      type: object
+      properties:
+        account:
+          $ref: "#/components/schemas/AccountReference"
+        balances:
+          type: array
+          items:
+            $ref: "#/components/schemas/Balance"
+    AccountReference:
+      type: object
+      properties:
+        iban:
+          pattern: "^[A-Z]{2}[0-9]{2}[a-zA-Z0-9]{1,30}$"
+          type: string
+        maskedPan:
+          maxLength: 35
+          minLength: 0
+          type: string
+        currency:
+          pattern: "^[A-Z]{3}$"
+          type: string
+        cashAccountType:
+          type: string
+    Amount:
+      required:
+      - amount
+      - currency
+      type: object
+      properties:
+        currency:
+          pattern: "^[A-Z]{3}$"
+          type: string
+        amount:
+          pattern: "^-?[0-9]{1,14}(\\.[0-9]{1,3})?$"
+          type: string
+    Balance:
+      required:
+      - balanceAmount
+      - balanceType
+      - creditLimitIncluded
+      - referenceDate
+      type: object
+      properties:
+        balanceAmount:
+          $ref: "#/components/schemas/Amount"
+        balanceType:
+          type: string
+          enum:
+          - closingBooked
+          - expected
+          - openingBooked
+          - interimAvailable
+          - interimBooked
+          - forwardAvailable
+          - nonInvoiced
+        creditLimitIncluded:
+          type: boolean
+        referenceDate:
+          type: string
+          format: date
+    AccountDetails:
+      required:
+      - _links
+      - bic
+      - cashAccountType
+      - currency
+      - displayName
+      - iban
+      - name
+      - ownerName
+      - product
+      - resourceId
+      - status
+      - usage
+      type: object
+      properties:
+        currency:
+          pattern: "^[A-Z]{3}$"
+          type: string
+        resourceId:
+          type: string
+        iban:
+          pattern: "^[A-Z]{2}[0-9]{2}[a-zA-Z0-9]{1,30}$"
+          type: string
+        name:
+          maxLength: 70
+          minLength: 0
+          type: string
+        displayName:
+          maxLength: 70
+          minLength: 0
+          type: string
+        product:
+          maxLength: 35
+          minLength: 0
+          type: string
+        cashAccountType:
+          type: string
+        status:
+          type: string
+          enum:
+          - enabled
+          - deleted
+          - blocked
+        bic:
+          pattern: "^[A-Z0-9]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$"
+          type: string
+        usage:
+          maxLength: 4
+          minLength: 0
+          type: string
+          enum:
+          - PRIV
+          - ORGA
+        balances:
+          type: array
+          items:
+            $ref: "#/components/schemas/Balance"
+        _links:
+          $ref: "#/components/schemas/LinksAccountDetails"
+        ownerName:
+          maxLength: 140
+          minLength: 0
+          type: string
+    AccountDetailsResponse:
+      required:
+      - account
+      type: object
+      properties:
+        account:
+          $ref: "#/components/schemas/AccountDetails"
+    HrefType:
+      type: object
+      properties:
+        href:
+          type: string
+    LinksAccountDetails:
+      required:
+      - balances
+      - transactions
+      type: object
+      properties:
+        balances:
+          $ref: "#/components/schemas/HrefType"
+        transactions:
+          $ref: "#/components/schemas/HrefType"
+    ReportExchangeRate:
+      required:
+      - exchangeRate
+      - quotationDate
+      - sourceCurrency
+      - targetCurrency
+      - unitCurrency
+      type: object
+      properties:
+        sourceCurrency:
+          pattern: "^[A-Z]{3}$"
+          type: string
+        exchangeRate:
+          type: string
+        unitCurrency:
+          pattern: "^[A-Z]{3}$"
+          type: string
+        targetCurrency:
+          pattern: "^[A-Z]{3}$"
+          type: string
+        quotationDate:
+          type: string
+          format: date
+    TransactionDetailsResponse:
+      required:
+      - transactionsDetails
+      type: object
+      properties:
+        transactionsDetails:
+          $ref: "#/components/schemas/Transactions"
+    TransactionExtras:
+      required:
+      - counterpartyAndRemittanceInformationUnstructured
+      type: object
+      properties:
+        counterpartyAndRemittanceInformationUnstructured:
+          type: string
+          description: "Concatenates the counterparty name with the remittance information,\
+            \ to be used by consumers which only wants one field for both information."
+    Transactions:
+      required:
+      - _extras
+      - batchIndicator
+      - bookingDate
+      - creditorName
+      - transactionAmount
+      - transactionId
+      - valueDate
+      type: object
+      properties:
+        transactionAmount:
+          $ref: "#/components/schemas/Amount"
+        transactionId:
+          type: string
+        endToEndId:
+          maxLength: 35
+          minLength: 0
+          type: string
+        batchIndicator:
+          type: boolean
+        batchNumberOfTransactions:
+          type: integer
+          format: int32
+        mandateId:
+          maxLength: 35
+          minLength: 0
+          type: string
+        bookingDate:
+          type: string
+          format: date
+        valueDate:
+          type: string
+          format: date
+        currencyExchange:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReportExchangeRate"
+        creditorName:
+          maxLength: 70
+          minLength: 0
+          type: string
+        creditorAccount:
+          $ref: "#/components/schemas/AccountReference"
+        creditorAgent:
+          pattern: "^[A-Z]{6}[A-Z2-9][A-NP-Z0-9]([A-Z0-9]{3})?$"
+          type: string
+        debtorName:
+          maxLength: 70
+          minLength: 0
+          type: string
+        debtorAccount:
+          $ref: "#/components/schemas/AccountReference"
+        debtorAgent:
+          pattern: "^[A-Z]{6}[A-Z2-9][A-NP-Z0-9]([A-Z0-9]{3})?$"
+          type: string
+        remittanceInformationUnstructured:
+          maxLength: 140
+          minLength: 0
+          type: string
+        _extras:
+          $ref: "#/components/schemas/TransactionExtras"
+    AccountReport:
+      type: object
+      properties:
+        _links:
+          $ref: "#/components/schemas/LinksAccountReport"
+        booked:
+          type: array
+          items:
+            $ref: "#/components/schemas/Transactions"
+        pending:
+          type: array
+          items:
+            $ref: "#/components/schemas/Transactions"
+    LinksAccountReport:
+      required:
+      - account
+      type: object
+      properties:
+        account:
+          $ref: "#/components/schemas/HrefType"
+        next:
+          $ref: "#/components/schemas/HrefType"
+        previous:
+          $ref: "#/components/schemas/HrefType"
+    TransactionListResponse:
+      type: object
+      properties:
+        account:
+          $ref: "#/components/schemas/AccountReference"
+        balances:
+          type: array
+          items:
+            $ref: "#/components/schemas/Balance"
+        transactions:
+          $ref: "#/components/schemas/AccountReport"
+    AccountListResponse:
+      required:
+      - accounts
+      type: object
+      properties:
+        accounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/AccountDetails"
+    CardAccountBalancesResponse:
+      required:
+      - balances
+      type: object
+      properties:
+        balances:
+          type: array
+          items:
+            $ref: "#/components/schemas/Balance"
+        cardAccount:
+          $ref: "#/components/schemas/AccountReference"
+        debitAccounting:
+          type: boolean
+    CardAccountDetails:
+      required:
+      - _links
+      - creditLimit
+      - currency
+      - debitAccounting
+      - displayName
+      - maskedPan
+      - name
+      - ownerName
+      - product
+      - resourceId
+      - status
+      - usage
+      type: object
+      properties:
+        maskedPan:
+          maxLength: 35
+          minLength: 0
+          type: string
+        currency:
+          pattern: "^[A-Z]{3}$"
+          type: string
+        resourceId:
+          type: string
+        ownerName:
+          maxLength: 140
+          minLength: 0
+          type: string
+        name:
+          maxLength: 70
+          minLength: 0
+          type: string
+        displayName:
+          maxLength: 70
+          minLength: 0
+          type: string
+        product:
+          maxLength: 35
+          minLength: 0
+          type: string
+        debitAccounting:
+          type: boolean
+        status:
+          type: string
+          enum:
+          - enabled
+          - deleted
+          - blocked
+        usage:
+          maxLength: 4
+          minLength: 0
+          type: string
+          enum:
+          - PRIV
+          - ORGA
+        creditLimit:
+          $ref: "#/components/schemas/Amount"
+        balances:
+          type: array
+          items:
+            $ref: "#/components/schemas/Balance"
+        _links:
+          $ref: "#/components/schemas/LinksAccountDetails"
+    CardAccountDetailsResponse:
+      required:
+      - cardAccount
+      type: object
+      properties:
+        cardAccount:
+          $ref: "#/components/schemas/CardAccountDetails"
+    Address:
+      required:
+      - country
+      type: object
+      properties:
+        country:
+          pattern: "^[A-Z]{2}$"
+          type: string
+        streetName:
+          maxLength: 70
+          minLength: 0
+          type: string
+        townName:
+          type: string
+        postCode:
+          type: string
+    CardAccountReport:
+      required:
+      - _links
+      type: object
+      properties:
+        _links:
+          $ref: "#/components/schemas/LinksCardAccountReport"
+        booked:
+          type: array
+          items:
+            $ref: "#/components/schemas/CardTransaction"
+        pending:
+          type: array
+          items:
+            $ref: "#/components/schemas/CardTransaction"
+    CardAccountTransactionListResponse:
+      type: object
+      properties:
+        cardAccount:
+          $ref: "#/components/schemas/AccountReference"
+        debitAccounting:
+          type: boolean
+        cardTransactions:
+          $ref: "#/components/schemas/CardAccountReport"
+        balances:
+          type: array
+          items:
+            $ref: "#/components/schemas/Balance"
+    CardTransaction:
+      required:
+      - cardAcceptorAddress
+      - cardTransactionId
+      - markupFee
+      - markupFeePercentage
+      - maskedPAN
+      - merchantCategoryCode
+      - transactionAmount
+      - transactionDate
+      - transactionDetails
+      type: object
+      properties:
+        transactionAmount:
+          $ref: "#/components/schemas/Amount"
+        cardTransactionId:
+          type: string
+        transactionDate:
+          type: string
+          format: date
+        bookingDate:
+          type: string
+          format: date
+        valueDate:
+          type: string
+          format: date
+        currencyExchange:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReportExchangeRate"
+        originalAmount:
+          $ref: "#/components/schemas/Amount"
+        markupFee:
+          $ref: "#/components/schemas/Amount"
+        markupFeePercentage:
+          type: string
+        cardAcceptorId:
+          maxLength: 35
+          minLength: 0
+          type: string
+        cardAcceptorAddress:
+          $ref: "#/components/schemas/Address"
+        merchantCategoryCode:
+          maxLength: 4
+          minLength: 4
+          type: string
+        maskedPAN:
+          maxLength: 35
+          minLength: 0
+          type: string
+        transactionDetails:
+          maxLength: 1000
+          minLength: 0
+          type: string
+    LinksCardAccountReport:
+      type: object
+      properties:
+        cardAccount:
+          $ref: "#/components/schemas/HrefType"
+        next:
+          $ref: "#/components/schemas/HrefType"
+        previous:
+          $ref: "#/components/schemas/HrefType"
+    CardAccountListResponse:
+      required:
+      - cardAccounts
+      type: object
+      properties:
+        cardAccounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/CardAccountDetails"
+    PaymentInitiationCancelResponseMinus202:
+      required:
+      - transactionStatus
+      type: object
+      properties:
+        transactionStatus:
+          type: string
+          enum:
+          - ACSC
+          - RCVD
+          - PDNG
+          - RJCT
+          - CANC
+          - ACFC
+          - PART
+    PaymentInitiationWithStatusResponse:
+      required:
+      - creditorAccount
+      - creditorName
+      - debtorAccount
+      - instructedAmount
+      type: object
+      properties:
+        debtorAccount:
+          $ref: "#/components/schemas/AccountReference"
+        instructedAmount:
+          $ref: "#/components/schemas/Amount"
+        creditorAccount:
+          $ref: "#/components/schemas/AccountReference"
+        creditorName:
+          maxLength: 70
+          minLength: 0
+          type: string
+        endToEndIdentification:
+          maxLength: 35
+          minLength: 0
+          type: string
+        remittanceInformationUnstructured:
+          maxLength: 140
+          minLength: 0
+          type: string
+        requestedExecutionDate:
+          type: string
+          format: date
+        transactionStatus:
+          type: string
+          enum:
+          - ACSC
+          - RCVD
+          - PDNG
+          - RJCT
+          - CANC
+          - ACFC
+          - PART
+    BulkPaymentInitiationWithStatusResponse:
+      required:
+      - debtorAccount
+      - payments
+      - transactionStatus
+      type: object
+      properties:
+        debtorAccount:
+          $ref: "#/components/schemas/AccountReference"
+        payments:
+          type: array
+          items:
+            $ref: "#/components/schemas/PaymentInitiationBulkElementJson"
+        requestedExecutionDate:
+          type: string
+          format: date
+        transactionStatus:
+          type: string
+          enum:
+          - ACSC
+          - RCVD
+          - PDNG
+          - RJCT
+          - CANC
+          - ACFC
+          - PART
+    PaymentInitiationBulkElementJson:
+      required:
+      - creditorAccount
+      - creditorName
+      - instructedAmount
+      type: object
+      properties:
+        instructedAmount:
+          $ref: "#/components/schemas/Amount"
+        creditorAccount:
+          $ref: "#/components/schemas/AccountReference"
+        creditorName:
+          maxLength: 70
+          minLength: 0
+          type: string
+        endToEndIdentification:
+          maxLength: 35
+          minLength: 0
+          type: string
+        creditorAddress:
+          $ref: "#/components/schemas/Address"
+        remittanceInformationUnstructured:
+          maxLength: 140
+          minLength: 0
+          type: string
+    PaymentInitiationStatusResponseMinus200Json:
+      required:
+      - transactionStatus
+      type: object
+      properties:
+        transactionStatus:
+          type: string
+          enum:
+          - ACSC
+          - RCVD
+          - PDNG
+          - RJCT
+          - CANC
+          - ACFC
+          - PART
+        psuMessage:
+          maxLength: 500
+          minLength: 0
+          type: string
+        tppMessage:
+          type: array
+          items:
+            $ref: "#/components/schemas/TppMessage"
+    TppMessage:
+      required:
+      - category
+      - code
+      type: object
+      properties:
+        category:
+          type: string
+          enum:
+          - ERROR
+          - WARNING
+        code:
+          type: string
+          enum:
+          - ACCESS_EXCEEDED
+          - BENEFICIARY_WHITELISTING_REQUIRED
+          - CANCELLATION_INVALID
+          - CERTIFICATE_BLOCKED
+          - CERTIFICATE_EXPIRED
+          - CERTIFICATE_INVALID
+          - CERTIFICATE_MISSING
+          - CERTIFICATE_REVOKE
+          - CONSENT_EXPIRED
+          - CONSENT_INVALID
+          - CONSENT_UNKNOWN
+          - CORPORATE_ID_INVALID
+          - EXECUTION_DATE_INVALID
+          - FORMAT_ERROR
+          - FUNDS_NOT_AVAILABLE
+          - KID_MISSING
+          - PARAMETER_NOT_CONSISTENT
+          - PARAMETER_NOT_SUPPORTED
+          - PAYMENT_FAILED
+          - PERIOD_INVALID
+          - PRODUCT_INVALID
+          - PRODUCT_UNKNOWN
+          - PSU_CREDENTIALS_INVALID
+          - REQUESTED_FORMATS_INVALID
+          - RESOURCE_BLOCKED
+          - RESOURCE_EXPIRED
+          - RESOURCE_UNKNOWN
+          - ROLE_INVALID
+          - SCA_INVALID
+          - SCA_METHOD_UNKNOWN
+          - SERVICE_BLOCKED
+          - SERVICE_INVALID
+          - SESSIONS_NOT_SUPPORTED
+          - SIGNATURE_INVALID
+          - SIGNATURE_MISSING
+          - STATUS_INVALID
+          - TIMESTAMP_INVALID
+          - TOKEN_EXPIRED
+          - TOKEN_INVALID
+          - TOKEN_UNKNOWN
+          - WARNING
+        path:
+          type: string
+        text:
+          maxLength: 500
+          minLength: 0
+          type: string
+    PaymentInitiationJson:
+      required:
+      - creditorAccount
+      - creditorName
+      - debtorAccount
+      - instructedAmount
+      type: object
+      properties:
+        debtorAccount:
+          $ref: "#/components/schemas/AccountReference"
+        instructedAmount:
+          $ref: "#/components/schemas/Amount"
+        creditorAccount:
+          $ref: "#/components/schemas/AccountReference"
+        creditorName:
+          maxLength: 70
+          minLength: 0
+          type: string
+        endToEndIdentification:
+          maxLength: 35
+          minLength: 0
+          type: string
+        creditorAddress:
+          $ref: "#/components/schemas/Address"
+        remittanceInformationUnstructured:
+          maxLength: 140
+          minLength: 0
+          type: string
+        requestedExecutionDate:
+          type: string
+          format: date
+    BulkPaymentInitiationJson:
+      required:
+      - debtorAccount
+      - payments
+      type: object
+      properties:
+        debtorAccount:
+          $ref: "#/components/schemas/AccountReference"
+        payments:
+          type: array
+          items:
+            $ref: "#/components/schemas/PaymentInitiationBulkElementJson"
+        requestedExecutionDate:
+          type: string
+          format: date
+    LinksPaymentInitiation:
+      type: object
+      properties:
+        self:
+          $ref: "#/components/schemas/HrefType"
+        status:
+          $ref: "#/components/schemas/HrefType"
+    PaymentInitationRequestResponseMinus201:
+      required:
+      - _links
+      - paymentId
+      - transactionStatus
+      type: object
+      properties:
+        transactionStatus:
+          type: string
+          enum:
+          - ACSC
+          - RCVD
+          - PDNG
+          - RJCT
+          - CANC
+          - ACFC
+          - PART
+        paymentId:
+          type: string
+        _links:
+          $ref: "#/components/schemas/LinksPaymentInitiation"
+        psuMessage:
+          maxLength: 500
+          minLength: 0
+          type: string
+        tppMessages:
+          type: array
+          items:
+            $ref: "#/components/schemas/TppMessage"
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://client.memo.bank/authorize
+          tokenUrl: /oauth2/token
+          refreshUrl: /oauth2/token
+          scopes:
+            AIS: Account Information Service.
+            PIS: Payment Initiation Service.
+x-topics:
+- title: Onboarding
+  content: |
+    For TPPs to be able to make a request on the API, they must follow the onboarding process.  For that, it is required from them to [send us an email](mailto:openbanking@memo.bank) with the following  elements:
+      - one or more **redirect URI** for OAuth2 authentication
+      - a valid **QSealC certificate**
+
+
+    In exchange of what they will receive:
+      - a `keyId` to be used with HTTP Signature authentication
+      - a `client_id` and a `client_secret` to be used with OAuth2 authentication
+- title: Authentication
+  content: |
+    ## OAuth2
+    We follow the standard **Authorization Code** grant flow from OAuth2 to authenticate a TPP acting on behalf of a PSU.
+
+    As an example, in production our URLs are:
+      - Authorization URL: https://client.memo.bank/authorize
+      - Token URL: https://api.memo.bank/nextgenpsd2/oauth2/token
+      - Refresh URL: https://api.memo.bank/nextgenpsd2/oauth2/token
+
+    We strongly recommend that you send your requests to these endpoints using `application/json` or `application/x-www-form-urlencoded` as content type since query params are considered unsafe.
+
+    The `access_token` has a TTL of **2 hours** and the `refresh_token` has a TTL of **2 weeks**.
+
+    ## HTTP Signature
+    Requests must be signed by TPPs using the private key associated to the certificate provided during  the onboarding process.
+
+    We follow the [draft-cavage-http-signatures-12](https://datatracker.ietf.org/doc/html/draft-cavage-http-signatures-12) to authenticate a TPP.
+
+    Here is an exhaustive list of headers that must be signed:
+      - `(request-target)` (mandatory)
+      - `authorization` (mandatory)
+      - `date` (mandatory)
+      - `digest` (only if the request has a body)
+      - `host` (mandatory)
+      - `psu-corporate-id` (only if included in the request)
+      - `psu-id` (only if included in the request)
+      - `tpp-redirect-uri` (only if included in the request)
+      - `x-request-id` (only if included in the request)
+- title: Response formats
+  content: |
+    ## Success cases
+    Only the `application/json` content type is supported.
+
+    ## Error cases
+    In case of processing error, the API will use NextGenPSD2 specific solution to give additional error information in the response.
+
+    Some errors may not follow this format if they are sent by a proxy between the client and the application.  This is the case with most authentication errors as of now.
+
+    The `application/problem+json` content type from [RFC7807](https://datatracker.ietf.org/doc/html/rfc7807)  is not currently supported.
+- title: Authorisation
+  content: |
+    Authorisations for a consent or a payment are always implicitly created and the `/authorisations`  sub-resources are not implemented.
+- title: Rate limiting
+  content: "We enforce a rate limit on how many HTTP requests can be made in a  given\
+    \ period. When the limit is reached, our PSD2 API will return an error `429 Too\
+    \ Many Requests`.\n\nTo allow you to handle this rate limiting in a programmatic\
+    \ way, the following headers are sent along every response: \n- `RateLimit-Limit`:\
+    \ total number of available requests between two quota resets;\n- `RateLimit-Remaining`:\
+    \ number of available requests until the quota is reset;\n- `RateLimit-Reset`:\
+    \ time remaining (in seconds) until the quota is reset.\n"

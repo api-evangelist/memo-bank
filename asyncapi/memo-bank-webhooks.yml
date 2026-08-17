@@ -1,0 +1,218 @@
+generated: '2026-08-17'
+method: searched
+source:
+- openapi/memo-bank-premium-bank-api-openapi.yml
+- https://docs.api.memo.bank/group/webhook-webhook
+- https://docs-marketplace.api.memo.bank/topic/topic-webhooks
+- https://memo.bank/en/product/api/
+spec_type: Webhooks
+asyncapi_published: false
+asyncapi_note: >-
+  Memo Bank publishes NO AsyncAPI document. Probed https://docs.api.memo.bank/asyncapi.yaml,
+  /asyncapi.json and https://api.memo.bank/asyncapi.yaml on 2026-08-17 - all 404. The event surface is
+  real and well specified, but it is expressed through the OpenAPI 3.1 top-level `webhooks` object rather
+  than AsyncAPI. This catalogue is therefore captured from that webhooks block plus the prose docs; no
+  AsyncAPI has been fabricated.
+transport:
+  protocol: HTTPS webhook POST
+  direction: Memo Bank -> subscriber
+  delivery_url_requirement: Must use HTTPS (stated on the CreateWebhook schema).
+  content_types:
+  - application/json
+  - application/vnd.memo-bank.v1+json
+  content_type_note: >-
+    The versioned vendor media type carries the same Event schema, giving subscribers a media-type
+    versioning lever independent of the /v2/ path version.
+  authentication:
+    mechanism: bearer token issued by Memo Bank per webhook
+    header: Authorization
+    detail: >-
+      Creating a webhook returns a bearer_token which Memo Bank includes in the Authorization header of every
+      delivery to that endpoint. The subscriber verifies it to authenticate the sender.
+    signature: none
+    signature_note: >-
+      There is no HMAC request signature and no timestamp header, so deliveries are authenticated by a
+      shared bearer secret rather than a per-payload signature. That means a subscriber cannot detect
+      replay, and the secret is exposed to anyone who can read the webhook resource. An HMAC signature over
+      the body with a timestamp would be the standard hardening here.
+  retry_policy: >-
+    Memo Bank states a retry policy exists and that an event with the same id may be sent multiple times on
+    error, but the backoff schedule and maximum attempt count are not published.
+  ordering: not guaranteed / not published
+management:
+  api_managed: true
+  operations:
+  - listWebhooks
+  - createWebhook
+  - getWebhook
+  - deleteWebhook
+  introduced: '2026-03-18'
+  fields:
+    id: uuid
+    name: human label for the webhook
+    url: HTTPS delivery target
+    bearer_token: token Memo Bank sends in the Authorization header
+  update_supported: false
+  update_note: >-
+    There is no update operation - a webhook is created and deleted, so changing a delivery URL means
+    tearing down and re-registering, and the bearer token rotates with it.
+idempotency:
+  contract: >-
+    Event.id is a UUID and Memo Bank documents it explicitly as the deduplication key: an event with the
+    same id can be sent multiple times in case of error but should only be processed once.
+  key_field: id
+message:
+  name: Event
+  schema_ref: openapi/memo-bank-premium-bank-api-openapi.yml#/components/schemas/Event
+  operation_id: handleEvent
+  required:
+  - id
+  - date
+  - event_type
+  - resource_id
+  - resource_type
+  fields:
+    id: UUID of the event; the idempotency key.
+    date: Event creation date, ISO 8601 date-time.
+    event_type: One of 34 enumerated event types.
+    resource_type: One of 11 enumerated resource types.
+    resource_id: UUID of the resource the event refers to.
+  payload_style: >-
+    Thin/reference payload. The event carries only identifiers and a type - not the changed resource - so a
+    subscriber must call the corresponding GET operation to fetch state. This is the safer pattern for
+    banking data but doubles the round trips.
+  extensibility_contract: >-
+    Memo Bank reserves the right to add EventType and ResourceType members without a version bump, and
+    states subscribers must handle additions gracefully.
+marketplace_extension:
+  header: X-Memo-Connection-Id
+  purpose: >-
+    Identifies which marketplace connection an event belongs to, so a multi-tenant application can route the
+    event to the right customer context.
+  webhook_scoping: >-
+    Webhooks created with a marketplace OAuth access token are tied to that connection, allowing a distinct
+    URL per connected customer. Memo Bank can alternatively configure one global webhook for the whole
+    application.
+  source: https://docs-marketplace.api.memo.bank/topic/topic-webhooks
+event_count: 34
+resource_type_count: 11
+resource_types:
+- account
+- attachment
+- collection
+- iban
+- transaction
+- transfer
+- wire_transfer
+- bulk_transfers
+- bulk_collections
+- mandate_signature_request
+- account_assessment
+events:
+- group: account
+  types:
+  - event_type: account_created
+    resource_type: account
+  - event_type: account_updated
+    resource_type: account
+  - event_type: account_closed
+    resource_type: account
+- group: attachment
+  types:
+  - event_type: attachment_created
+    resource_type: attachment
+  - event_type: attachment_deleted
+    resource_type: attachment
+- group: iban
+  types:
+  - event_type: iban_created
+    resource_type: iban
+  - event_type: iban_updated
+    resource_type: iban
+  - event_type: iban_deleted
+    resource_type: iban
+- group: transaction
+  types:
+  - event_type: transaction_scheduled
+    resource_type: transaction
+  - event_type: transaction_authorized
+    resource_type: transaction
+  - event_type: transaction_confirmed
+    resource_type: transaction
+  - event_type: transaction_rejected
+    resource_type: transaction
+  - event_type: transaction_canceled
+    resource_type: transaction
+- group: transfer (SEPA)
+  types:
+  - event_type: transfer_confirmed
+    resource_type: transfer
+  - event_type: transfer_returned
+    resource_type: transfer
+  - event_type: transfer_canceled
+    resource_type: transfer
+  - event_type: transfer_failed
+    resource_type: transfer
+- group: wire transfer (SWIFT/RTGS)
+  types:
+  - event_type: wire_transfer_confirmed
+    resource_type: wire_transfer
+  - event_type: wire_transfer_returned
+    resource_type: wire_transfer
+  - event_type: wire_transfer_canceled
+    resource_type: wire_transfer
+  - event_type: wire_transfer_failed
+    resource_type: wire_transfer
+  - event_type: wire_transfer_attachment_required
+    resource_type: wire_transfer
+    note: >-
+      A compliance-driven event - the bank is asking for supporting documentation before the wire proceeds,
+      which an integrator can satisfy with createWireTransferAttachment.
+- group: collection (SEPA Direct Debit)
+  types:
+  - event_type: collection_confirmed
+    resource_type: collection
+  - event_type: collection_returned
+    resource_type: collection
+  - event_type: collection_canceled
+    resource_type: collection
+  - event_type: collection_failed
+    resource_type: collection
+- group: bulk
+  types:
+  - event_type: bulk_transfers_completed
+    resource_type: bulk_transfers
+  - event_type: bulk_collections_completed
+    resource_type: bulk_collections
+- group: mandate signature request
+  types:
+  - event_type: mandate_signature_request_sent
+    resource_type: mandate_signature_request
+  - event_type: mandate_signature_request_expired
+    resource_type: mandate_signature_request
+  - event_type: mandate_signature_request_completed
+    resource_type: mandate_signature_request
+  - event_type: mandate_signature_request_deleted
+    resource_type: mandate_signature_request
+- group: account assessment
+  types:
+  - event_type: account_assessment_completed
+    resource_type: account_assessment
+  - event_type: account_assessment_failed
+    resource_type: account_assessment
+lifecycle_coverage:
+  assessment: >-
+    Every asynchronous state machine in the product emits terminal events in both directions. Transfers,
+    wire transfers and collections each publish confirmed / returned / canceled / failed; transactions
+    publish the full scheduled -> authorized -> confirmed path plus rejected and canceled; bulk batches
+    signal completion; mandates and assessments signal both success and failure. For reconciliation
+    purposes this is complete - a subscriber never has to poll to discover a terminal outcome.
+gaps:
+- No AsyncAPI document, so the event surface is invisible to AsyncAPI tooling and event catalogues.
+- >-
+  No HMAC payload signature or timestamp header - deliveries are authenticated with a static bearer token
+  only, leaving no replay protection.
+- No published retry schedule or maximum attempt count.
+- No webhook update operation; changing a URL forces re-registration and rotates the bearer token.
+- No event-type subscription filter is documented, so a subscriber appears to receive all 34 types.
+- No delivery-log or event-replay endpoint for recovering missed events after an outage.

@@ -1,0 +1,181 @@
+# Memo Bank API
+
+OpenAPI file: https://docs.api.memo.bank/source.yaml
+
+## Description
+
+This is version `2.0` of this API documentation. Last update on Jul 31, 2026.
+**Welcome!** You can use our [Premium Bank API](https://memo.bank/produit/api/)  to check your company’s accounts, fetch your transactions, make SEPA transfers,  initiate SEPA direct debit collections, create virtual IBANs, and access most of Memo Bank features.
+> info
+> If you are a **third-party payment service provider** complying with PSD2, you may be more interested in our [NextGenPSD2 API](https://docs-nextgenpsd2.api.memo.bank).
+
+
+## Servers
+
+- Production: https://api.memo.bank (Production)
+
+- Sandbox: https://api.sandbox.memo.bank (Sandbox)
+
+
+## Topics
+
+### [Getting started](https://docs.api.memo.bank/topic/topic-getting-started.md)
+
+
+### [Authentication](https://docs.api.memo.bank/authentication.md)
+
+
+### [Idempotent requests](https://docs.api.memo.bank/topic/topic-idempotent-requests.md)
+
+
+### [Errors](https://docs.api.memo.bank/topic/topic-errors.md)
+
+
+### [Versioning and backwards compatibility](https://docs.api.memo.bank/topic/topic-versioning-and-backwards-compatibility.md)
+
+
+### [Rate limiting](https://docs.api.memo.bank/topic/topic-rate-limiting.md)
+
+
+### [API recipes](https://docs.api.memo.bank/topic/topic-api-recipes.md)
+
+
+### [FAQ](https://docs.api.memo.bank/topic/topic-faq.md)
+
+
+### [Sandbox](https://docs.api.memo.bank/topic/topic-sandbox.md)
+
+
+
+## Endpoints
+
+### [Accounts](https://docs.api.memo.bank/group/endpoint-accounts.md)
+
+- [Get an account](https://docs.api.memo.bank/operation/operation-getaccount.md)
+
+- [List all accounts](https://docs.api.memo.bank/operation/operation-listaccounts.md)
+
+
+### [IBANs](https://docs.api.memo.bank/group/endpoint-ibans.md)
+
+- [List all IBANs](https://docs.api.memo.bank/operation/operation-listibans.md)
+
+- [Create a virtual IBAN](https://docs.api.memo.bank/operation/operation-createiban.md)
+
+- [Get an IBAN](https://docs.api.memo.bank/operation/operation-getiban.md)
+
+- [Delete an IBAN](https://docs.api.memo.bank/operation/operation-deleteiban.md)
+
+- [Update an IBAN](https://docs.api.memo.bank/operation/operation-updateiban.md)
+
+
+### [Account assessments](https://docs.api.memo.bank/group/endpoint-account-assessments.md)
+
+- [Create an account assessment](https://docs.api.memo.bank/operation/operation-createaccountassessment.md)
+
+- [Get an account assessment](https://docs.api.memo.bank/operation/operation-getaccountassessment.md)
+
+
+### [Transactions](https://docs.api.memo.bank/group/endpoint-transactions.md)
+
+- [Get a transaction](https://docs.api.memo.bank/operation/operation-gettransaction.md)
+
+- [List all transactions](https://docs.api.memo.bank/operation/operation-listtransactions.md)
+
+
+### [Transfers](https://docs.api.memo.bank/group/endpoint-transfers.md)
+
+- [Get a transfer](https://docs.api.memo.bank/operation/operation-gettransfer.md)
+
+- [Cancel a SEPA transfer](https://docs.api.memo.bank/operation/operation-canceltransfer.md)
+
+- [Initiate a SEPA transfer](https://docs.api.memo.bank/operation/operation-createtransferv2.md)
+
+- [Create bulk transfers](https://docs.api.memo.bank/operation/operation-createtransfersbulk.md)
+
+- [Generate a proof of transfer](https://docs.api.memo.bank/operation/operation-getproofoftransfer.md)
+
+- [Get a bulk and its current progress](https://docs.api.memo.bank/operation/operation-gettransfersbulk.md)
+
+- [Get the status of individual transfers in a bulk](https://docs.api.memo.bank/operation/operation-gettransfersbulkitems.md)
+
+
+### [Wire Transfers](https://docs.api.memo.bank/group/endpoint-wire-transfers.md)
+
+- [Initiate a wire transfer](https://docs.api.memo.bank/operation/operation-createwiretransfer.md)
+
+- [Create an attachment to a wire transfer](https://docs.api.memo.bank/operation/operation-createwiretransferattachment.md)
+
+- [Generate a proof of wire transfer](https://docs.api.memo.bank/operation/operation-getproofofwiretransfer.md)
+
+- [Get a wire transfer](https://docs.api.memo.bank/operation/operation-getwiretransfer.md)
+
+
+### [Collections](https://docs.api.memo.bank/group/endpoint-collections.md)
+
+- [Get a collection](https://docs.api.memo.bank/operation/operation-getcollection.md)
+
+- [Cancel a SEPA Direct Debit collection](https://docs.api.memo.bank/operation/operation-cancelcollection.md)
+
+- [Schedule a SEPA Direct Debit collection](https://docs.api.memo.bank/operation/operation-createcollection.md)
+
+- [Create bulk collections](https://docs.api.memo.bank/operation/operation-createcollectionsbulk.md)
+
+- [Get a bulk and its current progress](https://docs.api.memo.bank/operation/operation-getcollectionsbulk.md)
+
+- [Get the status of individual collection in a bulk](https://docs.api.memo.bank/operation/operation-getcollectionsbulkitems.md)
+
+
+### [Mandate signature requests](https://docs.api.memo.bank/group/endpoint-mandate-signature-requests.md)
+
+- [List the mandate signature requests](https://docs.api.memo.bank/operation/operation-listmandatesignaturerequests.md)
+
+- [Create a new mandate signature request](https://docs.api.memo.bank/operation/operation-createmandatesignaturerequest.md)
+
+- [Get a mandate signature request](https://docs.api.memo.bank/operation/operation-getmandatesignaturerequest.md)
+
+- [Delete a mandate signature request](https://docs.api.memo.bank/operation/operation-deletemandatesignaturerequest.md)
+
+- [Renew a mandate signature request](https://docs.api.memo.bank/operation/operation-renewmandatesignaturerequest.md)
+
+
+### [Attachments](https://docs.api.memo.bank/group/endpoint-attachments.md)
+
+- [List all attachments](https://docs.api.memo.bank/operation/operation-listattachments.md)
+
+- [Create an attachment](https://docs.api.memo.bank/operation/operation-createattachment.md)
+
+- [Get an attachment](https://docs.api.memo.bank/operation/operation-getattachment.md)
+
+- [Delete an attachment](https://docs.api.memo.bank/operation/operation-deleteattachment.md)
+
+
+### [Webhooks](https://docs.api.memo.bank/group/endpoint-webhooks.md)
+
+- [List all webhooks](https://docs.api.memo.bank/operation/operation-listwebhooks.md)
+
+- [Create a webhook](https://docs.api.memo.bank/operation/operation-createwebhook.md)
+
+- [Get a webhook](https://docs.api.memo.bank/operation/operation-getwebhook.md)
+
+- [Delete a webhook](https://docs.api.memo.bank/operation/operation-deletewebhook.md)
+
+
+### [Sandbox](https://docs.api.memo.bank/group/endpoint-sandbox.md)
+
+- [Simulate an incoming SEPA collection](https://docs.api.memo.bank/operation/operation-createincomingcollection.md)
+
+- [Simulate an incoming SEPA transfer](https://docs.api.memo.bank/operation/operation-createincomingtransfer.md)
+
+
+
+## Webhooks
+
+### [Webhook](https://docs.api.memo.bank/group/webhook-webhook.md)
+
+- [Handle an event](https://docs.api.memo.bank/operation/operation-handleevent.md)
+
+
+
+
+[Powered by Bump.sh](https://bump.sh)

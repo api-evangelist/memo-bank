@@ -1,0 +1,136 @@
+generated: '2026-08-17'
+method: searched
+source:
+- https://docs.api.memo.bank/topic/topic-errors
+- https://docs.api.memo.bank/topic/topic-idempotent-requests
+- https://docs-marketplace.api.memo.bank/topic/topic-connection-lifecycle
+- openapi/memo-bank-premium-bank-api-openapi.yml
+format: proprietary
+format_note: >-
+  NOT RFC 9457. Memo Bank publishes a flat two-field JSON envelope ({"code": ..., "message": ...}) served as
+  application/json, with no type URI, no title/detail split and no instance member.
+envelope:
+  content_type: application/json
+  fields:
+    code: Machine-readable error code, the key that distinguishes error conditions.
+    message: Plain English explanation of the problem.
+  example: |
+    {
+      "code": "error_code",
+      "message": "Example error message."
+    }
+derivation_note: >-
+  This catalogue could NOT be derived from the OpenAPI. All 43 operations in
+  openapi/memo-bank-premium-bank-api-openapi.yml declare only 200, 201 and 204 responses - there is not a
+  single 4xx or 5xx response object, and no error schema exists in components.schemas. Everything below is
+  therefore taken from Memo Bank's own prose documentation, where the status code and its meaning are stated
+  explicitly. No error code has been invented: only codes and statuses Memo Bank actually publishes are
+  listed, which is why the catalogue is short relative to a 43-operation payments API.
+problems:
+- status: 409
+  code: null
+  title: Conflict - idempotent request still in flight
+  detail: >-
+    Returned when an Idempotency-Key is reused while the original request is still being processed.
+  remediation: Safe to retry with the same Idempotency-Key until a different response is returned.
+  retryable: true
+  source: https://docs.api.memo.bank/topic/topic-idempotent-requests
+- status: 422
+  code: null
+  title: Unprocessable entity - idempotency key reused with a different payload
+  detail: >-
+    Returned when a request reuses an Idempotency-Key but the request body is not identical to the original.
+  remediation: >-
+    Do not retry. Either send the original payload with that key, or generate a new V4 UUID key for the new
+    payload.
+  retryable: false
+  source: https://docs.api.memo.bank/topic/topic-idempotent-requests
+- status: 429
+  code: null
+  title: Too Many Requests
+  detail: >-
+    The rate limit for the period was exhausted. RateLimit-Limit, RateLimit-Remaining and RateLimit-Reset
+    are present on every response, so a client can see this coming.
+  remediation: >-
+    Back off until RateLimit-Reset seconds have elapsed, then retry with the same Idempotency-Key.
+  retryable: true
+  source: https://docs.api.memo.bank/topic/topic-rate-limiting
+- status: 401
+  code: Unauthorized
+  title: Unauthorized
+  detail: >-
+    Missing, malformed, expired or replayed request JWT. The iat claim is accepted within only 5 seconds of
+    server time, so client clock drift is a common cause.
+  remediation: >-
+    Re-mint the JWT with a fresh iat and a new jti UUID, confirm sub matches the method and full path
+    including query string, and confirm dig#S256 matches the body when one is sent.
+  retryable: false
+  method: probed
+  evidence: >-
+    Observed live on 2026-08-17: POST https://api.memo.bank/api/apps/mcp/server returned HTTP 401 with body
+    {"origin":"bank.memo.commons.jaxrs.jersey.JerseyApplication","message":"Unauthorized","status":"401"}.
+    Note this shape has origin/message/status members and does NOT match the documented code/message
+    envelope, so at least one surface returns a second, undocumented error shape.
+- status: 404
+  code: not_found
+  title: Not found
+  detail: Resource does not exist, or is not visible to the calling application.
+  remediation: Verify the resource id and that the application's permissions cover it.
+  retryable: false
+  method: probed
+  evidence: >-
+    Observed live on 2026-08-17: GET https://api.memo.bank/api/apps/mcp/server/.well-known/oauth-authorization-server
+    returned {"code":"not_found","message":"Not found."} - a genuine instance of the documented
+    code/message envelope.
+- status: 5xx
+  code: null
+  title: Server error
+  detail: Unexpected server-side failure.
+  remediation: Retry with the same Idempotency-Key; Memo Bank explicitly expects retries on 5XX.
+  retryable: true
+  source: https://docs.api.memo.bank/topic/topic-idempotent-requests
+- status: null
+  code: inactive_connection
+  title: Inactive marketplace connection
+  detail: >-
+    Marketplace-specific. Returned when the user has deactivated the connection between their workspace and
+    the application. The HTTP status is not published.
+  remediation: >-
+    Stop calling on behalf of that connection and re-run the OAuth 2.0 authorization flow to establish a new
+    one. A single connection may exist per user/workspace pair at a time.
+  retryable: false
+  api: Memo Bank Marketplace API
+  source: https://docs-marketplace.api.memo.bank/topic/topic-connection-lifecycle
+- status: null
+  code: unexpected_error
+  title: Unexpected error
+  detail: >-
+    Generic failure. Observed with a French-language message, indicating error messages are not uniformly
+    localised to English despite the documentation describing message as a plain English explanation.
+  remediation: Retry; if persistent, contact Memo Bank support.
+  retryable: true
+  method: probed
+  evidence: >-
+    Observed live on 2026-08-17: GET
+    https://api.memo.bank/api/apps/mcp/.well-known/oauth-protected-resource returned
+    {"key":"unexpected_error","reason":"Une erreur est survenue."} - note this uses key/reason members
+    rather than the documented code/message pair, a THIRD error shape on the same host.
+oauth_errors:
+  api: Memo Bank Marketplace API
+  transport: query parameters on the redirect_uri, per OAuth 2.0
+  fields:
+  - error
+  - error_description
+  source: https://docs-marketplace.api.memo.bank/topic/topic-authorization-flow
+gaps:
+- >-
+  No error responses at all in the OpenAPI: 0 of 43 operations declare a 4xx or 5xx response, and there is
+  no error schema in components.schemas among the 119 schemas defined.
+- >-
+  No published error-code reference page. Only four concrete codes could be recovered (not_found,
+  inactive_connection, unexpected_error, Unauthorized), three of them by probing rather than from docs.
+- >-
+  Three different error envelope shapes were observed live on api.memo.bank - the documented
+  {code, message}, plus {origin, message, status} and {key, reason} - so a client cannot rely on a single
+  parse path.
+- No RFC 9457 application/problem+json representation is offered.

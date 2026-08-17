@@ -1,25 +1,205 @@
 aid: memo-bank
 name: Memo Bank
-description: 'Memo Bank is a company surfaced as a portfolio company of serena and added to the API Evangelist
-  network as a stub for enrichment. Sector: fintech-insurtech. This profile is a lead awaiting the enrichment
-  pipeline.'
+description: >-
+  Memo Bank is an independent French commercial bank, accredited as a credit institution by the European
+  Central Bank and supervised by the ACPR, that serves small and mid-sized companies with current accounts,
+  loans, savings and an API-first payments platform. Its Premium Bank API is a REST/JSON contract authenticated
+  with RS256-signed JWT/JWS request tokens, covering accounts, transactions, bi-directional virtual IBANs,
+  SEPA credit transfers, SEPA Direct Debit collections and mandate signature requests, SWIFT/RTGS wire
+  transfers, bulk payment batches, attachments and account assessments, with 34 webhook event types for
+  asynchronous reconciliation. A Marketplace API adds an OAuth 2.0 layer so third-party developers can act on
+  customer resources, a NextGenPSD2 API implements the Berlin Group AIS/PIS interface for licensed third-party
+  providers, and a hosted MCP server exposes read-only banking data plus attachment upload to AI assistants.
 url: https://raw.githubusercontent.com/api-evangelist/memo-bank/refs/heads/main/apis.yml
+image: https://media.memo.bank/home_hero_602cdab270/home_hero_602cdab270.jpg
 x-type: company
 x-source: serena-portfolio
-x-tier: stub
-x-tier-reason: portfolio-lead
-specificationVersion: '0.20'
+specificationVersion: '0.21'
 created: '2026-08-17'
 modified: '2026-08-17'
 tags:
 - Company
 - Fintech Insurtech
-apis: []
+- banking
+- business-banking
+- payments
+- sepa
+- sepa-direct-debit
+- virtual-iban
+- wire-transfers
+- open-banking
+- psd2
+- berlin-group
+- webhooks
+- mcp
+- france
+apis:
+- name: Memo Bank Premium Bank API
+  description: >-
+    REST/JSON banking API for Memo Bank business customers, authenticated with RS256-signed JWT request
+    tokens. Covers accounts and balances, transactions with typed transaction sources, virtual and standard
+    IBANs, SEPA credit transfers (standard and instant), SEPA Direct Debit collections, mandate signature
+    requests, SWIFT/RTGS wire transfers, bulk transfer and collection batches, transaction attachments,
+    account assessments (IBAN/name verification), webhook management, and sandbox-only endpoints that
+    simulate incoming transactions. 43 operations across 32 paths, plus an OpenAPI 3.1 webhooks block
+    describing 34 event types.
+  humanURL: https://docs.api.memo.bank/
+  baseURL: https://api.memo.bank
+  tags:
+  - banking
+  - payments
+  - sepa
+  - sepa-direct-debit
+  - virtual-iban
+  - wire-transfers
+  - webhooks
+  properties:
+  - type: OpenAPI
+    url: openapi/memo-bank-premium-bank-api-openapi.yml
+  - type: Documentation
+    url: https://docs.api.memo.bank/
+  - type: APIReference
+    url: https://docs.api.memo.bank/version-2/
+  - type: GettingStarted
+    url: https://docs.api.memo.bank/topic/topic-getting-started
+  - type: Overlay
+    url: overlays/memo-bank-premium-bank-api-overlay.yaml
+  - type: Webhooks
+    url: asyncapi/memo-bank-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/memo-bank-tool-crosswalk.yml
+- name: Memo Bank Marketplace API
+  description: >-
+    OAuth 2.0 authorization layer that lets third-party developers build Memo Bank Marketplace integrations
+    and call the Premium Bank API on behalf of consenting customers. Documents the authorization flow,
+    connection lifecycle, marketplace webhooks, and the token endpoint that exchanges an authorization code
+    or refresh token for a short-lived access token.
+  humanURL: https://docs-marketplace.api.memo.bank/
+  baseURL: https://api.memo.bank
+  tags:
+  - open-banking
+  - oauth2
+  - marketplace
+  - banking
+  properties:
+  - type: OpenAPI
+    url: openapi/memo-bank-marketplace-api-openapi.yml
+  - type: Documentation
+    url: https://docs-marketplace.api.memo.bank/
+  - type: GettingStarted
+    url: https://docs-marketplace.api.memo.bank/topic/topic-getting-started
+  - type: Overlay
+    url: overlays/memo-bank-marketplace-api-overlay.yaml
+- name: Memo Bank NextGenPSD2 API
+  description: >-
+    Berlin Group NextGenPSD2 XS2A implementation (Implementation Guidelines 1.3.11) exposing Account
+    Information Service and Payment Initiation Service endpoints to licensed third-party payment service
+    providers under PSD2. Provides account lists, details, balances and transactions, card account
+    equivalents, and payment initiation, status and cancellation, secured with eIDAS certificates and an
+    OAuth 2.0 authorization-code flow carrying AIS and PIS scopes.
+  humanURL: https://docs-nextgenpsd2.api.memo.bank/
+  baseURL: https://api.memo.bank/nextgenpsd2
+  tags:
+  - psd2
+  - berlin-group
+  - open-banking
+  - banking
+  - payments
+  properties:
+  - type: OpenAPI
+    url: openapi/memo-bank-nextgenpsd2-api-openapi.yml
+  - type: Documentation
+    url: https://docs-nextgenpsd2.api.memo.bank/
+  - type: OAuthScopes
+    url: scopes/memo-bank-scopes.yml
+  - type: Overlay
+    url: overlays/memo-bank-nextgenpsd2-api-overlay.yaml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: DomainSecurity
+  url: security/memo-bank-domain-security.yml
 - type: Website
   url: https://memo.bank/
+- type: DeveloperPortal
+  url: https://docs.api.memo.bank/
+- type: Documentation
+  url: https://docs.api.memo.bank/
+- type: APIReference
+  url: https://docs.api.memo.bank/version-2/
+- type: GettingStarted
+  url: https://docs.api.memo.bank/topic/topic-getting-started
+- type: Support
+  url: https://aide.memo.bank/
+- type: Blog
+  url: https://memo.bank/en/magazine/
+- type: GitHubOrganization
+  url: https://github.com/memobank
+- type: Pricing
+  url: https://memo.bank/en/pricing/
+- type: SignUp
+  url: https://memo.bank/en/sign-up/
+- type: Login
+  url: https://client.memo.bank/login
+- type: TermsOfService
+  url: https://memo.bank/en/agreement/
+- type: PrivacyPolicy
+  url: https://memo.bank/en/personal-data/
+- type: Compliance
+  url: https://memo.bank/en/about/security-operations/
+- type: StatusPage
+  url: https://status.memo.bank/
+- type: ChangeLog
+  url: https://docs.api.memo.bank/changes
+- type: MCPServer
+  url: mcp/memo-bank-mcp.yml
+- type: LLMsTxt
+  url: llms/memo-bank-llms.txt
+- type: WellKnown
+  url: well-known/memo-bank-well-known.yml
+- type: Authentication
+  url: authentication/memo-bank-authentication.yml
+- type: OAuthScopes
+  url: scopes/memo-bank-scopes.yml
+- type: Conventions
+  url: conventions/memo-bank-conventions.yml
+- type: Idempotency
+  url: conventions/memo-bank-conventions.yml
+- type: RateLimits
+  url: rate-limits/memo-bank-rate-limits.yml
+- type: Plans
+  url: plans/memo-bank-plans-pricing.yml
+- type: Lifecycle
+  url: lifecycle/memo-bank-lifecycle.yml
+- type: Deprecation
+  url: https://docs.api.memo.bank/topic/topic-versioning-and-backwards-compatibility
+- type: Conformance
+  url: conformance/memo-bank-conformance.yml
+- type: ErrorCatalog
+  url: errors/memo-bank-problem-types.yml
+- type: DataModel
+  url: data-model/memo-bank-data-model.yml
+- type: Sandbox
+  url: sandbox/memo-bank-sandbox.yml
+- type: Webhooks
+  url: asyncapi/memo-bank-webhooks.yml
+- type: Packages
+  url: packages/memo-bank-packages.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: ToolCrosswalk
+  url: mcp/memo-bank-tool-crosswalk.yml
+- type: ChangeLog
+  url: changelog/memo-bank-changelog.yml
+- type: DeclineCodes
+  url: errors/memo-bank-decline-codes.yml
+- type: VulnerabilityDisclosure
+  url: security/memo-bank-vulnerability-disclosure.yml
+x-enrichment:
+  date: '2026-08-17'
+  status: enriched
+  artifacts_added: 26
+  pass: local-v1

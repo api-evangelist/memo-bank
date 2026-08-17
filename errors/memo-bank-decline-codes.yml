@@ -1,0 +1,412 @@
+generated: '2026-08-17'
+method: derived
+source: openapi/memo-bank-premium-bank-api-openapi.yml
+docs: https://docs.api.memo.bank/
+note: >-
+  Memo Bank publishes no standalone decline-code reference PAGE, but it does something better: the codes are
+  in the machine-readable contract. The failure_code property on TransferV2, WireTransfer and Collection
+  carries a full enum, and the TransferV2 and Collection property descriptions document each code's meaning
+  in prose inside the spec itself. This artifact lifts those verbatim. WireTransfer is the exception - its
+  28-value enum has no per-code documentation, so those entries carry the code and its rail but a null
+  meaning rather than a guessed one.
+envelope:
+  field: failure_code
+  present_on:
+  - TransferV2.failure_code
+  - WireTransfer.failure_code
+  - Collection.failure_code
+  semantics: >-
+    Populated only when the resource reaches the failed status. It is a resource property, not an API error
+    body, so it is read by polling the resource or by handling the *_failed webhook event and then fetching
+    the resource.
+  companion_field: status
+  distinct_from: >-
+    errors/memo-bank-problem-types.yml covers API-level errors returned as HTTP responses. These codes
+    describe a payment that was accepted by the API and then failed at execution or settlement.
+bulk_vs_single_semantics:
+  rule: >-
+    A meaningful and easily-missed distinction that Memo Bank documents explicitly. A subset of these codes
+    can only ever appear as a failure_code on a payment initiated inside a BULK. For a single payment the
+    same condition is returned synchronously as an HTTP error response and the resource is never created at
+    all.
+  implication: >-
+    An integrator handling both single and bulk initiation must implement the same condition twice - once as
+    a synchronous API error, once as an asynchronous failure_code - or bulk failures will go unhandled.
+  applies_to:
+  - single_only_as_http_error: true
+    codes_transfer:
+    - current_account_not_found
+    - instant_transfer_not_available
+    - insufficient_funds
+    - invalid_beneficiary_iban
+    - maximum_amount_exceeded
+    - missing_new_beneficiary_name
+    - new_beneficiary_is_owned_iban
+    - transfer_to_same_account
+    - transfer_to_owned_account_with_virtual_iban
+    - transfer_from_saving_account_to_external_beneficiary
+    - unreachable_beneficiary_iban
+    codes_collection:
+    - account_cannot_receive_collections
+    - current_account_not_found
+    - creditor_is_saving_account
+    - no_sepa_creditor_identifier
+    - mandate_info_missing
+    - mandate_iban_mismatch
+    - collection_to_same_account
+decline_codes:
+- rail: sepa-credit-transfer
+  resource: TransferV2
+  code_count: 22
+  documented_meanings: 22
+  codes:
+  - code: beneficiary_bank_account_closed
+    meaning: The beneficiary's bank account is closed.
+    stage: settlement
+    party: beneficiary bank
+    action: Obtain new beneficiary bank details; do not retry as-is.
+  - code: beneficiary_bank_error
+    meaning: The beneficiary's bank sent us an error.
+    stage: settlement
+    party: beneficiary bank
+    action: Transient at the counterparty bank; retry is reasonable.
+  - code: beneficiary_bank_invalid_bank_details
+    meaning: The beneficiary's bank account does not exist or no longer exists.
+    stage: settlement
+    party: beneficiary bank
+    action: Correct the beneficiary IBAN; do not retry as-is.
+  - code: beneficiary_bank_refusal
+    meaning: The beneficiary's bank has refused the transfer.
+    stage: settlement
+    party: beneficiary bank
+    action: Contact the beneficiary; the refusal reason is not exposed.
+  - code: intermediary_system_error
+    meaning: The interbank network sent us an error.
+    stage: settlement
+    party: interbank network
+    action: Transient; retry.
+  - code: memo_error
+    meaning: Something went wrong on our side.
+    stage: execution
+    party: Memo Bank
+    action: Transient; retry, and contact support if persistent.
+  - code: memo_refusal
+    meaning: We had to reject the transfer.
+    stage: execution
+    party: Memo Bank
+    action: Do not retry; contact your relationship manager.
+  - code: execution_failure
+    meaning: Other or undefined pre-settlement execution failures.
+    stage: pre-settlement
+    party: unspecified
+    action: Catch-all. Investigate before retrying.
+  - code: current_account_not_found
+    meaning: The provided local IBAN does not exist.
+    stage: validation
+    bulk_only: true
+    action: Fix local_iban.
+  - code: instant_transfer_not_available
+    meaning: The beneficiary can not receive instant transfers.
+    stage: validation
+    bulk_only: true
+    action: Re-initiate with type_strategy standard_only or instant_if_available.
+  - code: insufficient_funds
+    meaning: Not enough funds on your account to execute the transfer.
+    stage: validation
+    bulk_only: true
+    action: Fund the account and re-initiate.
+  - code: invalid_beneficiary_iban
+    meaning: The beneficiary's IBAN is invalid.
+    stage: validation
+    bulk_only: true
+    action: Correct the IBAN. Consider createAccountAssessment to verify before initiating.
+  - code: maximum_amount_exceeded
+    meaning: The transfer amount exceeds the limit.
+    stage: validation
+    bulk_only: true
+    action: Split the payment or raise the limit with your banker.
+  - code: missing_new_beneficiary_name
+    meaning: The beneficiary does not exist and the name was not provided.
+    stage: validation
+    bulk_only: true
+    action: Supply beneficiary_name for first-time beneficiaries.
+  - code: new_beneficiary_is_owned_iban
+    meaning: The beneficiary does not exist and is one of your IBAN.
+    stage: validation
+    bulk_only: true
+    action: Use an internal transfer instead.
+  - code: transfer_to_same_account
+    meaning: The transfer cannot credit the debtor account.
+    stage: validation
+    bulk_only: true
+    action: Change the source or destination.
+  - code: transfer_to_owned_account_with_virtual_iban
+    meaning: A virtual IBAN cannot be used to transfer between your accounts.
+    stage: validation
+    bulk_only: true
+    action: Use the account's main IBAN for internal movements.
+  - code: transfer_from_saving_account_to_external_beneficiary
+    meaning: You cannot transfer money to external beneficiaries from the Booster account.
+    stage: validation
+    bulk_only: true
+    action: Sweep to a current account first, then pay out.
+  - code: unreachable_beneficiary_iban
+    meaning: The beneficiary is unreachable for the given transfer type.
+    stage: validation
+    bulk_only: true
+    action: Change type_strategy or the beneficiary.
+  - code: invalid_currency_for_account
+    meaning: null
+    meaning_note: In the enum but not documented in the property description.
+    stage: validation
+  - code: account_does_not_support_network
+    meaning: null
+    meaning_note: In the enum but not documented in the property description.
+    stage: validation
+  - code: missing_beneficiary_address
+    meaning: null
+    meaning_note: In the enum but not documented in the property description.
+    stage: validation
+- rail: sepa-direct-debit-collection
+  resource: Collection
+  code_count: 21
+  documented_meanings: 21
+  codes:
+  - code: invalid_mandate_iban
+    meaning: The mandate's IBAN is invalid.
+    stage: validation
+    action: Correct the mandate IBAN.
+  - code: unreachable_mandate_iban
+    meaning: The mandate's IBAN is unreachable for the given scheme.
+    stage: validation
+    action: Check the b2b vs core scheme against the debtor bank's capability.
+  - code: missing_debtor_address
+    meaning: The debtor address is missing and required for non-EEA SEPA countries.
+    stage: validation
+    action: Supply the debtor address for non-EEA SEPA debtors.
+  - code: core_limit_exceeded
+    meaning: The limit for CORE collections was exceeded.
+    stage: validation
+    action: Split the collection or discuss limits with your banker.
+  - code: debtor_refusal
+    meaning: The debtor has refused the collection.
+    stage: settlement
+    party: debtor
+    action: >-
+      Do not re-present. Under SEPA the debtor has a refund right; resolve commercially. This is the code
+      most equivalent to a card chargeback.
+  - code: debtor_bank_account_closed
+    meaning: The debtor's bank account is closed.
+    stage: settlement
+    party: debtor bank
+    action: Obtain a new mandate with new bank details.
+  - code: debtor_bank_insufficient_funds
+    meaning: The debtor's bank account has insufficient funds.
+    stage: settlement
+    party: debtor bank
+    action: >-
+      Re-present later. This is the classic soft decline on direct debit and the one worth retrying on a
+      schedule.
+  - code: debtor_bank_error
+    meaning: The debtor's bank sent us an error.
+    stage: settlement
+    party: debtor bank
+    action: Transient; retry.
+  - code: debtor_bank_invalid_bank_details
+    meaning: The debtor's bank account does not exist or no longer exists.
+    stage: settlement
+    party: debtor bank
+    action: Obtain corrected mandate details.
+  - code: debtor_bank_refusal
+    meaning: The debtor's bank has refused the collection.
+    stage: settlement
+    party: debtor bank
+    action: Contact the debtor; the refusal reason is not exposed.
+  - code: intermediary_system_error
+    meaning: The interbank network sent us an error.
+    stage: settlement
+    action: Transient; retry.
+  - code: memo_error
+    meaning: Something went wrong on our side.
+    stage: execution
+    action: Transient; retry.
+  - code: memo_refusal
+    meaning: We had to reject the collection.
+    stage: execution
+    action: Do not retry; contact your relationship manager.
+  - code: execution_failure
+    meaning: Other or undefined pre-settlement execution failures.
+    stage: pre-settlement
+    action: Catch-all. Investigate before retrying.
+  - code: account_cannot_receive_collections
+    meaning: The account cannot receive collections.
+    stage: validation
+    bulk_only: true
+    action: Enable allow_collections on the IBAN or use one that accepts collections.
+  - code: current_account_not_found
+    meaning: The provided local IBAN does not exist.
+    stage: validation
+    bulk_only: true
+    action: Fix local_iban.
+  - code: creditor_is_saving_account
+    meaning: The provided local IBAN is a Booster account.
+    stage: validation
+    bulk_only: true
+    action: Collect into a current account instead.
+  - code: no_sepa_creditor_identifier
+    meaning: You need to setup a SEPA creditor identifier with your banker.
+    stage: onboarding
+    bulk_only: true
+    action: >-
+      A provisioning prerequisite, not a payment problem. Obtain an SCI from your banker before collecting.
+  - code: mandate_info_missing
+    meaning: New mandate information must be complete.
+    stage: validation
+    bulk_only: true
+    action: Supply full mandate details for a new mandate reference.
+  - code: mandate_iban_mismatch
+    meaning: The mandate reference already exists but with a different IBAN.
+    stage: validation
+    bulk_only: true
+    action: >-
+      Use a new mandate reference, or reconcile the existing mandate. Guards against silently repointing a
+      signed mandate at a different account.
+  - code: collection_to_same_account
+    meaning: The local IBAN and the debtor IBAN can not be the same.
+    stage: validation
+    bulk_only: true
+    action: Change the debtor or the creditor IBAN.
+- rail: wire-transfer (SWIFT / RTGS)
+  resource: WireTransfer
+  code_count: 28
+  documented_meanings: 0
+  documentation_gap: >-
+    The WireTransfer.failure_code description is a single sentence with no per-code breakdown, unlike its
+    TransferV2 and Collection siblings. All 28 codes below are recorded verbatim from the enum with a null
+    meaning - none has been inferred, even where the code name looks self-describing, because guessing the
+    semantics of a cross-border payment failure is exactly the kind of error that would mislead an
+    integrator.
+  codes:
+  - code: insufficient_funds
+    meaning: null
+  - code: execution_failure
+    meaning: null
+  - code: maximum_amount_exceeded
+    meaning: null
+  - code: current_account_not_found
+    meaning: null
+  - code: transfer_to_same_account
+    meaning: null
+  - code: transfer_to_owned_account_with_virtual_iban
+    meaning: null
+  - code: transfer_from_saving_account_to_external_beneficiary
+    meaning: null
+  - code: new_beneficiary_is_owned_iban
+    meaning: null
+  - code: iban_and_bic_inconsistency
+    meaning: null
+  - code: country_and_account_identifier_inconsistency
+    meaning: null
+  - code: country_unavailable
+    meaning: null
+  - code: currency_unavailable
+    meaning: null
+  - code: amount_too_low
+    meaning: null
+  - code: amount_too_high
+    meaning: null
+  - code: invalid_account_identifier_for_country
+    meaning: null
+  - code: invalid_currency_for_account
+    meaning: null
+  - code: invalid_instructed_currency
+    meaning: null
+  - code: wire_transfer_not_authorized_for_beneficiary
+    meaning: null
+  - code: invalid_routing_code_for_country
+    meaning: null
+  - code: missing_beneficiary_lei
+    meaning: null
+  - code: beneficiary_bank_account_closed
+    meaning: null
+  - code: beneficiary_bank_error
+    meaning: null
+  - code: beneficiary_bank_invalid_bank_details
+    meaning: null
+  - code: beneficiary_bank_refusal
+    meaning: null
+  - code: intermediary_system_error
+    meaning: null
+  - code: memo_error
+    meaning: null
+  - code: memo_refusal
+    meaning: null
+  - code: invalid_iban
+    meaning: null
+masking:
+  masked_to_counterparty: >-
+    Bank refusal reasons (beneficiary_bank_refusal, debtor_bank_refusal) are deliberately opaque - Memo Bank
+    surfaces that the counterparty bank refused but not why, because the reason is not disclosed to it
+    either.
+  internal_only_fields:
+  - internal_note
+  - custom_id
+  - custom_metadata
+  note: >-
+    internal_note, custom_id and custom_metadata are documented as visible only in the Memo Bank workspace
+    and NOT transmitted on the payment, so they are safe places for reconciliation keys. message by contrast
+    is visible to all involved parties.
+return_linkage:
+  field: return_transaction_id
+  present_on:
+  - TransferV2
+  - Collection
+  meaning: >-
+    When a payment is returned, this holds the id of the corresponding counter-transaction (a credit
+    transaction for a returned transfer, a debit for a returned collection), so a reconciliation system can
+    link the original and its reversal without matching on amount and date.
+prevention:
+  pre_flight_verification:
+    operations:
+    - createAccountAssessment
+    - getAccountAssessment
+    purpose: >-
+      IBAN and account-holder-name verification before initiating, which pre-empts invalid_beneficiary_iban,
+      unreachable_beneficiary_iban and beneficiary_bank_invalid_bank_details.
+    identification_types:
+    - LeiIdentification
+    - SirenIdentification
+    - NameIdentification
+summary:
+  total_codes: 71
+  unique_codes: 55
+  rails: 3
+  documented: 43
+  undocumented: 28
+  shared_across_rails:
+  - execution_failure
+  - intermediary_system_error
+  - memo_error
+  - memo_refusal
+  - current_account_not_found
+  - insufficient_funds
+  - maximum_amount_exceeded
+  assessment: >-
+    An unusually good failure taxonomy for a bank API - the codes separate validation, execution and
+    settlement stages and attribute fault to a party (yours, ours, the counterparty's bank, the network),
+    which is what a reconciliation system actually needs to decide whether to retry. The single largest gap
+    is that the 28 wire-transfer codes ship undocumented.
+gaps:
+- >-
+  WireTransfer's 28 failure codes have no published meanings, on the most operationally complex rail
+  (cross-border, correspondent banking).
+- >-
+  Three TransferV2 codes (invalid_currency_for_account, account_does_not_support_network,
+  missing_beneficiary_address) are in the enum but absent from the documented list.
+- >-
+  No standalone decline-code reference page, so the codes are discoverable only by reading the OpenAPI
+  property descriptions.
+- >-
+  No retryable/terminal flag on any code; the retry decision is left entirely to the integrator's reading of
+  the prose.
+- No mapping to SEPA ISO 20022 return reason codes (AC04, AM04, MD01, MS03 and so on).
