@@ -14,7 +14,7 @@ url: https://raw.githubusercontent.com/api-evangelist/memo-bank/refs/heads/main/
 image: https://media.memo.bank/home_hero_602cdab270/home_hero_602cdab270.jpg
 x-type: company
 x-source: serena-portfolio
-specificationVersion: '0.21'
+specificationVersion: '0.23'
 created: '2026-08-17'
 modified: '2026-08-17'
 tags:
