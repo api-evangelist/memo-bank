@@ -50,111 +50,589 @@ tags_raw:
 - mcp
 - france
 apis:
-- name: Memo Bank Premium Bank API
+- aid: memo-bank:memo-bank-account-assessments-api
+  name: Memo Bank Account assessments API
   description: >-
-    REST/JSON banking API for Memo Bank business customers, authenticated with RS256-signed JWT request
-    tokens. Covers accounts and balances, transactions with typed transaction sources, virtual and standard
-    IBANs, SEPA credit transfers (standard and instant), SEPA Direct Debit collections, mandate signature
-    requests, SWIFT/RTGS wire transfers, bulk transfer and collection batches, transaction attachments,
-    account assessments (IBAN/name verification), webhook management, and sandbox-only endpoints that
-    simulate incoming transactions. 43 operations across 32 paths, plus an OpenAPI 3.1 webhooks block
-    describing 34 event types.
+    Account assessments allow you to assess SEPA counterparty accounts before initiating transactions
+    with them. An assessment provides:
+
+
+    * **Risk indicators**: Detection of fraudulent activity, suspicious patterns, and other risk signals.
+
+    * **Identification matching**: Verify that the account name or other identifiers match the value known
+    by the account holder.
+
+    * **Account reachability**: Information about which payment schemes are supported by the account holder.
+
+
+    Account assessments are processed asynchronously: you need to listen to `account_assessment_completed`
+    and `account_assessment_failed` webhook  events to know when its time to retrieve the assessment results.
+
+
+    This feature is subject to specific pricing, please reach out to your banker to get more information.
   humanURL: https://docs.api.memo.bank/
   baseURL: https://api.memo.bank
   tags:
-  - Banking
-  - Payments
-  - SEPA
-  - SEPA Direct Debit
-  - Virtual IBAN
-  - Wire Transfers
-  - Webhook
-  tags_raw:
-  - banking
-  - payments
-  - sepa
-  - sepa-direct-debit
-  - virtual-iban
-  - wire-transfers
-  - webhooks
+  - Account assessments
   properties:
   - type: OpenAPI
-    url: openapi/memo-bank-premium-bank-api-openapi.yml
+    url: openapi/memo-bank-account-assessments-api-openapi.yml
   - type: Documentation
     url: https://docs.api.memo.bank/
   - type: APIReference
     url: https://docs.api.memo.bank/version-2/
   - type: GettingStarted
     url: https://docs.api.memo.bank/topic/topic-getting-started
-  - type: Overlay
-    url: overlays/memo-bank-premium-bank-api-overlay.yaml
   - type: Webhooks
     url: asyncapi/memo-bank-webhooks.yml
   - type: ToolCrosswalk
     url: mcp/memo-bank-tool-crosswalk.yml
-- name: Memo Bank Marketplace API
-  description: >-
-    OAuth 2.0 authorization layer that lets third-party developers build Memo Bank Marketplace integrations
-    and call the Premium Bank API on behalf of consenting customers. Documents the authorization flow,
-    connection lifecycle, marketplace webhooks, and the token endpoint that exchanges an authorization code
-    or refresh token for a short-lived access token.
-  humanURL: https://docs-marketplace.api.memo.bank/
-  baseURL: https://api.memo.bank
-  tags:
-  - Open Banking
-  - Authentication
-  - Marketplace
-  - Banking
-  tags_raw:
-  - open-banking
-  - oauth2
-  - marketplace
-  - banking
-  properties:
-  - type: OpenAPI
-    url: openapi/memo-bank-marketplace-api-openapi.yml
   - type: Documentation
     url: https://docs-marketplace.api.memo.bank/
   - type: GettingStarted
     url: https://docs-marketplace.api.memo.bank/topic/topic-getting-started
-  - type: Overlay
-    url: overlays/memo-bank-marketplace-api-overlay.yaml
-- name: Memo Bank NextGenPSD2 API
-  description: >-
-    Berlin Group NextGenPSD2 XS2A implementation (Implementation Guidelines 1.3.11) exposing Account
-    Information Service and Payment Initiation Service endpoints to licensed third-party payment service
-    providers under PSD2. Provides account lists, details, balances and transactions, card account
-    equivalents, and payment initiation, status and cancellation, secured with eIDAS certificates and an
-    OAuth 2.0 authorization-code flow carrying AIS and PIS scopes.
-  humanURL: https://docs-nextgenpsd2.api.memo.bank/
-  baseURL: https://api.memo.bank/nextgenpsd2
-  tags:
-  - PSD2
-  - Berlin Group
-  - Open Banking
-  - Banking
-  - Payments
-  tags_raw:
-  - psd2
-  - berlin-group
-  - open-banking
-  - banking
-  - payments
-  properties:
-  - type: OpenAPI
-    url: openapi/memo-bank-nextgenpsd2-api-openapi.yml
   - type: Documentation
     url: https://docs-nextgenpsd2.api.memo.bank/
   - type: OAuthScopes
     url: scopes/memo-bank-scopes.yml
-  - type: Overlay
-    url: overlays/memo-bank-nextgenpsd2-api-overlay.yaml
+- aid: memo-bank:memo-bank-accounts-api
+  name: Memo Bank Accounts API
+  description: >-
+    Accounts are any bank account that your company owns: current account, ring-fenced account,  settlement
+    account, specially dedicated account, trust account, meal voucher account,  booster account, etc.
+    They boil down to a list of [transactions](#endpoint-transactions) and a balance.
+  humanURL: https://docs.api.memo.bank/
+  baseURL: https://api.memo.bank
+  tags:
+  - Accounts
+  properties:
+  - type: OpenAPI
+    url: openapi/memo-bank-accounts-api-openapi.yml
+  - type: Documentation
+    url: https://docs.api.memo.bank/
+  - type: APIReference
+    url: https://docs.api.memo.bank/version-2/
+  - type: GettingStarted
+    url: https://docs.api.memo.bank/topic/topic-getting-started
+  - type: Webhooks
+    url: asyncapi/memo-bank-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/memo-bank-tool-crosswalk.yml
+  - type: Documentation
+    url: https://docs-marketplace.api.memo.bank/
+  - type: GettingStarted
+    url: https://docs-marketplace.api.memo.bank/topic/topic-getting-started
+  - type: Documentation
+    url: https://docs-nextgenpsd2.api.memo.bank/
+  - type: OAuthScopes
+    url: scopes/memo-bank-scopes.yml
+- aid: memo-bank:memo-bank-ais-api
+  name: Memo Bank AIS API
+  description: "Account Information Service.\n\n\nConsent is given using the **OAuth2 as a pre-step**\
+    \ authentication flow described in NextGenPSD2 specifications.\nThis means you don't have to manage\
+    \ consents using the dedicated endpoints (which are not implemented), \nbut only to redirect the PSU\
+    \ to our authorisation page (using `AIS` as OAuth2 scope).\nAfter performing a strong customer authentication,\
+    \ the PSU will be redirected to your redirect URI with an \n**authorisation code** that you can then\
+    \ exchange for an **access token**.\n\n\nThis **access token** will let you authenticate at the XS2A\
+    \ interface to request the PSU accounts balances and \ntransactions history."
+  humanURL: https://docs.api.memo.bank/
+  baseURL: https://api.memo.bank
+  tags:
+  - AIS
+  properties:
+  - type: OpenAPI
+    url: openapi/memo-bank-ais-api-openapi.yml
+  - type: Documentation
+    url: https://docs.api.memo.bank/
+  - type: APIReference
+    url: https://docs.api.memo.bank/version-2/
+  - type: GettingStarted
+    url: https://docs.api.memo.bank/topic/topic-getting-started
+  - type: Webhooks
+    url: asyncapi/memo-bank-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/memo-bank-tool-crosswalk.yml
+  - type: Documentation
+    url: https://docs-marketplace.api.memo.bank/
+  - type: GettingStarted
+    url: https://docs-marketplace.api.memo.bank/topic/topic-getting-started
+  - type: Documentation
+    url: https://docs-nextgenpsd2.api.memo.bank/
+  - type: OAuthScopes
+    url: scopes/memo-bank-scopes.yml
+- aid: memo-bank:memo-bank-attachments-api
+  name: Memo Bank Attachments API
+  description: Documents attached to transactions.
+  humanURL: https://docs.api.memo.bank/
+  baseURL: https://api.memo.bank
+  tags:
+  - Attachments
+  properties:
+  - type: OpenAPI
+    url: openapi/memo-bank-attachments-api-openapi.yml
+  - type: Documentation
+    url: https://docs.api.memo.bank/
+  - type: APIReference
+    url: https://docs.api.memo.bank/version-2/
+  - type: GettingStarted
+    url: https://docs.api.memo.bank/topic/topic-getting-started
+  - type: Webhooks
+    url: asyncapi/memo-bank-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/memo-bank-tool-crosswalk.yml
+  - type: Documentation
+    url: https://docs-marketplace.api.memo.bank/
+  - type: GettingStarted
+    url: https://docs-marketplace.api.memo.bank/topic/topic-getting-started
+  - type: Documentation
+    url: https://docs-nextgenpsd2.api.memo.bank/
+  - type: OAuthScopes
+    url: scopes/memo-bank-scopes.yml
+- aid: memo-bank:memo-bank-collections-api
+  name: Memo Bank Collections API
+  description: "Collections are SEPA direct debit collections, including SEPA CORE direct debits and SEPA\
+    \ B2B direct debits. \n\nTo initiate a direct debit, a **mandate** signed by the debtor is required.\
+    \  You have the option to use our [signature request](endpoint-mandate-signature-requests)  workflow,\
+    \ which handles this signature, or you can choose to manage it  yourself. Whichever method you select,\
+    \ you will only need to provide  the mandate information when setting up the direct debit, not the\
+    \ signed  document itself.\n\nThey can be initiated asynchronously, one by one or in bulk. \n\nUnlike\
+    \ [transfers](#endpoint-transfers), collections can only be scheduled for a date in the future.  As\
+    \ a result, their lifecycle is also simplified.\n\n<img src=\"https://assets.memo.bank/memobankapi/collections-lifecycle-api-v3.png\"\
+    \ alt=\"Collections lifecycle\" width=\"750\">"
+  humanURL: https://docs.api.memo.bank/
+  baseURL: https://api.memo.bank
+  tags:
+  - Collections
+  properties:
+  - type: OpenAPI
+    url: openapi/memo-bank-collections-api-openapi.yml
+  - type: Documentation
+    url: https://docs.api.memo.bank/
+  - type: APIReference
+    url: https://docs.api.memo.bank/version-2/
+  - type: GettingStarted
+    url: https://docs.api.memo.bank/topic/topic-getting-started
+  - type: Webhooks
+    url: asyncapi/memo-bank-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/memo-bank-tool-crosswalk.yml
+  - type: Documentation
+    url: https://docs-marketplace.api.memo.bank/
+  - type: GettingStarted
+    url: https://docs-marketplace.api.memo.bank/topic/topic-getting-started
+  - type: Documentation
+    url: https://docs-nextgenpsd2.api.memo.bank/
+  - type: OAuthScopes
+    url: scopes/memo-bank-scopes.yml
+- aid: memo-bank:memo-bank-ibans-api
+  name: Memo Bank IBA Ns API
+  description: >-
+    IBANs are identifiers for bank accounts. There are two types of IBANs at Memo Bank:
+
+    * Main IBANs, which act as primary identifiers for a bank account.  There is exactly one main IBAN
+    per bank account. You cannot delete it. When an account is closed, its main IBAN remains active only
+    for  incoming transactions, which will be automatically rerouted to the  main account.
+
+    * Virtual IBANs, which are aliases for the main IBAN. They can be created, deactivated, and reactivated
+    at will. When the account they are attached to  is closed, they get reattached to the main account.
+
+
+    All operations on IBANs are synchronous and effective immediately,  meaning that you can use a new
+    IBAN to send or receive money right  after its creation.
+  humanURL: https://docs.api.memo.bank/
+  baseURL: https://api.memo.bank
+  tags:
+  - IBANs
+  properties:
+  - type: OpenAPI
+    url: openapi/memo-bank-ibans-api-openapi.yml
+  - type: Documentation
+    url: https://docs.api.memo.bank/
+  - type: APIReference
+    url: https://docs.api.memo.bank/version-2/
+  - type: GettingStarted
+    url: https://docs.api.memo.bank/topic/topic-getting-started
+  - type: Webhooks
+    url: asyncapi/memo-bank-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/memo-bank-tool-crosswalk.yml
+  - type: Documentation
+    url: https://docs-marketplace.api.memo.bank/
+  - type: GettingStarted
+    url: https://docs-marketplace.api.memo.bank/topic/topic-getting-started
+  - type: Documentation
+    url: https://docs-nextgenpsd2.api.memo.bank/
+  - type: OAuthScopes
+    url: scopes/memo-bank-scopes.yml
+- aid: memo-bank:memo-bank-mandate-signature-requests-api
+  name: Memo Bank Mandate signature requests API
+  description: >-
+    Mandate signature requests are a way to prepare and send collection mandates for signature. The mandate
+    debtor  receives an email with a link so they can complete and sign the mandate. Once it has been
+    signed, the resulting  mandate becomes immediately available for making [collections](#endpoint-collections).
+    Dedicated  [webhook events](#webhook-webhook) can be used to track mandate signature requests state
+    changes.
+  humanURL: https://docs.api.memo.bank/
+  baseURL: https://api.memo.bank
+  tags:
+  - Mandate signature requests
+  properties:
+  - type: OpenAPI
+    url: openapi/memo-bank-mandate-signature-requests-api-openapi.yml
+  - type: Documentation
+    url: https://docs.api.memo.bank/
+  - type: APIReference
+    url: https://docs.api.memo.bank/version-2/
+  - type: GettingStarted
+    url: https://docs.api.memo.bank/topic/topic-getting-started
+  - type: Webhooks
+    url: asyncapi/memo-bank-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/memo-bank-tool-crosswalk.yml
+  - type: Documentation
+    url: https://docs-marketplace.api.memo.bank/
+  - type: GettingStarted
+    url: https://docs-marketplace.api.memo.bank/topic/topic-getting-started
+  - type: Documentation
+    url: https://docs-nextgenpsd2.api.memo.bank/
+  - type: OAuthScopes
+    url: scopes/memo-bank-scopes.yml
+- aid: memo-bank:memo-bank-oauth2-api
+  name: Memo Bank O Auth2 API
+  description: OAuth2 token management endpoints.
+  humanURL: https://docs.api.memo.bank/
+  baseURL: https://api.memo.bank
+  tags:
+  - OAuth2
+  properties:
+  - type: OpenAPI
+    url: openapi/memo-bank-oauth2-api-openapi.yml
+  - type: Documentation
+    url: https://docs.api.memo.bank/
+  - type: APIReference
+    url: https://docs.api.memo.bank/version-2/
+  - type: GettingStarted
+    url: https://docs.api.memo.bank/topic/topic-getting-started
+  - type: Webhooks
+    url: asyncapi/memo-bank-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/memo-bank-tool-crosswalk.yml
+  - type: Documentation
+    url: https://docs-marketplace.api.memo.bank/
+  - type: GettingStarted
+    url: https://docs-marketplace.api.memo.bank/topic/topic-getting-started
+  - type: Documentation
+    url: https://docs-nextgenpsd2.api.memo.bank/
+  - type: OAuthScopes
+    url: scopes/memo-bank-scopes.yml
+- aid: memo-bank:memo-bank-pis-api
+  name: Memo Bank PIS API
+  description: "Payment Initiation Service.\n\n\nPayment initiation is done using the **integrated OAuth2**\
+    \ authentication flow described in NextGenPSD2\nspecifications.\nThis means you first have to initiate\
+    \ a payment using the dedicated endpoint, then redirect the PSU to our \nauthorisation page following\
+    \ the link present in the response (using `PIS:{paymentId}` as OAuth2 scope).\nAfter performing a\
+    \ strong customer authentication, the PSU will be redirected to your redirect URI with an\n**authorisation\
+    \ code** that you can then exchange for an **access token**.\n\n\nThis **access token** is only needed\
+    \ to cancel a payment on behalf a PSU (this does not require a strong\ncustomer authentication). It\
+    \ is not needed to retrieve the current status of a payment."
+  humanURL: https://docs.api.memo.bank/
+  baseURL: https://api.memo.bank
+  tags:
+  - PIS
+  properties:
+  - type: OpenAPI
+    url: openapi/memo-bank-pis-api-openapi.yml
+  - type: Documentation
+    url: https://docs.api.memo.bank/
+  - type: APIReference
+    url: https://docs.api.memo.bank/version-2/
+  - type: GettingStarted
+    url: https://docs.api.memo.bank/topic/topic-getting-started
+  - type: Webhooks
+    url: asyncapi/memo-bank-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/memo-bank-tool-crosswalk.yml
+  - type: Documentation
+    url: https://docs-marketplace.api.memo.bank/
+  - type: GettingStarted
+    url: https://docs-marketplace.api.memo.bank/topic/topic-getting-started
+  - type: Documentation
+    url: https://docs-nextgenpsd2.api.memo.bank/
+  - type: OAuthScopes
+    url: scopes/memo-bank-scopes.yml
+- aid: memo-bank:memo-bank-sandbox-api
+  name: Memo Bank Sandbox API
+  description: Sandbox only endpoints.
+  humanURL: https://docs.api.memo.bank/
+  baseURL: https://api.memo.bank
+  tags:
+  - Sandbox
+  properties:
+  - type: OpenAPI
+    url: openapi/memo-bank-sandbox-api-openapi.yml
+  - type: Documentation
+    url: https://docs.api.memo.bank/
+  - type: APIReference
+    url: https://docs.api.memo.bank/version-2/
+  - type: GettingStarted
+    url: https://docs.api.memo.bank/topic/topic-getting-started
+  - type: Webhooks
+    url: asyncapi/memo-bank-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/memo-bank-tool-crosswalk.yml
+  - type: Documentation
+    url: https://docs-marketplace.api.memo.bank/
+  - type: GettingStarted
+    url: https://docs-marketplace.api.memo.bank/topic/topic-getting-started
+  - type: Documentation
+    url: https://docs-nextgenpsd2.api.memo.bank/
+  - type: OAuthScopes
+    url: scopes/memo-bank-scopes.yml
+- aid: memo-bank:memo-bank-transactions-api
+  name: Memo Bank Transactions API
+  description: >-
+    Transactions are any debit and credit operations on an account.
+
+
+    <img src="https://assets.memo.bank/memobankapi/transactions-lifecycle-api-v2.png" alt="Transactions
+    lifecycle" width="750">
+
+
+    Note that the status of the transaction indicates whether or not it affects the account’s available
+    balance. `debit` transactions impact the balance as soon as they reach the `authorized` state. `credit`
+    transactions impact it only when their status turns to `confirmed`.
+  humanURL: https://docs.api.memo.bank/
+  baseURL: https://api.memo.bank
+  tags:
+  - Transactions
+  properties:
+  - type: OpenAPI
+    url: openapi/memo-bank-transactions-api-openapi.yml
+  - type: Documentation
+    url: https://docs.api.memo.bank/
+  - type: APIReference
+    url: https://docs.api.memo.bank/version-2/
+  - type: GettingStarted
+    url: https://docs.api.memo.bank/topic/topic-getting-started
+  - type: Webhooks
+    url: asyncapi/memo-bank-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/memo-bank-tool-crosswalk.yml
+  - type: Documentation
+    url: https://docs-marketplace.api.memo.bank/
+  - type: GettingStarted
+    url: https://docs-marketplace.api.memo.bank/topic/topic-getting-started
+  - type: Documentation
+    url: https://docs-nextgenpsd2.api.memo.bank/
+  - type: OAuthScopes
+    url: scopes/memo-bank-scopes.yml
+- aid: memo-bank:memo-bank-transfers-api
+  name: Memo Bank Transfers API
+  description: >-
+    Transfers are transfers within the SEPA-zone, including SEPA standard transfers, SEPA instant transfers
+    and Target 2 transfers.
+
+
+    They can be initiated asynchronously, one by one or in bulk.
+
+
+    They have a similar lifecycle compared to [transactions](#endpoint-transactions)  but note that there
+    are some minor differences for the `canceled`  and `failed` states.
+
+
+    <img src="https://assets.memo.bank/memobankapi/transfers-lifecycle-api-v3.png" alt="Transfers lifecycle"
+    width="750">
+  humanURL: https://docs.api.memo.bank/
+  baseURL: https://api.memo.bank
+  tags:
+  - Transfers
+  properties:
+  - type: OpenAPI
+    url: openapi/memo-bank-transfers-api-openapi.yml
+  - type: Documentation
+    url: https://docs.api.memo.bank/
+  - type: APIReference
+    url: https://docs.api.memo.bank/version-2/
+  - type: GettingStarted
+    url: https://docs.api.memo.bank/topic/topic-getting-started
+  - type: Webhooks
+    url: asyncapi/memo-bank-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/memo-bank-tool-crosswalk.yml
+  - type: Documentation
+    url: https://docs-marketplace.api.memo.bank/
+  - type: GettingStarted
+    url: https://docs-marketplace.api.memo.bank/topic/topic-getting-started
+  - type: Documentation
+    url: https://docs-nextgenpsd2.api.memo.bank/
+  - type: OAuthScopes
+    url: scopes/memo-bank-scopes.yml
+- aid: memo-bank:memo-bank-webhook-api
+  name: Memo Bank Webhook API
+  description: >-
+    # Events
+
+
+    When something interesting happens on your Memo Bank workspace, such as a new transaction being created,
+    Memo Bank can reach out to your application so that you can take action (such as sending an e-mail
+    alert about the transaction to your user) automatically.
+
+
+    The first step is to add a webhook to your application in the [`API`](https://client.memo.bank/api)
+    section of your Memo Bank workspace. As part of this, you will have to provide a URL on your own servers.
+    Memo Bank will then send HTTPS requests to that URL when there is an activity on your Memo Bank workspace.
+
+
+    Note that even if webhooks are setup within an application, events will  be received even when they
+    result from actions triggered on the Memo Bank  webapp or any other application.
+
+    # Consuming events
+
+    Individual events do not contain very much information on their own. This is by design, as the API
+    structure can remain extremely stable and avoid difficult webhook migrations in the future as the
+    Memo Bank API changes. If you need additional metadata, such as the amount of the transaction in the
+    above example, make a `GET` request to the API for that information. You can use the `resource_type`
+    and `resource_id` to determine what resource to fetch from the API.
+
+    # Failures and retries
+
+    If your application returns anything other than a 2xx HTTP status code,  if we do not receive a response
+    before timing out or in the case of  a network failure, we will retry the event up to 8 times with
+    exponentially increasing backoffs.  In your webhook endpoint implementation,  we recommend you place  inbound
+    Events into your application's own queuing system  (such as Kafka, Resque, etc) for asynchronous event
+    processing,  and returning a 200 response from your endpoint as quickly as possible.
+
+
+    Since retries may occur, your webhook endpoint must be idempotent. You should handle the possibility
+    of receiving the same event multiple times. We recommend using the event `id` field to detect and
+    ignore duplicate events on your side.
+
+    # Securing your webhook endpoint (recommended)
+
+    Memo Bank will include an `Authorization` header in each webhook request. Inside of it, you will find
+    `Bearer <token>` with the authentication token we provided when you created the webhook on the web
+    interface. We recommend that you check this header and reject requests with invalid token, indicating
+    a malicious request that would not have been issued by Memo Bank.
+
+
+    We also recommend that you restrict which IP addresses can call your  webhook. Here is the list of
+    our IPv4 addresses:
+
+    * Memo Bank Premium API (i.e. `api.memo.bank`):
+      * `34.38.96.206`
+      * `35.189.206.171`
+      * `35.241.129.224`
+      * `34.155.214.185`
+      * `34.155.206.98`
+      * `34.163.14.38`
+
+    * Memo Bank Premium Sandbox API (i.e. `api.sandbox.memo.bank`):
+      * `34.155.60.111`
+      * `34.163.27.39`
+  humanURL: https://docs.api.memo.bank/
+  baseURL: https://api.memo.bank
+  tags:
+  - Webhook
+  properties:
+  - type: OpenAPI
+    url: openapi/memo-bank-webhook-api-openapi.yml
+  - type: Documentation
+    url: https://docs.api.memo.bank/
+  - type: APIReference
+    url: https://docs.api.memo.bank/version-2/
+  - type: GettingStarted
+    url: https://docs.api.memo.bank/topic/topic-getting-started
+  - type: Webhooks
+    url: asyncapi/memo-bank-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/memo-bank-tool-crosswalk.yml
+  - type: Documentation
+    url: https://docs-marketplace.api.memo.bank/
+  - type: GettingStarted
+    url: https://docs-marketplace.api.memo.bank/topic/topic-getting-started
+  - type: Documentation
+    url: https://docs-nextgenpsd2.api.memo.bank/
+  - type: OAuthScopes
+    url: scopes/memo-bank-scopes.yml
+- aid: memo-bank:memo-bank-webhooks-api
+  name: Memo Bank Webhooks API
+  description: >-
+    Manage webhooks for your application. Webhooks allow you to receive real-time notifications when events
+    occur on your Memo Bank workspace.
+
+
+    Please refer to the [Webhook](https://docs.api.memo.bank/group/webhook-webhook) section for more information.
+  humanURL: https://docs.api.memo.bank/
+  baseURL: https://api.memo.bank
+  tags:
+  - Webhooks
+  properties:
+  - type: OpenAPI
+    url: openapi/memo-bank-webhooks-api-openapi.yml
+  - type: Documentation
+    url: https://docs.api.memo.bank/
+  - type: APIReference
+    url: https://docs.api.memo.bank/version-2/
+  - type: GettingStarted
+    url: https://docs.api.memo.bank/topic/topic-getting-started
+  - type: Webhooks
+    url: asyncapi/memo-bank-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/memo-bank-tool-crosswalk.yml
+  - type: Documentation
+    url: https://docs-marketplace.api.memo.bank/
+  - type: GettingStarted
+    url: https://docs-marketplace.api.memo.bank/topic/topic-getting-started
+  - type: Documentation
+    url: https://docs-nextgenpsd2.api.memo.bank/
+  - type: OAuthScopes
+    url: scopes/memo-bank-scopes.yml
+- aid: memo-bank:memo-bank-wire-transfers-api
+  name: Memo Bank Wire Transfers API
+  description: "Wire transfers are transfers going through Swift. They allow you to send funds outside\
+    \ the SEPA network and to transfer money in foreign currencies.\n\nInitiating a wire transfer may\
+    \ require you to upload a supporting document. In such case the transfer will have a `pending_attachment_required`\
+    \ status and you'll receive an event `wire_transfer_attachment_required` on your webhook. \n\nIf no\
+    \ document is required but you still want to attach one to your transaction, use the [attachments](#endpoint-attachments)\
+    \ endpoints.\n\n<img src=\"https://assets.memo.bank/memobankapi/wire-transfers-lifecycle-api-v1.png\"\
+    \ alt=\"Wire transfers lifecycle\" width=\"750\">"
+  humanURL: https://docs.api.memo.bank/
+  baseURL: https://api.memo.bank
+  tags:
+  - Wire Transfers
+  properties:
+  - type: OpenAPI
+    url: openapi/memo-bank-wire-transfers-api-openapi.yml
+  - type: Documentation
+    url: https://docs.api.memo.bank/
+  - type: APIReference
+    url: https://docs.api.memo.bank/version-2/
+  - type: GettingStarted
+    url: https://docs.api.memo.bank/topic/topic-getting-started
+  - type: Webhooks
+    url: asyncapi/memo-bank-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/memo-bank-tool-crosswalk.yml
+  - type: Documentation
+    url: https://docs-marketplace.api.memo.bank/
+  - type: GettingStarted
+    url: https://docs-marketplace.api.memo.bank/topic/topic-getting-started
+  - type: Documentation
+    url: https://docs-nextgenpsd2.api.memo.bank/
+  - type: OAuthScopes
+    url: scopes/memo-bank-scopes.yml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: Overlay
+  url: overlays/memo-bank-premium-bank-api-overlay.yaml
+- type: Overlay
+  url: overlays/memo-bank-marketplace-api-overlay.yaml
+- type: Overlay
+  url: overlays/memo-bank-nextgenpsd2-api-overlay.yaml
 - type: DomainSecurity
   url: security/memo-bank-domain-security.yml
 - type: Website
