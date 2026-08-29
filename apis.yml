@@ -639,6 +639,9 @@ maintainers:
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: CapabilityMap
+  url: capabilities/memo-bank-capability-edges.yml
+  name: Memo Bank Business Capability Map
 - type: Overlay
   url: overlays/memo-bank-premium-bank-api-overlay.yaml
 - type: Overlay
