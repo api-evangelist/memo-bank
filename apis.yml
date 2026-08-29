@@ -11,6 +11,18 @@ description: >-
   customer resources, a NextGenPSD2 API implements the Berlin Group AIS/PIS interface for licensed third-party
   providers, and a hosted MCP server exposes read-only banking data plus attachment upload to AI assistants.
 url: https://raw.githubusercontent.com/api-evangelist/memo-bank/refs/heads/main/apis.yml
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: true
+  label: Hosted service · you call their endpoint
+  confidence: high
+  source:
+  - openapi
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 image: https://media.memo.bank/home_hero_602cdab270/home_hero_602cdab270.jpg
 x-type: company
 x-source: serena-portfolio
