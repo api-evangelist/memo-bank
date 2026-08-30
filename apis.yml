@@ -32,19 +32,19 @@ modified: '2026-08-17'
 tags:
 - Company
 - Fintech Insurtech
-- Banking
-- Business Banking
+- banking
+- business-banking
 - Payments
-- SEPA
-- SEPA Direct Debit
-- Virtual IBAN
-- Wire Transfers
-- Open Banking
-- PSD2
-- Berlin Group
+- sepa
+- sepa-direct-debit
+- virtual-iban
+- wire-transfers
+- open-banking
+- psd2
+- berlin-group
 - Webhook
 - MCP
-- France
+- france
 tags_raw:
 - Company
 - Fintech Insurtech
@@ -116,6 +116,8 @@ apis:
   humanURL: https://docs.api.memo.bank/
   baseURL: https://api.memo.bank
   tags:
+  - Account
+  tags_raw:
   - Accounts
   properties:
   - type: OpenAPI
@@ -214,6 +216,8 @@ apis:
   humanURL: https://docs.api.memo.bank/
   baseURL: https://api.memo.bank
   tags:
+  - Collection
+  tags_raw:
   - Collections
   properties:
   - type: OpenAPI
@@ -315,6 +319,8 @@ apis:
   humanURL: https://docs.api.memo.bank/
   baseURL: https://api.memo.bank
   tags:
+  - Authentication
+  tags_raw:
   - OAuth2
   properties:
   - type: OpenAPI
@@ -416,6 +422,8 @@ apis:
   humanURL: https://docs.api.memo.bank/
   baseURL: https://api.memo.bank
   tags:
+  - Transaction
+  tags_raw:
   - Transactions
   properties:
   - type: OpenAPI
@@ -577,6 +585,8 @@ apis:
   humanURL: https://docs.api.memo.bank/
   baseURL: https://api.memo.bank
   tags:
+  - Webhook
+  tags_raw:
   - Webhooks
   properties:
   - type: OpenAPI
