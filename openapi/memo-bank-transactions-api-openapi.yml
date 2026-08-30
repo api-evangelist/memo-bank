@@ -1,0 +1,1651 @@
+openapi: 3.2.0
+info:
+  title: Memo Bank Transactions API
+  description: '**Welcome!** You can use our [Premium Bank API](https://memo.bank/produit/api/)  to check your company’s accounts, fetch your transactions, make SEPA transfers,  initiate SEPA direct debit collections, create virtual IBANs, and access most of Memo Bank features.
+
+    > info
+
+    > If you are a **third-party payment service provider** complying with PSD2, you may be more interested in our [NextGenPSD2 API](https://docs-nextgenpsd2.api.memo.bank).
+
+    '
+  version: '2.0'
+servers:
+- url: https://api.memo.bank
+  description: Production
+- url: https://api.sandbox.memo.bank
+  description: Sandbox
+tags:
+- name: Transactions
+  description: 'Transactions are any debit and credit operations on an account.
+
+
+    <img src="https://assets.memo.bank/memobankapi/transactions-lifecycle-api-v2.png" alt="Transactions lifecycle" width="750">
+
+
+    Note that the status of the transaction indicates whether or not it affects the account’s available balance. `debit` transactions impact the balance as soon as they reach the `authorized` state. `credit` transactions impact it only when their status turns to `confirmed`.
+
+    '
+paths:
+  /v2/transactions/{id}:
+    get:
+      tags:
+      - Transactions
+      summary: Get a transaction
+      description: '**Scope**: `transactions:read`'
+      operationId: getTransaction
+      parameters:
+      - name: id
+        in: path
+        description: ID of the transaction.
+        required: true
+        schema:
+          type: string
+          format: uuid
+        example: c70bd7bc-58e0-4fdb-8c1f-70186e0de587
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+      security:
+      - JWT: []
+  /v2/transactions:
+    get:
+      tags:
+      - Transactions
+      summary: List all transactions
+      description: '**Scope**: `transactions:read`'
+      operationId: listTransactions
+      parameters:
+      - name: account_id
+        in: query
+        description: Filter transactions by account.
+        schema:
+          type: string
+          format: uuid
+        example: 29883c3d-0b11-4c38-91b0-af9018cc5b14
+      - name: page
+        in: query
+        description: Index of the requested page. Deprecated, use `page_token` instead.
+        deprecated: true
+        schema:
+          minimum: 1
+          type: integer
+          format: int32
+      - name: page_token
+        in: query
+        description: Token used to fetch a specific page, as returned by the `next_page_token` or `prev_page_token` field of a previous response. Mutually exclusive with `page`.
+        schema:
+          type: string
+      - name: size
+        in: query
+        description: Number of elements per page in response.
+        schema:
+          maximum: 100
+          minimum: 1
+          type: integer
+          format: int32
+          default: 10
+      - name: start_date
+        in: query
+        description: Filter transactions by execution date (inclusive greater than), in ISO8601 format.
+        schema:
+          type: string
+          format: date-time
+        example: 2021-09-01 12:30:00+00:00
+      - name: end_date
+        in: query
+        description: Filter transactions by execution date (exclusive lower than), in ISO8601 format.
+        schema:
+          type: string
+          format: date-time
+        example: 2021-09-30 12:30:00+00:00
+      - name: reference
+        in: query
+        description: Filter transactions by reference.
+        schema:
+          type: string
+          format: uuid
+        example: 0c734fd7-4753-424e-85f3-0b4e3590ee1c
+      - name: local_iban
+        in: query
+        description: Filter transactions by local IBAN. Allows for example to list all incoming **and** outgoing transactions that passed through a given virtual IBAN.
+        schema:
+          type: string
+      - name: batch_id
+        in: query
+        description: Filter transactions by transaction batch.
+        schema:
+          type: string
+          format: uuid
+        example: 0c734fd7-4753-424e-85f3-0b4e3590ee1c
+      - name: custom_id
+        in: query
+        description: Filter transactions by custom ID.
+        schema:
+          type: string
+        example: 637406efda8534de8c0e
+      - name: order_by
+        in: query
+        description: Sort transactions in ascending or descending order.
+        schema:
+          type: string
+          default: -execution_date
+          enum:
+          - execution_date
+          - -execution_date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionPage'
+      security:
+      - JWT: []
+components:
+  schemas:
+    TransferIncomingSource:
+      required:
+      - transfer_type
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+      - type: object
+        properties:
+          transfer_type:
+            type: string
+            description: Type of the transfer.
+            enum:
+            - standard
+            - instant
+          counterparty_iban:
+            type: string
+            description: IBAN of the counterparty. Can be null on old transactions for legacy reasons.
+          counterparty_bank_bic:
+            type: string
+            description: BIC of the counterparty's bank. Can be null on old transactions for legacy reasons.
+          message:
+            type: string
+            description: Message attached to this transfer, visible to all involved parties.
+            example: invoice n12345
+          end_to_end_id:
+            type: string
+            description: Unique identification to unambiguously identify the transfer. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the transfer. For example, if a transfer is returned, its return will share the same endToEndId.
+            example: b0bfb42baa2642c2af0ca3e880fcd590
+    TransactionSource:
+      type: object
+      description: Source of the transaction. We may add additional source types over time; your application should be able to handle such additions gracefully.
+      discriminator:
+        propertyName: type
+        mapping:
+          bank_account_remuneration: '#/components/schemas/BankAccountRemunerationSource'
+          card_credit: '#/components/schemas/CardCreditSource'
+          card_debit: '#/components/schemas/CardDebitSource'
+          card_deferred: '#/components/schemas/CardDeferredSource'
+          card_withdrawal: '#/components/schemas/CardWithdrawalSource'
+          collection_incoming: '#/components/schemas/CollectionIncomingSource'
+          collection_outgoing: '#/components/schemas/CollectionOutgoingSource'
+          collection_incoming_return: '#/components/schemas/CollectionIncomingReturnSource'
+          collection_outgoing_return_fees: '#/components/schemas/CollectionOutgoingReturnFeesSource'
+          collection_outgoing_return: '#/components/schemas/CollectionOutgoingReturnSource'
+          debt_purchase_application_fees: '#/components/schemas/DebtPurchaseApplicationFeesSource'
+          debt_purchase_disbursement: '#/components/schemas/DebtPurchaseDisbursementSource'
+          debt_purchase_interests: '#/components/schemas/DebtPurchaseInterestsSource'
+          debt_purchase_repayment: '#/components/schemas/DebtPurchaseRepaymentSource'
+          diverse_operation: '#/components/schemas/DiverseOperationSource'
+          investment_redemption_order: '#/components/schemas/InvestmentRedemptionOrderDTO'
+          investment_subscription_order: '#/components/schemas/InvestmentSubscriptionOrderDTO'
+          loan_application_fees: '#/components/schemas/LoanApplicationFeesSource'
+          loan_disbursement: '#/components/schemas/LoanDisbursementSource'
+          loan_guarantee_fee: '#/components/schemas/LoanGuaranteeFeeSource'
+          loan_reimbursement: '#/components/schemas/LoanReimbursementSource'
+          loan_repayment: '#/components/schemas/LoanRepaymentSource'
+          maintenance_transfer: '#/components/schemas/MaintenanceTransferSource'
+          maintenance_wire_transfer: '#/components/schemas/MaintenanceWireTransferSource'
+          overdraft_agios: '#/components/schemas/OverdraftAgiosSource'
+          overdraft_application_fees: '#/components/schemas/OverdraftApplicationFeesSource'
+          rtgs_transfer_incoming: '#/components/schemas/RtgsTransferIncomingSource'
+          rtgs_transfer_incoming_return: '#/components/schemas/RtgsTransferIncomingReturnSource'
+          rtgs_transfer_outgoing: '#/components/schemas/RtgsTransferOutgoingSource'
+          rtgs_transfer_outgoing_return: '#/components/schemas/RtgsTransferOutgoingReturnSource'
+          subscription: '#/components/schemas/SubscriptionSource'
+          sweep_transfer_incoming: '#/components/schemas/SweepTransferIncomingSource'
+          sweep_transfer_outgoing: '#/components/schemas/SweepTransferOutgoingSource'
+          term_deposit_closure: '#/components/schemas/TermDepositClosureSourceDTO'
+          term_deposit_creation: '#/components/schemas/TermDepositCreationSourceDTO'
+          term_deposit_interest_payment: '#/components/schemas/TermDepositInterestPaymentSourceDTO'
+          term_deposit_withdrawal: '#/components/schemas/TermDepositWithdrawalSourceDTO'
+          transfer_incoming: '#/components/schemas/TransferIncomingSource'
+          transfer_outgoing: '#/components/schemas/TransferOutgoingSource'
+          transfer_incoming_return: '#/components/schemas/TransferIncomingReturnSource'
+          transfer_outgoing_return: '#/components/schemas/TransferOutgoingReturnSource'
+          wire_transfer_incoming: '#/components/schemas/WireTransferIncomingSource'
+          wire_transfer_outgoing: '#/components/schemas/WireTransferOutgoingSource'
+          wire_transfer_outgoing_return: '#/components/schemas/WireTransferOutgoingReturnSource'
+      oneOf:
+      - $ref: '#/components/schemas/BankAccountRemunerationSource'
+      - $ref: '#/components/schemas/CardCreditSource'
+      - $ref: '#/components/schemas/CardDebitSource'
+      - $ref: '#/components/schemas/CardDeferredSource'
+      - $ref: '#/components/schemas/CardWithdrawalSource'
+      - $ref: '#/components/schemas/CollectionIncomingSource'
+      - $ref: '#/components/schemas/CollectionOutgoingSource'
+      - $ref: '#/components/schemas/CollectionIncomingReturnSource'
+      - $ref: '#/components/schemas/CollectionOutgoingReturnFeesSource'
+      - $ref: '#/components/schemas/CollectionOutgoingReturnSource'
+      - $ref: '#/components/schemas/DebtPurchaseApplicationFeesSource'
+      - $ref: '#/components/schemas/DebtPurchaseDisbursementSource'
+      - $ref: '#/components/schemas/DebtPurchaseInterestsSource'
+      - $ref: '#/components/schemas/DebtPurchaseRepaymentSource'
+      - $ref: '#/components/schemas/DiverseOperationSource'
+      - $ref: '#/components/schemas/InvestmentRedemptionOrderDTO'
+      - $ref: '#/components/schemas/InvestmentSubscriptionOrderDTO'
+      - $ref: '#/components/schemas/LoanApplicationFeesSource'
+      - $ref: '#/components/schemas/LoanDisbursementSource'
+      - $ref: '#/components/schemas/LoanGuaranteeFeeSource'
+      - $ref: '#/components/schemas/LoanReimbursementSource'
+      - $ref: '#/components/schemas/LoanRepaymentSource'
+      - $ref: '#/components/schemas/MaintenanceTransferSource'
+      - $ref: '#/components/schemas/MaintenanceWireTransferSource'
+      - $ref: '#/components/schemas/OverdraftAgiosSource'
+      - $ref: '#/components/schemas/OverdraftApplicationFeesSource'
+      - $ref: '#/components/schemas/RtgsTransferIncomingSource'
+      - $ref: '#/components/schemas/RtgsTransferIncomingReturnSource'
+      - $ref: '#/components/schemas/RtgsTransferOutgoingSource'
+      - $ref: '#/components/schemas/RtgsTransferOutgoingReturnSource'
+      - $ref: '#/components/schemas/SubscriptionSource'
+      - $ref: '#/components/schemas/SweepTransferIncomingSource'
+      - $ref: '#/components/schemas/SweepTransferOutgoingSource'
+      - $ref: '#/components/schemas/TermDepositClosureSourceDTO'
+      - $ref: '#/components/schemas/TermDepositCreationSourceDTO'
+      - $ref: '#/components/schemas/TermDepositInterestPaymentSourceDTO'
+      - $ref: '#/components/schemas/TermDepositWithdrawalSourceDTO'
+      - $ref: '#/components/schemas/TransferIncomingSource'
+      - $ref: '#/components/schemas/TransferOutgoingSource'
+      - $ref: '#/components/schemas/TransferIncomingReturnSource'
+      - $ref: '#/components/schemas/TransferOutgoingReturnSource'
+      - $ref: '#/components/schemas/WireTransferIncomingSource'
+      - $ref: '#/components/schemas/WireTransferOutgoingSource'
+      - $ref: '#/components/schemas/WireTransferOutgoingReturnSource'
+    CardDeferredSource:
+      required:
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+    OverdraftApplicationFeesSource:
+      required:
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+    SubscriptionSource:
+      required:
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+    CollectionOutgoingReturnFeesSource:
+      required:
+      - returned_collection_id
+      - returned_collection_reference
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+      - type: object
+        properties:
+          counterparty_iban:
+            type: string
+            description: IBAN of the counterparty. Can be null on old transactions for legacy reasons.
+          counterparty_bank_bic:
+            type: string
+            description: BIC of the counterparty's bank. Can be null on old transactions for legacy reasons.
+          message:
+            type: string
+            description: Message attached to this collection, visible to all involved parties.
+            example: invoice n12345
+          end_to_end_id:
+            type: string
+            description: Unique identification to unambiguously identify the collection. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the collection. For example, if a collection is returned, its return will share the same endToEndId.
+            example: b0bfb42baa2642c2af0ca3e880fcd590
+          returned_collection_id:
+            type: string
+            description: ID of the original collection being returned.
+            format: uuid
+          returned_collection_reference:
+            type: string
+            description: Reference of the original collection being returned.
+          reason:
+            type: string
+            description: Reason for the return of the original collection. Can be null on old transactions for legacy reasons.
+            enum:
+            - bank_identifier_incorrect
+            - blocked_account
+            - closed_account
+            - correspondent_bank_not_possible
+            - creditor_bank_is_not_registered
+            - creditor_psp_not_registered
+            - customer_deceased
+            - customer_disabled_direct_debit
+            - debtor_psp_not_registered
+            - disputed
+            - duplication
+            - end_customer_deceased
+            - eri_option_not_supported
+            - following_cancellation_request
+            - fraudulent_originated
+            - inactive_mandate
+            - inconsistent_with_end_customer
+            - incorrect_account_number
+            - insufficient_funds
+            - invalid_bank_operation_code
+            - invalid_code_or_format
+            - invalid_creditor_account_number
+            - invalid_debtor_account
+            - invalid_interbank_communication
+            - invalid_transaction_code_or_invalid_file_format
+            - mandate_mismatch
+            - missing_creditors_name_or_address
+            - missing_creditor_address
+            - missing_creditor_name_or_address
+            - missing_debtors_name_or_address
+            - missing_debtor_account_or_identification
+            - missing_debtor_name_or_address
+            - missing_mandatory_information_mandate
+            - no_mandate
+            - no_mandate_on_scheme
+            - not_specified_reason_agent_generated
+            - not_specified_reason_customer_generated
+            - psp_identifier_incorrect
+            - refund_request_by_bank
+            - refund_request_by_end_customer
+            - regulatory_reason
+            - requested_by_the_debtor
+            - requested_by_customer
+            - settlement_failed
+            - specific_service_offered_by_debtor_psp
+            - technical_problem
+            - transaction_forbidden
+            - transaction_unauthorized
+            - unrecognized_initiating_party
+            - wrong_amount
+    SweepTransferIncomingSource:
+      required:
+      - counterparty_bank_bic
+      - counterparty_iban
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+      - type: object
+        properties:
+          counterparty_iban:
+            type: string
+            description: IBAN of the counterparty.
+          counterparty_bank_bic:
+            type: string
+            description: BIC of the counterparty's bank.
+    TermDepositCreationSourceDTO:
+      required:
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+    TransactionSourceDiscriminator:
+      required:
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - bank_account_remuneration
+          - card_credit
+          - card_debit
+          - card_deferred
+          - card_withdrawal
+          - collection_incoming
+          - collection_outgoing
+          - collection_incoming_return
+          - collection_outgoing_return
+          - collection_outgoing_return_fees
+          - debt_purchase_application_fees
+          - debt_purchase_disbursement
+          - debt_purchase_interests
+          - debt_purchase_repayment
+          - diverse_operation
+          - investment_redemption_order
+          - investment_subscription_order
+          - loan_application_fees
+          - loan_disbursement
+          - loan_guarantee_fee
+          - loan_reimbursement
+          - loan_repayment
+          - maintenance_transfer
+          - maintenance_wire_transfer
+          - overdraft_agios
+          - overdraft_application_fees
+          - rtgs_transfer_incoming
+          - rtgs_transfer_incoming_return
+          - rtgs_transfer_outgoing
+          - rtgs_transfer_outgoing_return
+          - subscription
+          - sweep_transfer_incoming
+          - sweep_transfer_outgoing
+          - term_deposit_closure
+          - term_deposit_creation
+          - term_deposit_interest_payment
+          - term_deposit_withdrawal
+          - transfer_incoming
+          - transfer_outgoing
+          - transfer_incoming_return
+          - transfer_outgoing_return
+          - wire_transfer_incoming
+          - wire_transfer_outgoing
+          - wire_transfer_outgoing_return
+    TermDepositClosureSourceDTO:
+      required:
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+    WireTransferOutgoingReturnSource:
+      required:
+      - returned_transfer_reference
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+      - type: object
+        properties:
+          counterparty_account_number:
+            type: string
+            description: Account number of the counterparty.
+          message:
+            type: string
+            description: Message attached to this transfer, visible to all involved parties.
+            example: invoice n12345
+          returned_transfer_reference:
+            type: string
+            description: Reference of the original wire transfer being returned.
+          reason:
+            type: string
+            description: Reason for the return of the original transfer. Can be null on old transactions for legacy reasons.
+            enum:
+            - bank_identifier_incorrect
+            - blocked_account
+            - closed_account
+            - correspondent_bank_not_possible
+            - creditor_bank_is_not_registered
+            - creditor_psp_not_registered
+            - customer_deceased
+            - customer_disabled_direct_debit
+            - debtor_psp_not_registered
+            - disputed
+            - duplication
+            - end_customer_deceased
+            - eri_option_not_supported
+            - following_cancellation_request
+            - fraudulent_originated
+            - inactive_mandate
+            - inconsistent_with_end_customer
+            - incorrect_account_number
+            - insufficient_funds
+            - invalid_bank_operation_code
+            - invalid_code_or_format
+            - invalid_creditor_account_number
+            - invalid_debtor_account
+            - invalid_interbank_communication
+            - invalid_transaction_code_or_invalid_file_format
+            - mandate_mismatch
+            - missing_creditors_name_or_address
+            - missing_creditor_address
+            - missing_creditor_name_or_address
+            - missing_debtors_name_or_address
+            - missing_debtor_account_or_identification
+            - missing_debtor_name_or_address
+            - missing_mandatory_information_mandate
+            - no_mandate
+            - no_mandate_on_scheme
+            - not_specified_reason_agent_generated
+            - not_specified_reason_customer_generated
+            - psp_identifier_incorrect
+            - refund_request_by_bank
+            - refund_request_by_end_customer
+            - regulatory_reason
+            - requested_by_the_debtor
+            - requested_by_customer
+            - settlement_failed
+            - specific_service_offered_by_debtor_psp
+            - technical_problem
+            - transaction_forbidden
+            - transaction_unauthorized
+            - unrecognized_initiating_party
+            - wrong_amount
+    WireTransferIncomingSource:
+      required:
+      - instructed_amount
+      - instructed_currency
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+      - type: object
+        properties:
+          counterparty_account_number:
+            type: string
+            description: Account number of the counterparty.
+          message:
+            type: string
+            description: Message attached to this transfer, visible to all involved parties.
+            example: invoice n12345
+          instructed_amount:
+            type: integer
+            description: Instructed amount of the transaction, in the smallest unit of the instructed currency. The amount is always positive, use `direction` to give it a sign.
+            format: int64
+          instructed_currency:
+            type: string
+            description: Instructed currency of the transaction amount, in ISO 4217 format.
+            example: USD
+    TransferOutgoingReturnSource:
+      required:
+      - returned_transfer_id
+      - returned_transfer_reference
+      - transfer_type
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+      - type: object
+        properties:
+          transfer_type:
+            type: string
+            description: Type of the transfer.
+            enum:
+            - standard
+            - instant
+          counterparty_iban:
+            type: string
+            description: IBAN of the counterparty. Can be null on old transactions for legacy reasons.
+          counterparty_bank_bic:
+            type: string
+            description: BIC of the counterparty's bank. Can be null on old transactions for legacy reasons.
+          message:
+            type: string
+            description: Message attached to this transfer, visible to all involved parties.
+            example: invoice n12345
+          end_to_end_id:
+            type: string
+            description: Unique identification to unambiguously identify the transfer. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the transfer. For example, if a transfer is returned, its return will share the same endToEndId.
+            example: b0bfb42baa2642c2af0ca3e880fcd590
+          returned_transfer_id:
+            type: string
+            description: ID of the original transfer being returned.
+            format: uuid
+          returned_transfer_reference:
+            type: string
+            description: Reference of the original transfer being returned.
+          reason:
+            type: string
+            description: Reason for the return of the original transfer. Can be null on old transactions for legacy reasons.
+            enum:
+            - bank_identifier_incorrect
+            - blocked_account
+            - closed_account
+            - correspondent_bank_not_possible
+            - creditor_bank_is_not_registered
+            - creditor_psp_not_registered
+            - customer_deceased
+            - customer_disabled_direct_debit
+            - debtor_psp_not_registered
+            - disputed
+            - duplication
+            - end_customer_deceased
+            - eri_option_not_supported
+            - following_cancellation_request
+            - fraudulent_originated
+            - inactive_mandate
+            - inconsistent_with_end_customer
+            - incorrect_account_number
+            - insufficient_funds
+            - invalid_bank_operation_code
+            - invalid_code_or_format
+            - invalid_creditor_account_number
+            - invalid_debtor_account
+            - invalid_interbank_communication
+            - invalid_transaction_code_or_invalid_file_format
+            - mandate_mismatch
+            - missing_creditors_name_or_address
+            - missing_creditor_address
+            - missing_creditor_name_or_address
+            - missing_debtors_name_or_address
+            - missing_debtor_account_or_identification
+            - missing_debtor_name_or_address
+            - missing_mandatory_information_mandate
+            - no_mandate
+            - no_mandate_on_scheme
+            - not_specified_reason_agent_generated
+            - not_specified_reason_customer_generated
+            - psp_identifier_incorrect
+            - refund_request_by_bank
+            - refund_request_by_end_customer
+            - regulatory_reason
+            - requested_by_the_debtor
+            - requested_by_customer
+            - settlement_failed
+            - specific_service_offered_by_debtor_psp
+            - technical_problem
+            - transaction_forbidden
+            - transaction_unauthorized
+            - unrecognized_initiating_party
+            - wrong_amount
+    CardCreditSource:
+      required:
+      - settlement_amount
+      - settlement_currency
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+      - type: object
+        properties:
+          settlement_amount:
+            type: integer
+            description: Settlement amount of the transaction, in the smallest unit of the settlement currency. The amount is always positive, use `direction` to give it a sign.
+            format: int64
+          settlement_currency:
+            type: string
+            description: Settlement currency of the transaction amount, in ISO 4217 format.
+            example: USD
+    LoanGuaranteeFeeSource:
+      required:
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+    MaintenanceTransferSource:
+      required:
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+    OverdraftAgiosSource:
+      required:
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+    TransferOutgoingSource:
+      required:
+      - transfer_id
+      - transfer_type
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+      - type: object
+        properties:
+          transfer_type:
+            type: string
+            description: Type of the transfer.
+            enum:
+            - standard
+            - instant
+          counterparty_iban:
+            type: string
+            description: IBAN of the counterparty. Can be null on old transactions for legacy reasons.
+          counterparty_bank_bic:
+            type: string
+            description: BIC of the counterparty's bank. Can be null on old transactions for legacy reasons.
+          message:
+            type: string
+            description: Message attached to this transfer, visible to all involved parties.
+            example: invoice n12345
+          end_to_end_id:
+            type: string
+            description: Unique identification to unambiguously identify the transfer. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the transfer. For example, if a transfer is returned, its return will share the same endToEndId.
+            example: b0bfb42baa2642c2af0ca3e880fcd590
+          transfer_id:
+            type: string
+            description: ID of the transfer that created this transaction.
+            format: uuid
+    CardDebitSource:
+      required:
+      - settlement_amount
+      - settlement_currency
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+      - type: object
+        properties:
+          settlement_amount:
+            type: integer
+            description: Settlement amount of the transaction, in the smallest unit of the settlement currency. The amount is always positive, use `direction` to give it a sign.
+            format: int64
+          settlement_currency:
+            type: string
+            description: Settlement currency of the transaction amount, in ISO 4217 format.
+            example: USD
+    DebtPurchaseApplicationFeesSource:
+      required:
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+    SweepTransferOutgoingSource:
+      required:
+      - counterparty_bank_bic
+      - counterparty_iban
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+      - type: object
+        properties:
+          counterparty_iban:
+            type: string
+            description: IBAN of the counterparty.
+          counterparty_bank_bic:
+            type: string
+            description: BIC of the counterparty's bank.
+    DebtPurchaseInterestsSource:
+      required:
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+    CollectionOutgoingSource:
+      required:
+      - collection_id
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+      - type: object
+        properties:
+          counterparty_iban:
+            type: string
+            description: IBAN of the counterparty. Can be null on old transactions for legacy reasons.
+          counterparty_bank_bic:
+            type: string
+            description: BIC of the counterparty's bank. Can be null on old transactions for legacy reasons.
+          message:
+            type: string
+            description: Message attached to this collection, visible to all involved parties.
+            example: invoice n12345
+          end_to_end_id:
+            type: string
+            description: Unique identification to unambiguously identify the collection. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the collection. For example, if a collection is returned, its return will share the same endToEndId.
+            example: b0bfb42baa2642c2af0ca3e880fcd590
+          collection_id:
+            type: string
+            description: ID of the collection that created this transaction.
+            format: uuid
+    InvestmentSubscriptionOrderDTO:
+      required:
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+    LoanRepaymentSource:
+      required:
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+    TermDepositWithdrawalSourceDTO:
+      required:
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+    DebtPurchaseDisbursementSource:
+      required:
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+    LoanApplicationFeesSource:
+      required:
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+    RtgsTransferIncomingSource:
+      required:
+      - counterparty_account_number
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+      - type: object
+        properties:
+          counterparty_account_number:
+            type: string
+            description: Account number of the counterparty.
+          counterparty_bank_bic:
+            type: string
+            description: BIC of the counterparty's bank.
+          end_to_end_id:
+            type: string
+            description: Unique identification to unambiguously identify the transfer. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the transfer. For example, if a transfer is returned, its return will share the same endToEndId.
+            example: b0bfb42baa2642c2af0ca3e880fcd590
+          message:
+            type: string
+            description: Message attached to this transfer, visible to all involved parties.
+            example: invoice n12345
+    DebtPurchaseRepaymentSource:
+      required:
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+    RtgsTransferOutgoingSource:
+      required:
+      - counterparty_account_number
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+      - type: object
+        properties:
+          counterparty_account_number:
+            type: string
+            description: Account number of the counterparty.
+          counterparty_bank_bic:
+            type: string
+            description: BIC of the counterparty's bank.
+          end_to_end_id:
+            type: string
+            description: Unique identification to unambiguously identify the transfer. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the transfer. For example, if a transfer is returned, its return will share the same endToEndId.
+            example: b0bfb42baa2642c2af0ca3e880fcd590
+          message:
+            type: string
+            description: Message attached to this transfer, visible to all involved parties.
+            example: invoice n12345
+    CardWithdrawalSource:
+      required:
+      - settlement_amount
+      - settlement_currency
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+      - type: object
+        properties:
+          settlement_amount:
+            type: integer
+            description: Settlement amount of the transaction, in the smallest unit of the settlement currency. The amount is always positive, use `direction` to give it a sign.
+            format: int64
+          settlement_currency:
+            type: string
+            description: Settlement currency of the transaction amount, in ISO 4217 format.
+            example: USD
+    RtgsTransferOutgoingReturnSource:
+      required:
+      - counterparty_account_number
+      - reason
+      - returned_transfer_reference
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+      - type: object
+        properties:
+          counterparty_account_number:
+            type: string
+            description: Account number of the counterparty.
+          counterparty_bank_bic:
+            type: string
+            description: BIC of the counterparty's bank.
+          end_to_end_id:
+            type: string
+            description: Unique identification to unambiguously identify the transfer. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the transfer. For example, if a transfer is returned, its return will share the same endToEndId.
+            example: b0bfb42baa2642c2af0ca3e880fcd590
+          returned_transfer_reference:
+            type: string
+            description: Reference of the original transfer being returned.
+          reason:
+            type: string
+            description: Reason for the return of the original transfer.
+            enum:
+            - bank_identifier_incorrect
+            - blocked_account
+            - closed_account
+            - correspondent_bank_not_possible
+            - creditor_bank_is_not_registered
+            - creditor_psp_not_registered
+            - customer_deceased
+            - customer_disabled_direct_debit
+            - debtor_psp_not_registered
+            - disputed
+            - duplication
+            - end_customer_deceased
+            - eri_option_not_supported
+            - following_cancellation_request
+            - fraudulent_originated
+            - inactive_mandate
+            - inconsistent_with_end_customer
+            - incorrect_account_number
+            - insufficient_funds
+            - invalid_bank_operation_code
+            - invalid_code_or_format
+            - invalid_creditor_account_number
+            - invalid_debtor_account
+            - invalid_interbank_communication
+            - invalid_transaction_code_or_invalid_file_format
+            - mandate_mismatch
+            - missing_creditors_name_or_address
+            - missing_creditor_address
+            - missing_creditor_name_or_address
+            - missing_debtors_name_or_address
+            - missing_debtor_account_or_identification
+            - missing_debtor_name_or_address
+            - missing_mandatory_information_mandate
+            - no_mandate
+            - no_mandate_on_scheme
+            - not_specified_reason_agent_generated
+            - not_specified_reason_customer_generated
+            - psp_identifier_incorrect
+            - refund_request_by_bank
+            - refund_request_by_end_customer
+            - regulatory_reason
+            - requested_by_the_debtor
+            - requested_by_customer
+            - settlement_failed
+            - specific_service_offered_by_debtor_psp
+            - technical_problem
+            - transaction_forbidden
+            - transaction_unauthorized
+            - unrecognized_initiating_party
+            - wrong_amount
+    Transaction:
+      required:
+      - account_id
+      - amount
+      - attachment_count
+      - counterparty_name
+      - currency
+      - direction
+      - execution_date
+      - id
+      - link
+      - local_iban
+      - reference
+      - request_date
+      - source
+      - status
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique ID of the transaction.
+          format: uuid
+          example: fe98f29d-5165-45ff-83f9-d7aa83e970b5
+        link:
+          type: string
+          description: Link to this transaction in your Memo Bank workspace.
+          example: https://client.memo.bank/WTHKVHUYQ/link/transactions/fe98f29d-5165-45ff-83f9-d7aa83e970b5
+        reference:
+          type: string
+          description: Reference of the money movement. In case you initiate a transfer between two of your own accounts, both transactions (`debit` and `credit`) will have the same reference, it can be safely used to correlate them.
+          format: uuid
+          example: 2fd68688-9a48-4706-80d8-977c96c660f5
+        account_id:
+          type: string
+          description: ID of the account this transaction belongs to.
+          format: uuid
+          example: 708683cb-60f6-464a-a62f-be2e339c34aa
+        amount:
+          type: integer
+          description: Amount of the transaction, in the smallest unit of the `currency`. The amount is always positive, use `direction` to give it a sign.
+          format: int64
+        local_iban:
+          type: string
+          description: IBAN through which this transaction got in or out of the account. Can be the main IBAN of the account or a virtual IBAN.
+          example: FR27590171083068762111832788
+        currency:
+          type: string
+          description: Currency of the transaction amount, in ISO 4217 format.
+          example: EUR
+        direction:
+          type: string
+          description: Direction of the transaction.
+          enum:
+          - debit
+          - credit
+        request_date:
+          type: string
+          description: Date at which the transaction has been requested, in ISO8601 format. Usually the same as the execution date, except for scheduled transfers and transfer requests.
+          format: date-time
+        execution_date:
+          type: string
+          description: Date at which the transaction processing has started or will start, in ISO8601 format. For debits, that’s when the money is removed from the available balance of the account.
+          format: date-time
+        accounting_date:
+          type: string
+          description: Date at which the transaction has been confirmed, in ISO8601 format. For credits, that’s when the money is credited from the available balance of the account.
+          format: date-time
+        counterparty_name:
+          type: string
+          description: Name of the counterparty.
+        internal_note:
+          type: string
+          description: Internal note attached to this transaction, visible only in your Memo Bank workspace.
+          example: phone bill
+        status:
+          type: string
+          description: Current status of the transaction.
+          enum:
+          - scheduled
+          - authorized
+          - confirmed
+          - rejected
+          - canceled
+        batch_id:
+          type: string
+          description: ID of the batch this transaction belongs to, if any.
+          format: uuid
+          example: dc47b1ee-1bd7-4072-8d1b-27ff4297b33e
+        custom_id:
+          type: string
+          description: Custom identifier attached to the transaction. It is not transmitted nor visible in your Memo Bank workspace. It can only be retrieved or used to search for transactions via Memo Bank API.
+          example: 637406efda8534de8c0e
+        custom_metadata:
+          type: string
+          description: Custom metadata attached to the transaction. It is not transmitted nor visible in your Memo Bank workspace and can only be retrieved via API.
+          example: This is some metadata
+        attachment_count:
+          type: integer
+          description: Number of documents attached to this transaction.
+          format: int32
+        source:
+          $ref: '#/components/schemas/TransactionSource'
+    CollectionOutgoingReturnSource:
+      required:
+      - returned_collection_id
+      - returned_collection_reference
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+      - type: object
+        properties:
+          counterparty_iban:
+            type: string
+            description: IBAN of the counterparty. Can be null on old transactions for legacy reasons.
+          counterparty_bank_bic:
+            type: string
+            description: BIC of the counterparty's bank. Can be null on old transactions for legacy reasons.
+          message:
+            type: string
+            description: Message attached to this collection, visible to all involved parties.
+            example: invoice n12345
+          end_to_end_id:
+            type: string
+            description: Unique identification to unambiguously identify the collection. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the collection. For example, if a collection is returned, its return will share the same endToEndId.
+            example: b0bfb42baa2642c2af0ca3e880fcd590
+          returned_collection_id:
+            type: string
+            description: ID of the original collection being returned.
+            format: uuid
+          returned_collection_reference:
+            type: string
+            description: Reference of the original collection being returned.
+          reason:
+            type: string
+            description: Reason for the return of the original collection. Can be null on old transactions for legacy reasons.
+            enum:
+            - bank_identifier_incorrect
+            - blocked_account
+            - closed_account
+            - correspondent_bank_not_possible
+            - creditor_bank_is_not_registered
+            - creditor_psp_not_registered
+            - customer_deceased
+            - customer_disabled_direct_debit
+            - debtor_psp_not_registered
+            - disputed
+            - duplication
+            - end_customer_deceased
+            - eri_option_not_supported
+            - following_cancellation_request
+            - fraudulent_originated
+            - inactive_mandate
+            - inconsistent_with_end_customer
+            - incorrect_account_number
+            - insufficient_funds
+            - invalid_bank_operation_code
+            - invalid_code_or_format
+            - invalid_creditor_account_number
+            - invalid_debtor_account
+            - invalid_interbank_communication
+            - invalid_transaction_code_or_invalid_file_format
+            - mandate_mismatch
+            - missing_creditors_name_or_address
+            - missing_creditor_address
+            - missing_creditor_name_or_address
+            - missing_debtors_name_or_address
+            - missing_debtor_account_or_identification
+            - missing_debtor_name_or_address
+            - missing_mandatory_information_mandate
+            - no_mandate
+            - no_mandate_on_scheme
+            - not_specified_reason_agent_generated
+            - not_specified_reason_customer_generated
+            - psp_identifier_incorrect
+            - refund_request_by_bank
+            - refund_request_by_end_customer
+            - regulatory_reason
+            - requested_by_the_debtor
+            - requested_by_customer
+            - settlement_failed
+            - specific_service_offered_by_debtor_psp
+            - technical_problem
+            - transaction_forbidden
+            - transaction_unauthorized
+            - unrecognized_initiating_party
+            - wrong_amount
+    InvestmentRedemptionOrderDTO:
+      required:
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+    DiverseOperationSource:
+      required:
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+    CollectionIncomingSource:
+      required:
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+      - type: object
+        properties:
+          counterparty_iban:
+            type: string
+            description: IBAN of the counterparty. Can be null on old transactions for legacy reasons.
+          counterparty_bank_bic:
+            type: string
+            description: BIC of the counterparty's bank. Can be null on old transactions for legacy reasons.
+          message:
+            type: string
+            description: Message attached to this collection, visible to all involved parties.
+            example: invoice n12345
+          end_to_end_id:
+            type: string
+            description: Unique identification to unambiguously identify the collection. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the collection. For example, if a collection is returned, its return will share the same endToEndId.
+            example: b0bfb42baa2642c2af0ca3e880fcd590
+    LoanDisbursementSource:
+      required:
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+    LoanReimbursementSource:
+      required:
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+    TransferIncomingReturnSource:
+      required:
+      - returned_transfer_reference
+      - transfer_type
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+      - type: object
+        properties:
+          transfer_type:
+            type: string
+            description: Type of the transfer.
+            enum:
+            - standard
+            - instant
+          counterparty_iban:
+            type: string
+            description: IBAN of the counterparty. Can be null on old transactions for legacy reasons.
+          counterparty_bank_bic:
+            type: string
+            description: BIC of the counterparty's bank. Can be null on old transactions for legacy reasons.
+          message:
+            type: string
+            description: Message attached to this transfer, visible to all involved parties.
+            example: invoice n12345
+          end_to_end_id:
+            type: string
+            description: Unique identification to unambiguously identify the transfer. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the transfer. For example, if a transfer is returned, its return will share the same endToEndId.
+            example: b0bfb42baa2642c2af0ca3e880fcd590
+          returned_transfer_reference:
+            type: string
+            description: Reference of the original transfer being returned.
+          reason:
+            type: string
+            description: Reason for the return of the original transfer. Can be null on old transactions for legacy reasons.
+            enum:
+            - bank_identifier_incorrect
+            - blocked_account
+            - closed_account
+            - correspondent_bank_not_possible
+            - creditor_bank_is_not_registered
+            - creditor_psp_not_registered
+            - customer_deceased
+            - customer_disabled_direct_debit
+            - debtor_psp_not_registered
+            - disputed
+            - duplication
+            - end_customer_deceased
+            - eri_option_not_supported
+            - following_cancellation_request
+            - fraudulent_originated
+            - inactive_mandate
+            - inconsistent_with_end_customer
+            - incorrect_account_number
+            - insufficient_funds
+            - invalid_bank_operation_code
+            - invalid_code_or_format
+            - invalid_creditor_account_number
+            - invalid_debtor_account
+            - invalid_interbank_communication
+            - invalid_transaction_code_or_invalid_file_format
+            - mandate_mismatch
+            - missing_creditors_name_or_address
+            - missing_creditor_address
+            - missing_creditor_name_or_address
+            - missing_debtors_name_or_address
+            - missing_debtor_account_or_identification
+            - missing_debtor_name_or_address
+            - missing_mandatory_information_mandate
+            - no_mandate
+            - no_mandate_on_scheme
+            - not_specified_reason_agent_generated
+            - not_specified_reason_customer_generated
+            - psp_identifier_incorrect
+            - refund_request_by_bank
+            - refund_request_by_end_customer
+            - regulatory_reason
+            - requested_by_the_debtor
+            - requested_by_customer
+            - settlement_failed
+            - specific_service_offered_by_debtor_psp
+            - technical_problem
+            - transaction_forbidden
+            - transaction_unauthorized
+            - unrecognized_initiating_party
+            - wrong_amount
+    BankAccountRemunerationSource:
+      required:
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+    CollectionIncomingReturnSource:
+      required:
+      - returned_collection_reference
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+      - type: object
+        properties:
+          counterparty_iban:
+            type: string
+            description: IBAN of the counterparty. Can be null on old transactions for legacy reasons.
+          counterparty_bank_bic:
+            type: string
+            description: BIC of the counterparty's bank. Can be null on old transactions for legacy reasons.
+          message:
+            type: string
+            description: Message attached to this collection, visible to all involved parties.
+            example: invoice n12345
+          end_to_end_id:
+            type: string
+            description: Unique identification to unambiguously identify the collection. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the collection. For example, if a collection is returned, its return will share the same endToEndId.
+            example: b0bfb42baa2642c2af0ca3e880fcd590
+          returned_collection_reference:
+            type: string
+            description: Reference of the original collection being returned.
+          reason:
+            type: string
+            description: Reason for the return of the original collection. Can be null on old transactions for legacy reasons.
+            enum:
+            - bank_identifier_incorrect
+            - blocked_account
+            - closed_account
+            - correspondent_bank_not_possible
+            - creditor_bank_is_not_registered
+            - creditor_psp_not_registered
+            - customer_deceased
+            - customer_disabled_direct_debit
+            - debtor_psp_not_registered
+            - disputed
+            - duplication
+            - end_customer_deceased
+            - eri_option_not_supported
+            - following_cancellation_request
+            - fraudulent_originated
+            - inactive_mandate
+            - inconsistent_with_end_customer
+            - incorrect_account_number
+            - insufficient_funds
+            - invalid_bank_operation_code
+            - invalid_code_or_format
+            - invalid_creditor_account_number
+            - invalid_debtor_account
+            - invalid_interbank_communication
+            - invalid_transaction_code_or_invalid_file_format
+            - mandate_mismatch
+            - missing_creditors_name_or_address
+            - missing_creditor_address
+            - missing_creditor_name_or_address
+            - missing_debtors_name_or_address
+            - missing_debtor_account_or_identification
+            - missing_debtor_name_or_address
+            - missing_mandatory_information_mandate
+            - no_mandate
+            - no_mandate_on_scheme
+            - not_specified_reason_agent_generated
+            - not_specified_reason_customer_generated
+            - psp_identifier_incorrect
+            - refund_request_by_bank
+            - refund_request_by_end_customer
+            - regulatory_reason
+            - requested_by_the_debtor
+            - requested_by_customer
+            - settlement_failed
+            - specific_service_offered_by_debtor_psp
+            - technical_problem
+            - transaction_forbidden
+            - transaction_unauthorized
+            - unrecognized_initiating_party
+            - wrong_amount
+    RtgsTransferIncomingReturnSource:
+      required:
+      - counterparty_account_number
+      - reason
+      - returned_transfer_reference
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+      - type: object
+        properties:
+          counterparty_account_number:
+            type: string
+            description: Account number of the counterparty.
+          counterparty_bank_bic:
+            type: string
+            description: BIC of the counterparty's bank.
+          end_to_end_id:
+            type: string
+            description: Unique identification to unambiguously identify the transfer. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the transfer. For example, if a transfer is returned, its return will share the same endToEndId.
+            example: b0bfb42baa2642c2af0ca3e880fcd590
+          returned_transfer_reference:
+            type: string
+            description: Reference of the original transfer being returned.
+          reason:
+            type: string
+            description: Reason for the return of the original transfer.
+            enum:
+            - bank_identifier_incorrect
+            - blocked_account
+            - closed_account
+            - correspondent_bank_not_possible
+            - creditor_bank_is_not_registered
+            - creditor_psp_not_registered
+            - customer_deceased
+            - customer_disabled_direct_debit
+            - debtor_psp_not_registered
+            - disputed
+            - duplication
+            - end_customer_deceased
+            - eri_option_not_supported
+            - following_cancellation_request
+            - fraudulent_originated
+            - inactive_mandate
+            - inconsistent_with_end_customer
+            - incorrect_account_number
+            - insufficient_funds
+            - invalid_bank_operation_code
+            - invalid_code_or_format
+            - invalid_creditor_account_number
+            - invalid_debtor_account
+            - invalid_interbank_communication
+            - invalid_transaction_code_or_invalid_file_format
+            - mandate_mismatch
+            - missing_creditors_name_or_address
+            - missing_creditor_address
+            - missing_creditor_name_or_address
+            - missing_debtors_name_or_address
+            - missing_debtor_account_or_identification
+            - missing_debtor_name_or_address
+            - missing_mandatory_information_mandate
+            - no_mandate
+            - no_mandate_on_scheme
+            - not_specified_reason_agent_generated
+            - not_specified_reason_customer_generated
+            - psp_identifier_incorrect
+            - refund_request_by_bank
+            - refund_request_by_end_customer
+            - regulatory_reason
+            - requested_by_the_debtor
+            - requested_by_customer
+            - settlement_failed
+            - specific_service_offered_by_debtor_psp
+            - technical_problem
+            - transaction_forbidden
+            - transaction_unauthorized
+            - unrecognized_initiating_party
+            - wrong_amount
+    MaintenanceWireTransferSource:
+      required:
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+    WireTransferOutgoingSource:
+      required:
+      - instructed_amount
+      - instructed_currency
+      - type
+      - wire_transfer_id
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+      - type: object
+        properties:
+          counterparty_account_number:
+            type: string
+            description: Account number of the counterparty.
+          message:
+            type: string
+            description: Message attached to this transfer, visible to all involved parties.
+            example: invoice n12345
+          instructed_amount:
+            type: integer
+            description: Instructed amount of the transaction, in the smallest unit of the instructed currency. The amount is always positive, use `direction` to give it a sign.
+            format: int64
+          instructed_currency:
+            type: string
+            description: Instructed currency of the transaction amount, in ISO 4217 format.
+            example: USD
+          wire_transfer_id:
+            type: string
+            description: ID of the wire transfer that created this transaction.
+            format: uuid
+    TransactionPage:
+      required:
+      - has_next
+      - has_prev
+      - results
+      type: object
+      properties:
+        results:
+          type: array
+          description: Elements of the page.
+          items:
+            $ref: '#/components/schemas/Transaction'
+        has_prev:
+          type: boolean
+          description: Flag indicating if there is a previous page. Deprecated, use `prev_page_token` instead.
+          deprecated: true
+        has_next:
+          type: boolean
+          description: Flag indicating if there is a next page. Deprecated, use `next_page_token` instead.
+          deprecated: true
+        next_page_token:
+          type: string
+          description: Token to fetch the next page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no next page.
+          nullable: true
+          example: eyJwIjozfQ
+        prev_page_token:
+          type: string
+          description: Token to fetch the previous page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no previous page.
+          nullable: true
+          example: eyJwIjoxfQ
+    TermDepositInterestPaymentSourceDTO:
+      required:
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TransactionSourceDiscriminator'
+x-topics:
+- title: Getting started
+  content: 'To get started with our Premium Bank API, talk to your banker first. He or she needs  to activate the API feature on your Memo Bank workspace.
+
+
+    Once your banker has granted you API access, you can then set up your authentication using our web interface. To do so, navigate to the  [`API`](https://client.memo.bank/api) section of your Memo Bank workspace.
+
+
+    Owners and administrators can create applications and manage their permissions. They can also invite collaborators to an application, allowing them to manage certificates, IP allow-lists, and  webhooks.
+
+
+    Once an application and a certificate have been created, you will have  three pieces of information allowing you to authenticate requests on  the API:
+
+    1. a **certificate** and its SHA256 thumbprint;
+
+    2. a **secret code**;
+
+    3. a cryptographic **private key**.
+
+    '
+- title: Authentication
+  content: "Our authentication is based on JSON Web Token ([JWT](https://datatracker.ietf.org/doc/html/rfc7519)) and JSON Web Signature ([JWS](https://datatracker.ietf.org/doc/html/rfc7515)).\n\nRegardless of which programming language you are using, there should be [a library](https://jwt.io/libraries) to handle the cryptographic part for you. All you need is to provide the correct header and payload claims. \n\n**In the JWT header:**\n- `alg` must be `RS256`, as we require an RSA-SHA256 signature. \n- `typ` must be `JWT`.\n- `x5t#S256` is the SHA256 thumbprint of the certificate, which you can find in the user interface.\n\n**In the JWT payload:**\n- `sub` must be the request method, followed by a space and the full path, including query parameters.\n- `aud` must be the domain to which you are making the request, e.g., `api.memo.bank`.\n- `iat` must be the timestamp at which you created the token. Note that we accept only a 5-second difference from the server time to mitigate clock skew.\n- `jti` must be a unique identifier for the token. It must be different for each request and follow the UUID format.\n- `sec` must be the secret information you obtained during the setup process in the user interface. This is a custom claim not covered by the JWT specification.\n- `dig#S256` must contain the base64url-encoded SHA-256 hash of the body (`base64url(sha256(body))`, see [`base64url`](https://datatracker.ietf.org/doc/html/rfc7515#appendix-C)). It must be provided only if the request has a body; for example, it is not necessary for `GET` requests. This is a custom claim not covered by the JWT specification.\n\nThe JWT must then be **signed with the private key** you generated during the setup (see [Getting started](#topic-getting-started)), and included in the HTTP headers of the request, as a standard bearer token `Authorization: Bearer <token>`.\n"
+  example: "_Example JWT header and payload_\n```json\n{\n  \"alg\": \"RS256\",\n  \"typ\": \"JWT\",\n  \"x5t#S256\": \"3A14ZcxIaasp4RHaYReL7wevm3oDzn7ZqmgqScCMY74\"\n}\n{\n  \"sub\": \"POST /v1/transfers\",\n  \"aud\": \"api.memo.bank\",\n  \"iat\": 1657055009,\n  \"jti\": \"5525620b-9dcd-4562-8c6c-60984f46cb48\",\n  \"sec\": \"a2029d646c94406d2945b7a2b31e4fb3ff09a6d0ae29144380775b5471c4e846\",\n  \"dig#S256\": \"lW6N_kO2gPMsMkzXyn028gWwrnaN0kJaiy7FMJcR0Ek\"\n}\n```\n"
+- title: Idempotent requests
+  content: "Our Premium Bank API supports **idempotency** to safely retry requests without accidentally performing the same operation twice. This is useful when an API call is disrupted in transit and you do not receive a response. For example, if a request to create a transfer does not go through due to a network connection error, you can retry the request with the same  idempotency key to guarantee that only the single transfer originally  attempted is created.\n\nTo perform an idempotent request, provide an additional `Idempotency-Key` **request header**. We recommend using a **V4 UUID**. If the API call fails with a network error or responds with a  `5XX`, `409`, or `429` status code, we expect the caller to perform retries with the same `Idempotency-Key` header until it responds differently. For any other response code, especially other `4XX` errors, there is no point in attempting retries, as we will always return the same result. \n\nWhen a previous response is replayed, the response includes an  additional HTTP header: `Idempotent-Replayed: true`.\n\nIf an original request is still being processed when an idempotency key is reused, the API will return a `409 Conflict` error  (which is safe to retry).\n\nSubsequent requests must be identical to the original request, or the API  will return a `422 Unprocessable Entity` error. We do not support setting  an idempotency key on `GET` and `DELETE` requests, as these requests are inherently idempotent.\n"
+  example: "```\ncurl --request POST \\\n  --url https://api.memo.bank/v1/transfers \\\n  --header 'Authorization: Bearer ***' \\\n  --header 'Idempotency-Key: 19b390d1-e7d4-4e27-abe2-49cac9b41ba1' \\\n  --header 'Content-Type: application/json' \\\n  --data '{...}'\n```\n"
+- title: Errors
+  content: 'Our Premium Bank API uses standard HTTP response codes to indicate the success or failure of requests. Codes in the `2xx` range indicate success; codes in the `4xx` and `5xx` ranges indicate errors. The format of error messages is unified and can be distinguished by their `code` key. The `message` provides a plain English explanation of the problem.
+
+    '
+  example: "```json\n{\n  \"code\": \"error_code\",\n  \"message\": \"Example error message.\",\n}\n```\n"
+- title: Versioning and backwards compatibility
+  content: 'Our Premium Bank API is versioned by path (`/v1/...`). When we introduce breaking changes, we will increase this version number. We will, of course, continually make backward-compatible changes without increasing the version number.
+
+
+    Examples of changes we do **not** consider breaking include:
+
+    * Adding new API resources.
+
+    * Adding new optional request parameters to existing API methods.
+
+    * Adding new properties to existing API responses. We will occasionally move response fields in the API and will continue to return the existing field in its previous location while removing it from this documentation.
+
+    * Changing the order of properties in existing API responses.
+
+    * Changing the length or format of opaque strings, such as object IDs, error messages, and other human-readable strings. Strings that are marked as const or enum in this documentation will not change.
+
+    * Adding new `EventType` or `ResourceType` enum values for webhooks.
+
+    * Adding new `TransactionSource` enum values for transactions.
+
+    '
+- title: Rate limiting
+  content: "We enforce a rate limit on the number of HTTP requests that can be made in a  given period. When the limit is reached, our Premium Bank API will return a `429 Too Many Requests` error.\n\nTo allow you to handle this rate limiting programmatically, the following headers are sent with every response: \n- `RateLimit-Limit`: total number of available requests between two quota resets;\n- `RateLimit-Remaining`: number of available requests until the quota is reset;\n- `RateLimit-Reset`: time remaining (in seconds) until the quota is reset.\n"
+- title: API recipes
+  content: 'While our OpenAPI specification provides a comprehensive reference for the Memo Bank API, we''ve created  API recipes to give you practical, hands-on guides for common use cases. These recipes offer step-by-step  examples to help you quickly integrate and leverage our API. You can find them here:  [API Premium - Memo Bank](https://aide.memo.bank/category/349-api)
+
+    '
+- title: FAQ
+  content: '### How do transactions differ from transfers and collections?
+
+    Transfers and collections are types of transactions that you can initiate through the API. They have dedicated  endpoint resources to help you follow their detailed lifecycle. On the other hand,  transactions allow you to follow the lifecycle of all transactions, including those not initiated through  the API (incoming transactions, card transactions, etc). Since transfers and collections are a subset of  transactions, some webhook events will be triggered simultaneously (for instance, `transfer_confirmed` and  `transaction_confirmed`), and you can use either.
+
+    ### Is creating a beneficiary or mandate mandatory before initiating transactions?
+
+    Creating a beneficiary for transfers or a mandate for collections is not mandatory. When initiating a new  transfer or collection, you will provide the counterpart data directly in the initiating endpoint,  We will auto-create it, and you will be able to see it in the interface. For subsequent transfers/collections,  you will continue to provide the counterpart data, and we will match it with any existing beneficiary/mandate  in the interface.
+
+    ### How can I reconcile a return with its original transfer or collection?
+
+    The events `transfer_returned` and `collection_returned` received via webhook will inform you if a  return occurred on either a transfer or a collection. The `resource_id` in those events refers to the ID  of the original transfer/collection. The `return_transaction_id` field on those resources will reference  the return transaction, which is a new transaction typically with the same amount and opposite direction  compared to the original transaction. This new transaction will itself trigger a `transaction_confirmed`  webhook event. For such transactions, if you call [get the transaction](https://docs.api.memo.bank/operation/operation-gettransaction) and check the [source type](https://docs.api.memo.bank/operation/operation-gettransaction#operation-gettransaction-200-body-application-json-source-type),  it will either be `transfer_outgoing_return` or `collection_outgoing_return`.  The `returned_collection_id`/`returned_transfer_id` field will contain the ID of your original  collection/transfer that has been returned.
+
+    ### How can I differentiate transaction types?
+
+    To differentiate transaction types, you can use the [type](https://docs.api.memo.bank/operation/operation-gettransaction#operation-gettransaction-200-body-application-json-source-type) contained in the [source](https://docs.api.memo.bank/operation/operation-gettransaction#operation-gettransaction-200-body-application-json-source) object.
+
+    ### How do I express amounts for different currencies?
+
+    Amounts are always integers expressed in the smallest unit of their currency. When you [create a wire transfer](https://docs.api.memo.bank/operation/operation-createwiretransfer), the unit is determined by the `instructed_currency` you provide, so the same `instructed_amount` value represents a different sum depending on the currency:
+
+    - `instructed_amount: 1234` with `instructed_currency: EUR` means 12.34 €, as the euro has two decimals;
+
+    - `instructed_amount: 5000` with `instructed_currency: JPY` means 5,000 ¥, not 50 ¥, as the Japanese yen has no decimal;
+
+    - `instructed_amount: 1500` with `instructed_currency: TND` means 1.500 TND, that is one and a half dinars and not 1,500 dinars, as the Tunisian dinar has three decimals.
+
+
+    The number of decimals is defined by the ISO 4217 standard for each currency, rely on that standard rather than assuming two decimals.
+
+    SEPA [transfers](#endpoint-transfers) and [collections](#endpoint-collections) are euro-only, so their `amount` is always a number of cents.
+
+    ### What happens if my system is unavailable when Memo Bank sends webhooks?
+
+    We will retry each webhook event independently 8 times following an exponential backoff. The intervals between retries are: 3 min, 10 min, 30 min, 1 hour, 6 hours, 12 hours, 1 day, and 3 days. After that, we will stop retrying, but  you will be able to manually trigger a retry through our interface.
+
+    ### When using the `instant_if_available` strategy, will Memo Bank retry a failed instant transfer as a standard transfer?
+
+    No, we will not retry failed instant transfers as standard transfers. However, we recommend that you do so. If an  instant transfer fails, retrying it or using a standard transfer is often the best course of action.  `instant_if_available` will only ensure that we process your transfer as standard if the counterparty bank does not support instant transfers.
+
+    ### What is the difference between failed and cancelled transaction statuses?
+
+    Your transaction will end up in a cancelled status when you choose to cancel it either through  our API or our interface. In some cases, your transaction may also end up in a cancelled status due  to internal processing reasons, but most of the time, for processing reasons, your transaction will end up  in a failed status. Both statuses are definitive, and if you did not initiate the cancellation, you can consider them equivalent in your development.
+
+    ### Are webhooks triggered for transactions not initiated with the API?
+
+    Yes, they are. Webhooks are triggered regardless of the channel you use to initiate your transaction.
+
+    ### Is it possible to initiate a payment via API and have it validated by a human on the interface?
+
+    No, it is not possible. Our API is designed for automated, human-free transactions at scale.
+
+    ### How can I stay informed about the latest API updates?
+
+    We provide an RSS feed that you can subscribe to. It is available at this [URL](https://docs.api.memo.bank/changes) when you click the `Get Updates` button at the top of the page.
+
+    '
+- title: Sandbox
+  content: 'We offer a sandbox, allowing you to integrate your application with our API in a controlled environment. Get in touch with your banker to create an access.
+
+
+    All the endpoints described in this specification can be used on the sandbox. We also offer some [sandbox only endpoints](#endpoint-sandbox), allowing you to simulate incoming transactions.
+
+
+    The base URL for the sandbox API is https://api.sandbox.memo.bank and the URL for the sandbox web interface is https://client.sandbox.memo.bank.
+
+
+    To get to know more about our sandbox behavior and features, please read [our dedicated help page](https://aide.memo.bank/article/398-api-sandbox).
+
+    '

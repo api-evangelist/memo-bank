@@ -1,0 +1,328 @@
+openapi: 3.2.0
+info:
+  title: Memo Bank Webhooks API
+  description: '**Welcome!** You can use our [Premium Bank API](https://memo.bank/produit/api/)  to check your company’s accounts, fetch your transactions, make SEPA transfers,  initiate SEPA direct debit collections, create virtual IBANs, and access most of Memo Bank features.
+
+    > info
+
+    > If you are a **third-party payment service provider** complying with PSD2, you may be more interested in our [NextGenPSD2 API](https://docs-nextgenpsd2.api.memo.bank).
+
+    '
+  version: '2.0'
+servers:
+- url: https://api.memo.bank
+  description: Production
+- url: https://api.sandbox.memo.bank
+  description: Sandbox
+tags:
+- name: Webhooks
+  description: 'Manage webhooks for your application. Webhooks allow you to receive real-time notifications when events occur on your Memo Bank workspace.
+
+
+    Please refer to the [Webhook](https://docs.api.memo.bank/group/webhook-webhook) section for more information.
+
+    '
+paths:
+  /v2/webhooks:
+    get:
+      tags:
+      - Webhooks
+      summary: List all webhooks
+      description: '**Scope**: `webhooks:read`'
+      operationId: listWebhooks
+      parameters:
+      - name: page
+        in: query
+        description: Index of the requested page. Deprecated, use `page_token` instead.
+        deprecated: true
+        schema:
+          minimum: 1
+          type: integer
+          format: int32
+      - name: page_token
+        in: query
+        description: Token used to fetch a specific page, as returned by the `next_page_token` or `prev_page_token` field of a previous response. Mutually exclusive with `page`.
+        schema:
+          type: string
+      - name: size
+        in: query
+        description: Number of elements per page in response.
+        schema:
+          maximum: 100
+          minimum: 1
+          type: integer
+          format: int32
+          default: 10
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookPage'
+      security:
+      - JWT: []
+    post:
+      tags:
+      - Webhooks
+      summary: Create a webhook
+      description: '**Scope**: `webhooks:write`'
+      operationId: createWebhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWebhook'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+      security:
+      - JWT: []
+  /v2/webhooks/{id}:
+    get:
+      tags:
+      - Webhooks
+      summary: Get a webhook
+      description: '**Scope**: `webhooks:read`'
+      operationId: getWebhook
+      parameters:
+      - name: id
+        in: path
+        description: ID of the webhook.
+        required: true
+        schema:
+          type: string
+          format: uuid
+        example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+      security:
+      - JWT: []
+    delete:
+      tags:
+      - Webhooks
+      summary: Delete a webhook
+      description: '**Scope**: `webhooks:write`'
+      operationId: deleteWebhook
+      parameters:
+      - name: id
+        in: path
+        description: ID of the webhook.
+        required: true
+        schema:
+          type: string
+          format: uuid
+        example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+      responses:
+        '204':
+          description: No Content
+      security:
+      - JWT: []
+components:
+  schemas:
+    WebhookPage:
+      required:
+      - has_next
+      - has_prev
+      - results
+      type: object
+      properties:
+        results:
+          type: array
+          description: Elements of the page.
+          items:
+            $ref: '#/components/schemas/Webhook'
+        has_prev:
+          type: boolean
+          description: Flag indicating if there is a previous page. Deprecated, use `prev_page_token` instead.
+          deprecated: true
+        has_next:
+          type: boolean
+          description: Flag indicating if there is a next page. Deprecated, use `next_page_token` instead.
+          deprecated: true
+        next_page_token:
+          type: string
+          description: Token to fetch the next page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no next page.
+          nullable: true
+          example: eyJwIjozfQ
+        prev_page_token:
+          type: string
+          description: Token to fetch the previous page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no previous page.
+          nullable: true
+          example: eyJwIjoxfQ
+    Webhook:
+      required:
+      - bearer_token
+      - id
+      - name
+      - url
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the webhook.
+          format: uuid
+          example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+        name:
+          type: string
+          description: Name of the webhook.
+          example: My Webhook
+        url:
+          type: string
+          description: URL to which webhook events are delivered.
+          example: https://example.com/webhooks
+        bearer_token:
+          type: string
+          description: Bearer token included in the Authorization header of webhook deliveries.
+          example: HlbgX7FlE8MlgYQjIu8U0WKaW
+    CreateWebhook:
+      required:
+      - name
+      - url
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the webhook.
+          example: My Webhook
+        url:
+          type: string
+          description: URL to which webhook events will be delivered. Must use HTTPS.
+          example: https://example.com/webhooks
+x-topics:
+- title: Getting started
+  content: 'To get started with our Premium Bank API, talk to your banker first. He or she needs  to activate the API feature on your Memo Bank workspace.
+
+
+    Once your banker has granted you API access, you can then set up your authentication using our web interface. To do so, navigate to the  [`API`](https://client.memo.bank/api) section of your Memo Bank workspace.
+
+
+    Owners and administrators can create applications and manage their permissions. They can also invite collaborators to an application, allowing them to manage certificates, IP allow-lists, and  webhooks.
+
+
+    Once an application and a certificate have been created, you will have  three pieces of information allowing you to authenticate requests on  the API:
+
+    1. a **certificate** and its SHA256 thumbprint;
+
+    2. a **secret code**;
+
+    3. a cryptographic **private key**.
+
+    '
+- title: Authentication
+  content: "Our authentication is based on JSON Web Token ([JWT](https://datatracker.ietf.org/doc/html/rfc7519)) and JSON Web Signature ([JWS](https://datatracker.ietf.org/doc/html/rfc7515)).\n\nRegardless of which programming language you are using, there should be [a library](https://jwt.io/libraries) to handle the cryptographic part for you. All you need is to provide the correct header and payload claims. \n\n**In the JWT header:**\n- `alg` must be `RS256`, as we require an RSA-SHA256 signature. \n- `typ` must be `JWT`.\n- `x5t#S256` is the SHA256 thumbprint of the certificate, which you can find in the user interface.\n\n**In the JWT payload:**\n- `sub` must be the request method, followed by a space and the full path, including query parameters.\n- `aud` must be the domain to which you are making the request, e.g., `api.memo.bank`.\n- `iat` must be the timestamp at which you created the token. Note that we accept only a 5-second difference from the server time to mitigate clock skew.\n- `jti` must be a unique identifier for the token. It must be different for each request and follow the UUID format.\n- `sec` must be the secret information you obtained during the setup process in the user interface. This is a custom claim not covered by the JWT specification.\n- `dig#S256` must contain the base64url-encoded SHA-256 hash of the body (`base64url(sha256(body))`, see [`base64url`](https://datatracker.ietf.org/doc/html/rfc7515#appendix-C)). It must be provided only if the request has a body; for example, it is not necessary for `GET` requests. This is a custom claim not covered by the JWT specification.\n\nThe JWT must then be **signed with the private key** you generated during the setup (see [Getting started](#topic-getting-started)), and included in the HTTP headers of the request, as a standard bearer token `Authorization: Bearer <token>`.\n"
+  example: "_Example JWT header and payload_\n```json\n{\n  \"alg\": \"RS256\",\n  \"typ\": \"JWT\",\n  \"x5t#S256\": \"3A14ZcxIaasp4RHaYReL7wevm3oDzn7ZqmgqScCMY74\"\n}\n{\n  \"sub\": \"POST /v1/transfers\",\n  \"aud\": \"api.memo.bank\",\n  \"iat\": 1657055009,\n  \"jti\": \"5525620b-9dcd-4562-8c6c-60984f46cb48\",\n  \"sec\": \"a2029d646c94406d2945b7a2b31e4fb3ff09a6d0ae29144380775b5471c4e846\",\n  \"dig#S256\": \"lW6N_kO2gPMsMkzXyn028gWwrnaN0kJaiy7FMJcR0Ek\"\n}\n```\n"
+- title: Idempotent requests
+  content: "Our Premium Bank API supports **idempotency** to safely retry requests without accidentally performing the same operation twice. This is useful when an API call is disrupted in transit and you do not receive a response. For example, if a request to create a transfer does not go through due to a network connection error, you can retry the request with the same  idempotency key to guarantee that only the single transfer originally  attempted is created.\n\nTo perform an idempotent request, provide an additional `Idempotency-Key` **request header**. We recommend using a **V4 UUID**. If the API call fails with a network error or responds with a  `5XX`, `409`, or `429` status code, we expect the caller to perform retries with the same `Idempotency-Key` header until it responds differently. For any other response code, especially other `4XX` errors, there is no point in attempting retries, as we will always return the same result. \n\nWhen a previous response is replayed, the response includes an  additional HTTP header: `Idempotent-Replayed: true`.\n\nIf an original request is still being processed when an idempotency key is reused, the API will return a `409 Conflict` error  (which is safe to retry).\n\nSubsequent requests must be identical to the original request, or the API  will return a `422 Unprocessable Entity` error. We do not support setting  an idempotency key on `GET` and `DELETE` requests, as these requests are inherently idempotent.\n"
+  example: "```\ncurl --request POST \\\n  --url https://api.memo.bank/v1/transfers \\\n  --header 'Authorization: Bearer ***' \\\n  --header 'Idempotency-Key: 19b390d1-e7d4-4e27-abe2-49cac9b41ba1' \\\n  --header 'Content-Type: application/json' \\\n  --data '{...}'\n```\n"
+- title: Errors
+  content: 'Our Premium Bank API uses standard HTTP response codes to indicate the success or failure of requests. Codes in the `2xx` range indicate success; codes in the `4xx` and `5xx` ranges indicate errors. The format of error messages is unified and can be distinguished by their `code` key. The `message` provides a plain English explanation of the problem.
+
+    '
+  example: "```json\n{\n  \"code\": \"error_code\",\n  \"message\": \"Example error message.\",\n}\n```\n"
+- title: Versioning and backwards compatibility
+  content: 'Our Premium Bank API is versioned by path (`/v1/...`). When we introduce breaking changes, we will increase this version number. We will, of course, continually make backward-compatible changes without increasing the version number.
+
+
+    Examples of changes we do **not** consider breaking include:
+
+    * Adding new API resources.
+
+    * Adding new optional request parameters to existing API methods.
+
+    * Adding new properties to existing API responses. We will occasionally move response fields in the API and will continue to return the existing field in its previous location while removing it from this documentation.
+
+    * Changing the order of properties in existing API responses.
+
+    * Changing the length or format of opaque strings, such as object IDs, error messages, and other human-readable strings. Strings that are marked as const or enum in this documentation will not change.
+
+    * Adding new `EventType` or `ResourceType` enum values for webhooks.
+
+    * Adding new `TransactionSource` enum values for transactions.
+
+    '
+- title: Rate limiting
+  content: "We enforce a rate limit on the number of HTTP requests that can be made in a  given period. When the limit is reached, our Premium Bank API will return a `429 Too Many Requests` error.\n\nTo allow you to handle this rate limiting programmatically, the following headers are sent with every response: \n- `RateLimit-Limit`: total number of available requests between two quota resets;\n- `RateLimit-Remaining`: number of available requests until the quota is reset;\n- `RateLimit-Reset`: time remaining (in seconds) until the quota is reset.\n"
+- title: API recipes
+  content: 'While our OpenAPI specification provides a comprehensive reference for the Memo Bank API, we''ve created  API recipes to give you practical, hands-on guides for common use cases. These recipes offer step-by-step  examples to help you quickly integrate and leverage our API. You can find them here:  [API Premium - Memo Bank](https://aide.memo.bank/category/349-api)
+
+    '
+- title: FAQ
+  content: '### How do transactions differ from transfers and collections?
+
+    Transfers and collections are types of transactions that you can initiate through the API. They have dedicated  endpoint resources to help you follow their detailed lifecycle. On the other hand,  transactions allow you to follow the lifecycle of all transactions, including those not initiated through  the API (incoming transactions, card transactions, etc). Since transfers and collections are a subset of  transactions, some webhook events will be triggered simultaneously (for instance, `transfer_confirmed` and  `transaction_confirmed`), and you can use either.
+
+    ### Is creating a beneficiary or mandate mandatory before initiating transactions?
+
+    Creating a beneficiary for transfers or a mandate for collections is not mandatory. When initiating a new  transfer or collection, you will provide the counterpart data directly in the initiating endpoint,  We will auto-create it, and you will be able to see it in the interface. For subsequent transfers/collections,  you will continue to provide the counterpart data, and we will match it with any existing beneficiary/mandate  in the interface.
+
+    ### How can I reconcile a return with its original transfer or collection?
+
+    The events `transfer_returned` and `collection_returned` received via webhook will inform you if a  return occurred on either a transfer or a collection. The `resource_id` in those events refers to the ID  of the original transfer/collection. The `return_transaction_id` field on those resources will reference  the return transaction, which is a new transaction typically with the same amount and opposite direction  compared to the original transaction. This new transaction will itself trigger a `transaction_confirmed`  webhook event. For such transactions, if you call [get the transaction](https://docs.api.memo.bank/operation/operation-gettransaction) and check the [source type](https://docs.api.memo.bank/operation/operation-gettransaction#operation-gettransaction-200-body-application-json-source-type),  it will either be `transfer_outgoing_return` or `collection_outgoing_return`.  The `returned_collection_id`/`returned_transfer_id` field will contain the ID of your original  collection/transfer that has been returned.
+
+    ### How can I differentiate transaction types?
+
+    To differentiate transaction types, you can use the [type](https://docs.api.memo.bank/operation/operation-gettransaction#operation-gettransaction-200-body-application-json-source-type) contained in the [source](https://docs.api.memo.bank/operation/operation-gettransaction#operation-gettransaction-200-body-application-json-source) object.
+
+    ### How do I express amounts for different currencies?
+
+    Amounts are always integers expressed in the smallest unit of their currency. When you [create a wire transfer](https://docs.api.memo.bank/operation/operation-createwiretransfer), the unit is determined by the `instructed_currency` you provide, so the same `instructed_amount` value represents a different sum depending on the currency:
+
+    - `instructed_amount: 1234` with `instructed_currency: EUR` means 12.34 €, as the euro has two decimals;
+
+    - `instructed_amount: 5000` with `instructed_currency: JPY` means 5,000 ¥, not 50 ¥, as the Japanese yen has no decimal;
+
+    - `instructed_amount: 1500` with `instructed_currency: TND` means 1.500 TND, that is one and a half dinars and not 1,500 dinars, as the Tunisian dinar has three decimals.
+
+
+    The number of decimals is defined by the ISO 4217 standard for each currency, rely on that standard rather than assuming two decimals.
+
+    SEPA [transfers](#endpoint-transfers) and [collections](#endpoint-collections) are euro-only, so their `amount` is always a number of cents.
+
+    ### What happens if my system is unavailable when Memo Bank sends webhooks?
+
+    We will retry each webhook event independently 8 times following an exponential backoff. The intervals between retries are: 3 min, 10 min, 30 min, 1 hour, 6 hours, 12 hours, 1 day, and 3 days. After that, we will stop retrying, but  you will be able to manually trigger a retry through our interface.
+
+    ### When using the `instant_if_available` strategy, will Memo Bank retry a failed instant transfer as a standard transfer?
+
+    No, we will not retry failed instant transfers as standard transfers. However, we recommend that you do so. If an  instant transfer fails, retrying it or using a standard transfer is often the best course of action.  `instant_if_available` will only ensure that we process your transfer as standard if the counterparty bank does not support instant transfers.
+
+    ### What is the difference between failed and cancelled transaction statuses?
+
+    Your transaction will end up in a cancelled status when you choose to cancel it either through  our API or our interface. In some cases, your transaction may also end up in a cancelled status due  to internal processing reasons, but most of the time, for processing reasons, your transaction will end up  in a failed status. Both statuses are definitive, and if you did not initiate the cancellation, you can consider them equivalent in your development.
+
+    ### Are webhooks triggered for transactions not initiated with the API?
+
+    Yes, they are. Webhooks are triggered regardless of the channel you use to initiate your transaction.
+
+    ### Is it possible to initiate a payment via API and have it validated by a human on the interface?
+
+    No, it is not possible. Our API is designed for automated, human-free transactions at scale.
+
+    ### How can I stay informed about the latest API updates?
+
+    We provide an RSS feed that you can subscribe to. It is available at this [URL](https://docs.api.memo.bank/changes) when you click the `Get Updates` button at the top of the page.
+
+    '
+- title: Sandbox
+  content: 'We offer a sandbox, allowing you to integrate your application with our API in a controlled environment. Get in touch with your banker to create an access.
+
+
+    All the endpoints described in this specification can be used on the sandbox. We also offer some [sandbox only endpoints](#endpoint-sandbox), allowing you to simulate incoming transactions.
+
+
+    The base URL for the sandbox API is https://api.sandbox.memo.bank and the URL for the sandbox web interface is https://client.sandbox.memo.bank.
+
+
+    To get to know more about our sandbox behavior and features, please read [our dedicated help page](https://aide.memo.bank/article/398-api-sandbox).
+
+    '

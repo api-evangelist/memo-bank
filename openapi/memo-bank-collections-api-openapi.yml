@@ -1,0 +1,699 @@
+openapi: 3.2.0
+info:
+  title: Memo Bank Collections API
+  description: '**Welcome!** You can use our [Premium Bank API](https://memo.bank/produit/api/)  to check your company’s accounts, fetch your transactions, make SEPA transfers,  initiate SEPA direct debit collections, create virtual IBANs, and access most of Memo Bank features.
+
+    > info
+
+    > If you are a **third-party payment service provider** complying with PSD2, you may be more interested in our [NextGenPSD2 API](https://docs-nextgenpsd2.api.memo.bank).
+
+    '
+  version: '2.0'
+servers:
+- url: https://api.memo.bank
+  description: Production
+- url: https://api.sandbox.memo.bank
+  description: Sandbox
+tags:
+- name: Collections
+  description: "Collections are SEPA direct debit collections, including SEPA CORE direct debits and SEPA B2B direct debits. \n\nTo initiate a direct debit, a **mandate** signed by the debtor is required.  You have the option to use our [signature request](endpoint-mandate-signature-requests)  workflow, which handles this signature, or you can choose to manage it  yourself. Whichever method you select, you will only need to provide  the mandate information when setting up the direct debit, not the signed  document itself.\n\nThey can be initiated asynchronously, one by one or in bulk. \n\nUnlike [transfers](#endpoint-transfers), collections can only be scheduled for a date in the future.  As a result, their lifecycle is also simplified.\n\n<img src=\"https://assets.memo.bank/memobankapi/collections-lifecycle-api-v3.png\" alt=\"Collections lifecycle\" width=\"750\">\n"
+paths:
+  /v2/collections/{id}:
+    get:
+      tags:
+      - Collections
+      summary: Get a collection
+      description: '**Scope**: `collections:read`'
+      operationId: getCollection
+      parameters:
+      - name: id
+        in: path
+        description: ID of the collection.
+        required: true
+        schema:
+          type: string
+          format: uuid
+        example: 45195a6f-daa8-4bc1-9ac4-3979e72bd89d
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collection'
+      security:
+      - JWT: []
+    delete:
+      tags:
+      - Collections
+      summary: Cancel a SEPA Direct Debit collection
+      description: 'This endpoint allows you to cancel a SEPA Direct Debit collection before it has been submitted.
+
+
+        Concretely a collection can only be canceled while in `scheduled` state.
+
+
+        **Scope**: `collections:write`'
+      operationId: cancelCollection
+      parameters:
+      - name: id
+        in: path
+        description: ID of the collection.
+        required: true
+        schema:
+          type: string
+          format: uuid
+        example: 45195a6f-daa8-4bc1-9ac4-3979e72bd89d
+      responses:
+        '200':
+          description: OK
+      security:
+      - JWT: []
+  /v2/collections:
+    post:
+      tags:
+      - Collections
+      summary: Schedule a SEPA Direct Debit collection
+      description: 'This endpoint allows you to schedule a SEPA Direct Debit collection to be credited on one of your accounts.
+
+
+        **Scope**: `collections:write`'
+      operationId: createCollection
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCollection'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collection'
+      security:
+      - JWT: []
+  /v2/collections/bulks:
+    post:
+      tags:
+      - Collections
+      summary: Create bulk collections
+      description: 'This endpoint allows to create up to 5000 collections with a single call. It acts exactly as if you called the `POST /v2/collections` endpoint 5000 times yourself, except you don''t need to worry about rate limiting. It also allows you to get an aggregated state for this bulk.
+
+
+        This endpoint does not perform the collections synchronously, a `200 OK` response means the bulk will be handled in the near future. You can either poll the `GET` endpoint or use the webhooks to follow its progress.
+
+
+        Note that the completion of a bulk does not mean all collections are settled, it only means the collections were initiated (the equivalent of a call to `POST /v2/collections`).
+
+
+        **Scope**: `collections:write`'
+      operationId: createCollectionsBulk
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBulkCollections'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkCollections'
+      security:
+      - JWT: []
+  /v2/collections/bulks/{id}:
+    get:
+      tags:
+      - Collections
+      summary: Get a bulk and its current progress
+      description: '**Scope**: `collections:read`'
+      operationId: getCollectionsBulk
+      parameters:
+      - name: id
+        in: path
+        description: ID of the bulk.
+        required: true
+        schema:
+          type: string
+          format: uuid
+        example: 6ba07619-24ff-43f3-b1f0-cdc9b06bf8a7
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkCollections'
+      security:
+      - JWT: []
+  /v2/collections/bulks/{id}/collections:
+    get:
+      tags:
+      - Collections
+      summary: Get the status of individual collection in a bulk
+      description: '**Scope**: `collections:read`'
+      operationId: getCollectionsBulkItems
+      parameters:
+      - name: id
+        in: path
+        description: ID of the bulk.
+        required: true
+        schema:
+          type: string
+          format: uuid
+        example: 6ba07619-24ff-43f3-b1f0-cdc9b06bf8a7
+      - name: status
+        in: query
+        description: Filter collections by status.
+        schema:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - pending
+            - scheduled
+            - confirmed
+            - returned
+            - canceled
+            - failed
+      - name: page
+        in: query
+        description: Index of the requested page. Deprecated, use `page_token` instead.
+        deprecated: true
+        schema:
+          minimum: 1
+          type: integer
+          format: int32
+      - name: page_token
+        in: query
+        description: Token used to fetch a specific page, as returned by the `next_page_token` or `prev_page_token` field of a previous response. Mutually exclusive with `page`.
+        schema:
+          type: string
+      - name: size
+        in: query
+        description: Number of elements per page in response.
+        schema:
+          maximum: 100
+          minimum: 1
+          type: integer
+          format: int32
+          default: 10
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionPage'
+      security:
+      - JWT: []
+components:
+  schemas:
+    CreateBulkCollections:
+      required:
+      - collections
+      type: object
+      properties:
+        collections:
+          type: array
+          description: Collection creations to execute. There should not be more than 5000 collections in a single bulk, and there should be at least one.
+          items:
+            $ref: '#/components/schemas/CreateCollection'
+    Collection:
+      required:
+      - amount
+      - currency
+      - id
+      - local_iban
+      - mandate
+      - reference
+      - scheduled_date
+      - status
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the collection.
+          format: uuid
+          example: 61b05c4f-3f72-4951-8c30-a2a9faaa5184
+        reference:
+          type: string
+          description: Unique reference, can be used to correlate with the resulting Transaction.
+          format: uuid
+          example: ab004cfc-99fb-4ba9-bc9c-70982f853cb1
+        amount:
+          type: integer
+          description: The collection amount, in cents.
+          format: int64
+          example: 500
+        currency:
+          type: string
+          description: Currency of the amount, in ISO 4217 format.
+          example: EUR
+        mandate:
+          $ref: '#/components/schemas/CollectionMandate'
+        scheduled_date:
+          type: string
+          description: The collection scheduled date, in ISO8601 format.
+          format: date
+          example: 2022-12-05
+        local_iban:
+          type: string
+          description: IBAN credited or to be credited. It can be the main IBAN of an account or a virtual IBAN.
+          example: FR6430003000509825397888D64
+        account_id:
+          type: string
+          description: ID of the account this collection belongs to, it can be missing while we process it according to the local IBAN.
+          format: uuid
+          example: 708683cb-60f6-464a-a62f-be2e339c34aa
+        status:
+          type: string
+          description: Current status of the collection.
+          example: failed
+          enum:
+          - pending
+          - scheduled
+          - confirmed
+          - returned
+          - canceled
+          - failed
+        failure_code:
+          type: string
+          description: "Code that represents the failure reason when the collection has failed:\n- `invalid_mandate_iban`: The mandate's IBAN is invalid.\n- `unreachable_mandate_iban`: The mandate's IBAN is unreachable for the given scheme.\n- `missing_debtor_address`: The debtor address is missing and required for non-EEA SEPA countries.\n- `core_limit_exceeded`: The limit for CORE collections was exceeded.\n- `debtor_refusal`: The debtor has refused the collection.\n- `debtor_bank_account_closed`: The debtor's bank account is closed.\n- `debtor_bank_insufficient_funds`: The debtor's bank account has insufficient funds.\n- `debtor_bank_error`: The debtor's bank sent us an error.\n- `debtor_bank_invalid_bank_details`: The debtor's bank account does not exist or no longer exists.\n- `debtor_bank_refusal`: The debtor's bank has refused the collection.\n- `intermediary_system_error`: The interbank network sent us an error.\n- `memo_error`: Something went wrong on our side.\n- `memo_refusal`: We had to reject the collection.\n- `execution_failure`: Other or undefined pre-settlement execution failures.\n\nThe following codes can only be present on collections initiated as part of a bulk. \nWhen initiating a single collection, those codes will be returned as an error response \nand the collection won’t be created at all:\n- `account_cannot_receive_collections`: The account cannot receive collections.\n- `current_account_not_found`: The provided local IBAN does not exist.\n- `creditor_is_saving_account`: The provided local IBAN is a Booster account.\n- `no_sepa_creditor_identifier`: You need to setup a SEPA creditor identifier with your banker.\n- `mandate_info_missing`: New mandate information must be complete.\n- `mandate_iban_mismatch`: The mandate reference already exists but with a different IBAN.\n- `collection_to_same_account`: The local IBAN and the debtor IBAN can not be the same.\n"
+          enum:
+          - invalid_mandate_iban
+          - unreachable_mandate_iban
+          - missing_debtor_address
+          - core_limit_exceeded
+          - execution_failure
+          - current_account_not_found
+          - no_sepa_creditor_identifier
+          - creditor_is_saving_account
+          - mandate_info_missing
+          - mandate_iban_mismatch
+          - collection_to_same_account
+          - debtor_refusal
+          - debtor_bank_account_closed
+          - debtor_bank_error
+          - debtor_bank_insufficient_funds
+          - debtor_bank_invalid_bank_details
+          - debtor_bank_refusal
+          - intermediary_system_error
+          - memo_error
+          - memo_refusal
+          - account_cannot_receive_collections
+        message:
+          type: string
+          description: Message attached to this collection, visible to all involved parties.
+          example: invoice no12345
+        end_to_end_id:
+          type: string
+          description: Unique identification to unambiguously identify the transaction. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the transaction.
+          example: b0bfb42baa2642c2af0ca3e880fcd590
+        internal_note:
+          type: string
+          description: Internal note attached to this collection, visible only in your Memo Bank workspace.
+          example: phone bill
+        custom_id:
+          type: string
+          description: Custom identifier attached to the transaction resulting from this collection. It is not transmitted nor visible in your Memo Bank workspace. It can only be retrieved or used to search for transactions via Memo Bank API.
+          example: 637406efda8534de8c0e
+        custom_metadata:
+          type: string
+          description: Custom metadata attached to the transaction resulting from this collection. It is not transmitted nor visible in your Memo Bank workspace and can only be retrieved via API.
+          example: This is some metadata
+        return_transaction_id:
+          type: string
+          description: If the collection is returned, ID of the corresponding debit transaction.
+          format: uuid
+          example: 94faf5c3-b76e-4173-b2e9-ed27d988a92a
+    BulkCollections:
+      required:
+      - collections_canceled
+      - collections_confirmed
+      - collections_failed
+      - collections_total
+      - id
+      - status
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the bulk.
+          format: uuid
+          example: fe98f29d-5165-45ff-83f9-d7aa83e970b5
+        collections_total:
+          type: integer
+          description: Total number of collections in the bulk.
+          format: int32
+          example: 3000
+        collections_confirmed:
+          type: integer
+          description: Number of collections that were processed and confirmed.
+          format: int32
+          example: 1552
+        collections_canceled:
+          type: integer
+          description: Number of collections canceled before processing.
+          format: int32
+          example: 2
+        collections_failed:
+          type: integer
+          description: Number of collections that were processed and failed.
+          format: int32
+          example: 57
+        status:
+          type: string
+          description: Aggregated status of the bulk.
+          example: pending
+          enum:
+          - pending
+          - completed
+    CollectionMandateDebtor:
+      required:
+      - iban
+      - name
+      type: object
+      properties:
+        name:
+          maxLength: 256
+          minLength: 1
+          type: string
+          description: Name of the debtor.
+          example: John Doe
+        iban:
+          pattern: ^[A-Z]{2}[0-9]{2}[a-zA-Z0-9]{1,30}$
+          type: string
+          description: IBAN of the debtor.
+          example: FR2512739000308553756377J95
+        address:
+          $ref: '#/components/schemas/CollectionMandateDebtorAddress'
+      description: The debtor associated with this mandate.This field is only required in case of a new mandate. If there is an existing mandate with this reference and scheme, all information in this field will be ignored except for the debtor IBAN which needs to be the same as the one in the existing mandate. Providing a different IBAN will produce a 400 error with the code `outgoing_collection_mandate_iban_mismatch`.
+    CollectionPage:
+      required:
+      - has_next
+      - has_prev
+      - results
+      type: object
+      properties:
+        results:
+          type: array
+          description: Elements of the page.
+          items:
+            $ref: '#/components/schemas/Collection'
+        has_prev:
+          type: boolean
+          description: Flag indicating if there is a previous page. Deprecated, use `prev_page_token` instead.
+          deprecated: true
+        has_next:
+          type: boolean
+          description: Flag indicating if there is a next page. Deprecated, use `next_page_token` instead.
+          deprecated: true
+        next_page_token:
+          type: string
+          description: Token to fetch the next page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no next page.
+          nullable: true
+          example: eyJwIjozfQ
+        prev_page_token:
+          type: string
+          description: Token to fetch the previous page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no previous page.
+          nullable: true
+          example: eyJwIjoxfQ
+    CreateCollectionMandate:
+      required:
+      - reference
+      - scheme
+      type: object
+      properties:
+        reference:
+          pattern: ^[A-Za-z0-9+?/\-:().,'\s]{1,35}$
+          type: string
+          description: The unique mandate reference.
+          example: ABC123DEF
+        scheme:
+          type: string
+          description: The mandate scheme.
+          example: core
+          enum:
+          - b2b
+          - core
+        signature_date:
+          type: string
+          description: The mandate signature date, in ISO8601 format. The date must not be in the future. This field is only required in case of a new mandate. If there is an existing mandate matching the scheme and with the same reference, this field will be ignored.
+          format: date
+          example: 2022-12-01
+        debtor:
+          $ref: '#/components/schemas/CollectionMandateDebtor'
+        contract_reference:
+          maxLength: 256
+          minLength: 1
+          type: string
+          description: The contract reference attached to this mandate. This is optional metadata.If there is an existing mandate matching the scheme and with the same reference, this field will be ignored when provided.
+          example: CUST-1234
+      description: The SEPA Direct Debit collection mandate to be used.
+    CollectionMandate:
+      required:
+      - reference
+      - scheme
+      type: object
+      properties:
+        reference:
+          type: string
+          description: The unique mandate reference.
+          example: ABC123DEF
+        scheme:
+          type: string
+          description: The mandate scheme.
+          example: core
+          enum:
+          - b2b
+          - core
+      description: The SEPA Direct Debit collection mandate used.
+    CollectionMandateDebtorAddress:
+      required:
+      - city
+      - country
+      - postal_code
+      - street
+      type: object
+      properties:
+        street:
+          maxLength: 256
+          minLength: 1
+          type: string
+          description: Name of the street.
+          example: rue de la Boétie
+        building_number:
+          maxLength: 256
+          minLength: 1
+          type: string
+          description: Number of the building or house.
+          example: '42'
+        postal_code:
+          maxLength: 256
+          minLength: 1
+          type: string
+          description: Postal or zip code.
+          example: '75008'
+        city:
+          maxLength: 256
+          minLength: 1
+          type: string
+          description: Name of the city.
+          example: Paris
+        country:
+          pattern: ^[A-Z]{2}$
+          type: string
+          description: ISO3166-1 alpha-2 country code.
+          example: FR
+      description: The debtor's address. Mandatory only when the debtor's bank — more specifically, its BIC — is located in a non-EEA SEPA country or territory.
+    CreateCollection:
+      required:
+      - amount
+      - local_iban
+      - mandate
+      - scheduled_date
+      type: object
+      properties:
+        amount:
+          minimum: 1
+          type: integer
+          description: Amount to be collected, in cents. The currency is always EURO.
+          format: int64
+          example: 500
+        mandate:
+          $ref: '#/components/schemas/CreateCollectionMandate'
+        scheduled_date:
+          type: string
+          description: The ISO8601 formatted date on which the direct debit collection will be submitted. This date must not be in the past. If your direct debit is scheduled to be submitted on a non-business day, it will be effectively submitted on the next business day. The execution will then happen on the following business day. For example, a direct debit scheduled on a Saturday will be submitted on the following Monday and executed on the Tuesday (assuming that both week days are business days).
+          format: date
+          example: 2022-12-05
+        local_iban:
+          pattern: ^[A-Z]{2}[0-9]{2}[a-zA-Z0-9]{1,30}$
+          type: string
+          description: Existing IBAN to be credited. It can be the main IBAN of an account or a virtual IBAN.
+          example: FR6430003000509825397888D64
+        message:
+          maxLength: 140
+          minLength: 1
+          type: string
+          description: Message attached to this collection, visible to all involved parties.
+          example: invoice no12345
+        end_to_end_id:
+          maxLength: 35
+          minLength: 1
+          pattern: '[a-zA-Z0-9\-\?\:\(\)\.\,\''\+\ ]{1,35}'
+          type: string
+          description: Unique identification to unambiguously identify the transaction. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the transaction.
+          example: b0bfb42baa2642c2af0ca3e880fcd590
+        internal_note:
+          maxLength: 3000
+          minLength: 1
+          type: string
+          description: Internal note attached to this collection, visible only in your Memo Bank workspace.
+          example: phone bill
+        custom_id:
+          maxLength: 256
+          minLength: 1
+          type: string
+          description: Custom identifier that will be attached to the transaction resulting from this collection. It will not be transmitted nor visible in your Memo Bank workspace. It can only be retrieved or used to search for transactions via Memo Bank API.
+          example: 637406efda8534de8c0e
+        custom_metadata:
+          maxLength: 2048
+          minLength: 1
+          type: string
+          description: Custom metadata that will be attached to the transaction resulting from this collection. It will not be transmitted nor visible in your Memo Bank workspace and can only be retrieved via API.
+          example: This is some metadata
+x-topics:
+- title: Getting started
+  content: 'To get started with our Premium Bank API, talk to your banker first. He or she needs  to activate the API feature on your Memo Bank workspace.
+
+
+    Once your banker has granted you API access, you can then set up your authentication using our web interface. To do so, navigate to the  [`API`](https://client.memo.bank/api) section of your Memo Bank workspace.
+
+
+    Owners and administrators can create applications and manage their permissions. They can also invite collaborators to an application, allowing them to manage certificates, IP allow-lists, and  webhooks.
+
+
+    Once an application and a certificate have been created, you will have  three pieces of information allowing you to authenticate requests on  the API:
+
+    1. a **certificate** and its SHA256 thumbprint;
+
+    2. a **secret code**;
+
+    3. a cryptographic **private key**.
+
+    '
+- title: Authentication
+  content: "Our authentication is based on JSON Web Token ([JWT](https://datatracker.ietf.org/doc/html/rfc7519)) and JSON Web Signature ([JWS](https://datatracker.ietf.org/doc/html/rfc7515)).\n\nRegardless of which programming language you are using, there should be [a library](https://jwt.io/libraries) to handle the cryptographic part for you. All you need is to provide the correct header and payload claims. \n\n**In the JWT header:**\n- `alg` must be `RS256`, as we require an RSA-SHA256 signature. \n- `typ` must be `JWT`.\n- `x5t#S256` is the SHA256 thumbprint of the certificate, which you can find in the user interface.\n\n**In the JWT payload:**\n- `sub` must be the request method, followed by a space and the full path, including query parameters.\n- `aud` must be the domain to which you are making the request, e.g., `api.memo.bank`.\n- `iat` must be the timestamp at which you created the token. Note that we accept only a 5-second difference from the server time to mitigate clock skew.\n- `jti` must be a unique identifier for the token. It must be different for each request and follow the UUID format.\n- `sec` must be the secret information you obtained during the setup process in the user interface. This is a custom claim not covered by the JWT specification.\n- `dig#S256` must contain the base64url-encoded SHA-256 hash of the body (`base64url(sha256(body))`, see [`base64url`](https://datatracker.ietf.org/doc/html/rfc7515#appendix-C)). It must be provided only if the request has a body; for example, it is not necessary for `GET` requests. This is a custom claim not covered by the JWT specification.\n\nThe JWT must then be **signed with the private key** you generated during the setup (see [Getting started](#topic-getting-started)), and included in the HTTP headers of the request, as a standard bearer token `Authorization: Bearer <token>`.\n"
+  example: "_Example JWT header and payload_\n```json\n{\n  \"alg\": \"RS256\",\n  \"typ\": \"JWT\",\n  \"x5t#S256\": \"3A14ZcxIaasp4RHaYReL7wevm3oDzn7ZqmgqScCMY74\"\n}\n{\n  \"sub\": \"POST /v1/transfers\",\n  \"aud\": \"api.memo.bank\",\n  \"iat\": 1657055009,\n  \"jti\": \"5525620b-9dcd-4562-8c6c-60984f46cb48\",\n  \"sec\": \"a2029d646c94406d2945b7a2b31e4fb3ff09a6d0ae29144380775b5471c4e846\",\n  \"dig#S256\": \"lW6N_kO2gPMsMkzXyn028gWwrnaN0kJaiy7FMJcR0Ek\"\n}\n```\n"
+- title: Idempotent requests
+  content: "Our Premium Bank API supports **idempotency** to safely retry requests without accidentally performing the same operation twice. This is useful when an API call is disrupted in transit and you do not receive a response. For example, if a request to create a transfer does not go through due to a network connection error, you can retry the request with the same  idempotency key to guarantee that only the single transfer originally  attempted is created.\n\nTo perform an idempotent request, provide an additional `Idempotency-Key` **request header**. We recommend using a **V4 UUID**. If the API call fails with a network error or responds with a  `5XX`, `409`, or `429` status code, we expect the caller to perform retries with the same `Idempotency-Key` header until it responds differently. For any other response code, especially other `4XX` errors, there is no point in attempting retries, as we will always return the same result. \n\nWhen a previous response is replayed, the response includes an  additional HTTP header: `Idempotent-Replayed: true`.\n\nIf an original request is still being processed when an idempotency key is reused, the API will return a `409 Conflict` error  (which is safe to retry).\n\nSubsequent requests must be identical to the original request, or the API  will return a `422 Unprocessable Entity` error. We do not support setting  an idempotency key on `GET` and `DELETE` requests, as these requests are inherently idempotent.\n"
+  example: "```\ncurl --request POST \\\n  --url https://api.memo.bank/v1/transfers \\\n  --header 'Authorization: Bearer ***' \\\n  --header 'Idempotency-Key: 19b390d1-e7d4-4e27-abe2-49cac9b41ba1' \\\n  --header 'Content-Type: application/json' \\\n  --data '{...}'\n```\n"
+- title: Errors
+  content: 'Our Premium Bank API uses standard HTTP response codes to indicate the success or failure of requests. Codes in the `2xx` range indicate success; codes in the `4xx` and `5xx` ranges indicate errors. The format of error messages is unified and can be distinguished by their `code` key. The `message` provides a plain English explanation of the problem.
+
+    '
+  example: "```json\n{\n  \"code\": \"error_code\",\n  \"message\": \"Example error message.\",\n}\n```\n"
+- title: Versioning and backwards compatibility
+  content: 'Our Premium Bank API is versioned by path (`/v1/...`). When we introduce breaking changes, we will increase this version number. We will, of course, continually make backward-compatible changes without increasing the version number.
+
+
+    Examples of changes we do **not** consider breaking include:
+
+    * Adding new API resources.
+
+    * Adding new optional request parameters to existing API methods.
+
+    * Adding new properties to existing API responses. We will occasionally move response fields in the API and will continue to return the existing field in its previous location while removing it from this documentation.
+
+    * Changing the order of properties in existing API responses.
+
+    * Changing the length or format of opaque strings, such as object IDs, error messages, and other human-readable strings. Strings that are marked as const or enum in this documentation will not change.
+
+    * Adding new `EventType` or `ResourceType` enum values for webhooks.
+
+    * Adding new `TransactionSource` enum values for transactions.
+
+    '
+- title: Rate limiting
+  content: "We enforce a rate limit on the number of HTTP requests that can be made in a  given period. When the limit is reached, our Premium Bank API will return a `429 Too Many Requests` error.\n\nTo allow you to handle this rate limiting programmatically, the following headers are sent with every response: \n- `RateLimit-Limit`: total number of available requests between two quota resets;\n- `RateLimit-Remaining`: number of available requests until the quota is reset;\n- `RateLimit-Reset`: time remaining (in seconds) until the quota is reset.\n"
+- title: API recipes
+  content: 'While our OpenAPI specification provides a comprehensive reference for the Memo Bank API, we''ve created  API recipes to give you practical, hands-on guides for common use cases. These recipes offer step-by-step  examples to help you quickly integrate and leverage our API. You can find them here:  [API Premium - Memo Bank](https://aide.memo.bank/category/349-api)
+
+    '
+- title: FAQ
+  content: '### How do transactions differ from transfers and collections?
+
+    Transfers and collections are types of transactions that you can initiate through the API. They have dedicated  endpoint resources to help you follow their detailed lifecycle. On the other hand,  transactions allow you to follow the lifecycle of all transactions, including those not initiated through  the API (incoming transactions, card transactions, etc). Since transfers and collections are a subset of  transactions, some webhook events will be triggered simultaneously (for instance, `transfer_confirmed` and  `transaction_confirmed`), and you can use either.
+
+    ### Is creating a beneficiary or mandate mandatory before initiating transactions?
+
+    Creating a beneficiary for transfers or a mandate for collections is not mandatory. When initiating a new  transfer or collection, you will provide the counterpart data directly in the initiating endpoint,  We will auto-create it, and you will be able to see it in the interface. For subsequent transfers/collections,  you will continue to provide the counterpart data, and we will match it with any existing beneficiary/mandate  in the interface.
+
+    ### How can I reconcile a return with its original transfer or collection?
+
+    The events `transfer_returned` and `collection_returned` received via webhook will inform you if a  return occurred on either a transfer or a collection. The `resource_id` in those events refers to the ID  of the original transfer/collection. The `return_transaction_id` field on those resources will reference  the return transaction, which is a new transaction typically with the same amount and opposite direction  compared to the original transaction. This new transaction will itself trigger a `transaction_confirmed`  webhook event. For such transactions, if you call [get the transaction](https://docs.api.memo.bank/operation/operation-gettransaction) and check the [source type](https://docs.api.memo.bank/operation/operation-gettransaction#operation-gettransaction-200-body-application-json-source-type),  it will either be `transfer_outgoing_return` or `collection_outgoing_return`.  The `returned_collection_id`/`returned_transfer_id` field will contain the ID of your original  collection/transfer that has been returned.
+
+    ### How can I differentiate transaction types?
+
+    To differentiate transaction types, you can use the [type](https://docs.api.memo.bank/operation/operation-gettransaction#operation-gettransaction-200-body-application-json-source-type) contained in the [source](https://docs.api.memo.bank/operation/operation-gettransaction#operation-gettransaction-200-body-application-json-source) object.
+
+    ### How do I express amounts for different currencies?
+
+    Amounts are always integers expressed in the smallest unit of their currency. When you [create a wire transfer](https://docs.api.memo.bank/operation/operation-createwiretransfer), the unit is determined by the `instructed_currency` you provide, so the same `instructed_amount` value represents a different sum depending on the currency:
+
+    - `instructed_amount: 1234` with `instructed_currency: EUR` means 12.34 €, as the euro has two decimals;
+
+    - `instructed_amount: 5000` with `instructed_currency: JPY` means 5,000 ¥, not 50 ¥, as the Japanese yen has no decimal;
+
+    - `instructed_amount: 1500` with `instructed_currency: TND` means 1.500 TND, that is one and a half dinars and not 1,500 dinars, as the Tunisian dinar has three decimals.
+
+
+    The number of decimals is defined by the ISO 4217 standard for each currency, rely on that standard rather than assuming two decimals.
+
+    SEPA [transfers](#endpoint-transfers) and [collections](#endpoint-collections) are euro-only, so their `amount` is always a number of cents.
+
+    ### What happens if my system is unavailable when Memo Bank sends webhooks?
+
+    We will retry each webhook event independently 8 times following an exponential backoff. The intervals between retries are: 3 min, 10 min, 30 min, 1 hour, 6 hours, 12 hours, 1 day, and 3 days. After that, we will stop retrying, but  you will be able to manually trigger a retry through our interface.
+
+    ### When using the `instant_if_available` strategy, will Memo Bank retry a failed instant transfer as a standard transfer?
+
+    No, we will not retry failed instant transfers as standard transfers. However, we recommend that you do so. If an  instant transfer fails, retrying it or using a standard transfer is often the best course of action.  `instant_if_available` will only ensure that we process your transfer as standard if the counterparty bank does not support instant transfers.
+
+    ### What is the difference between failed and cancelled transaction statuses?
+
+    Your transaction will end up in a cancelled status when you choose to cancel it either through  our API or our interface. In some cases, your transaction may also end up in a cancelled status due  to internal processing reasons, but most of the time, for processing reasons, your transaction will end up  in a failed status. Both statuses are definitive, and if you did not initiate the cancellation, you can consider them equivalent in your development.
+
+    ### Are webhooks triggered for transactions not initiated with the API?
+
+    Yes, they are. Webhooks are triggered regardless of the channel you use to initiate your transaction.
+
+    ### Is it possible to initiate a payment via API and have it validated by a human on the interface?
+
+    No, it is not possible. Our API is designed for automated, human-free transactions at scale.
+
+    ### How can I stay informed about the latest API updates?
+
+    We provide an RSS feed that you can subscribe to. It is available at this [URL](https://docs.api.memo.bank/changes) when you click the `Get Updates` button at the top of the page.
+
+    '
+- title: Sandbox
+  content: 'We offer a sandbox, allowing you to integrate your application with our API in a controlled environment. Get in touch with your banker to create an access.
+
+
+    All the endpoints described in this specification can be used on the sandbox. We also offer some [sandbox only endpoints](#endpoint-sandbox), allowing you to simulate incoming transactions.
+
+
+    The base URL for the sandbox API is https://api.sandbox.memo.bank and the URL for the sandbox web interface is https://client.sandbox.memo.bank.
+
+
+    To get to know more about our sandbox behavior and features, please read [our dedicated help page](https://aide.memo.bank/article/398-api-sandbox).
+
+    '
