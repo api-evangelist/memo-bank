@@ -257,46 +257,6 @@ apis:
     url: https://docs-nextgenpsd2.api.memo.bank/
   - type: OAuthScopes
     url: scopes/memo-bank-scopes.yml
-- aid: memo-bank:memo-bank-ibans-api
-  name: Memo Bank IBA Ns API
-  description: >-
-    IBANs are identifiers for bank accounts. There are two types of IBANs at Memo Bank:
-
-    * Main IBANs, which act as primary identifiers for a bank account.  There is exactly one main IBAN
-    per bank account. You cannot delete it. When an account is closed, its main IBAN remains active only
-    for  incoming transactions, which will be automatically rerouted to the  main account.
-
-    * Virtual IBANs, which are aliases for the main IBAN. They can be created, deactivated, and reactivated
-    at will. When the account they are attached to  is closed, they get reattached to the main account.
-
-
-    All operations on IBANs are synchronous and effective immediately,  meaning that you can use a new
-    IBAN to send or receive money right  after its creation.
-  humanURL: https://docs.api.memo.bank/
-  baseURL: https://api.memo.bank
-  tags:
-  - IBANs
-  properties:
-  - type: OpenAPI
-    url: openapi/memo-bank-ibans-api-openapi.yml
-  - type: Documentation
-    url: https://docs.api.memo.bank/
-  - type: APIReference
-    url: https://docs.api.memo.bank/version-2/
-  - type: GettingStarted
-    url: https://docs.api.memo.bank/topic/topic-getting-started
-  - type: Webhooks
-    url: asyncapi/memo-bank-webhooks.yml
-  - type: ToolCrosswalk
-    url: mcp/memo-bank-tool-crosswalk.yml
-  - type: Documentation
-    url: https://docs-marketplace.api.memo.bank/
-  - type: GettingStarted
-    url: https://docs-marketplace.api.memo.bank/topic/topic-getting-started
-  - type: Documentation
-    url: https://docs-nextgenpsd2.api.memo.bank/
-  - type: OAuthScopes
-    url: scopes/memo-bank-scopes.yml
 - aid: memo-bank:memo-bank-mandate-signature-requests-api
   name: Memo Bank Mandate signature requests API
   description: >-
@@ -312,36 +272,6 @@ apis:
   properties:
   - type: OpenAPI
     url: openapi/memo-bank-mandate-signature-requests-api-openapi.yml
-  - type: Documentation
-    url: https://docs.api.memo.bank/
-  - type: APIReference
-    url: https://docs.api.memo.bank/version-2/
-  - type: GettingStarted
-    url: https://docs.api.memo.bank/topic/topic-getting-started
-  - type: Webhooks
-    url: asyncapi/memo-bank-webhooks.yml
-  - type: ToolCrosswalk
-    url: mcp/memo-bank-tool-crosswalk.yml
-  - type: Documentation
-    url: https://docs-marketplace.api.memo.bank/
-  - type: GettingStarted
-    url: https://docs-marketplace.api.memo.bank/topic/topic-getting-started
-  - type: Documentation
-    url: https://docs-nextgenpsd2.api.memo.bank/
-  - type: OAuthScopes
-    url: scopes/memo-bank-scopes.yml
-- aid: memo-bank:memo-bank-oauth2-api
-  name: Memo Bank O Auth2 API
-  description: OAuth2 token management endpoints.
-  humanURL: https://docs.api.memo.bank/
-  baseURL: https://api.memo.bank
-  tags:
-  - Authentication
-  tags_raw:
-  - OAuth2
-  properties:
-  - type: OpenAPI
-    url: openapi/memo-bank-oauth2-api-openapi.yml
   - type: Documentation
     url: https://docs.api.memo.bank/
   - type: APIReference
@@ -642,6 +572,74 @@ apis:
   properties:
   - type: OpenAPI
     url: openapi/memo-bank-wire-transfers-api-openapi.yml
+  - type: Documentation
+    url: https://docs.api.memo.bank/
+  - type: APIReference
+    url: https://docs.api.memo.bank/version-2/
+  - type: GettingStarted
+    url: https://docs.api.memo.bank/topic/topic-getting-started
+  - type: Webhooks
+    url: asyncapi/memo-bank-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/memo-bank-tool-crosswalk.yml
+  - type: Documentation
+    url: https://docs-marketplace.api.memo.bank/
+  - type: GettingStarted
+    url: https://docs-marketplace.api.memo.bank/topic/topic-getting-started
+  - type: Documentation
+    url: https://docs-nextgenpsd2.api.memo.bank/
+  - type: OAuthScopes
+    url: scopes/memo-bank-scopes.yml
+- aid: memo-bank:memo-bank-ibans-api
+  name: Memo Bank IBA Ns API
+  description: >-
+    IBANs are identifiers for bank accounts. There are two types of IBANs at Memo Bank:
+
+    * Main IBANs, which act as primary identifiers for a bank account.  There is exactly one main IBAN
+    per bank account. You cannot delete it. When an account is closed, its main IBAN remains active only
+    for  incoming transactions, which will be automatically rerouted to the  main account.
+
+    * Virtual IBANs, which are aliases for the main IBAN. They can be created, deactivated, and reactivated
+    at will. When the account they are attached to  is closed, they get reattached to the main account.
+
+
+    All operations on IBANs are synchronous and effective immediately,  meaning that you can use a new
+    IBAN to send or receive money right  after its creation.
+  humanURL: https://docs.api.memo.bank/
+  baseURL: https://api.memo.bank
+  tags:
+  - IBANs
+  properties:
+  - type: OpenAPI
+    url: openapi/memo-bank-ibans-api-openapi.yml
+  - type: Documentation
+    url: https://docs.api.memo.bank/
+  - type: APIReference
+    url: https://docs.api.memo.bank/version-2/
+  - type: GettingStarted
+    url: https://docs.api.memo.bank/topic/topic-getting-started
+  - type: Webhooks
+    url: asyncapi/memo-bank-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/memo-bank-tool-crosswalk.yml
+  - type: Documentation
+    url: https://docs-marketplace.api.memo.bank/
+  - type: GettingStarted
+    url: https://docs-marketplace.api.memo.bank/topic/topic-getting-started
+  - type: Documentation
+    url: https://docs-nextgenpsd2.api.memo.bank/
+  - type: OAuthScopes
+    url: scopes/memo-bank-scopes.yml
+- aid: memo-bank:memo-bank-oauth2-api
+  name: Memo Bank O Auth2 API
+  description: OAuth2 token management endpoints.
+  humanURL: https://docs.api.memo.bank/
+  baseURL: https://api.memo.bank
+  tags:
+  - OAuth2
+  properties:
+  - type: OpenAPI
+    url: openapi/memo-bank-oauth2-api-openapi.yml
   - type: Documentation
     url: https://docs.api.memo.bank/
   - type: APIReference
