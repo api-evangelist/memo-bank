@@ -303,6 +303,8 @@ apis:
   humanURL: https://docs.api.memo.bank/
   baseURL: https://api.memo.bank
   tags:
+  - PI
+  tags_raw:
   - PIS
   properties:
   - type: OpenAPI
@@ -636,6 +638,8 @@ apis:
   humanURL: https://docs.api.memo.bank/
   baseURL: https://api.memo.bank
   tags:
+  - Authentication
+  tags_raw:
   - OAuth2
   properties:
   - type: OpenAPI
