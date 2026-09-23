@@ -1,13 +1,11 @@
 openapi: 3.2.0
 info:
-  title: Memo Bank Sandbox API
-  description: '**Welcome!** You can use our [Premium Bank API](https://memo.bank/produit/api/)  to check your company’s accounts, fetch your transactions, make SEPA transfers,  initiate SEPA direct debit collections, create virtual IBANs, and access most of Memo Bank features.
+  title: Memo Bank Sandbox API
+  description: '**Welcome!** You can use our Premium Bank API to check your company’s accounts, fetch your transactions, make SEPA transfers, initiate SEPA direct debit collections, create virtual IBANs, and access most of Memo Bank features.
 
     > info
 
-    > If you are a **third-party payment service provider** complying with PSD2, you may be more interested in our [NextGenPSD2 API](https://docs-nextgenpsd2.api.memo.bank).
-
-    '
+    > If you are a **third-party payment service provider** complying with PSD2, you may be more interested in our NextGenPSD2 API.'
   version: '2.0'
 servers:
 - url: https://api.memo.bank
@@ -16,9 +14,7 @@ servers:
   description: Sandbox
 tags:
 - name: Sandbox
-  description: 'Sandbox only endpoints.
-
-    '
+  description: Sandbox only endpoints.
 paths:
   /v2/sandbox/incoming_collections:
     post:
@@ -64,6 +60,69 @@ paths:
         description: Sandbox
 components:
   schemas:
+    CreateIncomingCollectionMandateCreditor:
+      type: object
+      properties:
+        name:
+          maxLength: 256
+          minLength: 1
+          type: string
+          description: Name of the creditor.
+          example: John Doe
+        iban:
+          pattern: ^[A-Z]{2}[0-9]{2}[a-zA-Z0-9]{1,30}$
+          type: string
+          description: IBAN of the creditor.
+          example: FR2512739000308553756377J95
+        sepa_identifier:
+          pattern: ^([A-Z]{2})([0-9]{2})ZZZ([A-Z0-9]{4,})$
+          type: string
+          description: SEPA identifier of the creditor.
+          example: FR18ZZZ002305
+      description: The creditor associated with this mandate.
+    CreateIncomingCollectionMandate:
+      type: object
+      properties:
+        reference:
+          pattern: ^[A-Za-z0-9+?/\-:().,'\s]{1,35}$
+          type: string
+          description: The unique mandate reference.
+          example: ABC123DEF
+        creditor:
+          $ref: '#/components/schemas/CreateIncomingCollectionMandateCreditor'
+      description: The SEPA Direct Debit collection mandate. Allow you to provide mandate information that will be used for the transaction. If not provided, default values will be used.
+    CreateIncomingCollection:
+      required:
+      - amount
+      - local_iban
+      type: object
+      properties:
+        amount:
+          minimum: 1
+          type: integer
+          description: Amount of the transfer, in cents. The currency is always EURO.
+          format: int64
+          example: 500
+        local_iban:
+          pattern: ^[A-Z]{2}[0-9]{2}[a-zA-Z0-9]{1,30}$
+          type: string
+          description: Existing IBAN to be used as the destination of the transfer. Can be the main IBAN of an account or a virtual IBAN.
+          example: FR6430003000509825397888D64
+        message:
+          maxLength: 140
+          minLength: 1
+          type: string
+          description: Message attached to this transfer, visible to all involved parties.
+          example: invoice no12345
+        end_to_end_id:
+          maxLength: 35
+          minLength: 1
+          pattern: '[a-zA-Z0-9\-\?\:\(\)\.\,\''\+\ ]{1,35}'
+          type: string
+          description: Unique identification to unambiguously identify the transaction. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the transaction.
+          example: b0bfb42baa2642c2af0ca3e880fcd590
+        mandate:
+          $ref: '#/components/schemas/CreateIncomingCollectionMandate'
     CreateIncomingTransfer:
       required:
       - amount
@@ -103,69 +162,6 @@ components:
           type: string
           description: IBAN of the debtor. Allow you to provide the IBAN that will be used for the transaction. If not provided, a default value will be used.
           example: FR2512739000308553756377J95
-    CreateIncomingCollectionMandate:
-      type: object
-      properties:
-        reference:
-          pattern: ^[A-Za-z0-9+?/\-:().,'\s]{1,35}$
-          type: string
-          description: The unique mandate reference.
-          example: ABC123DEF
-        creditor:
-          $ref: '#/components/schemas/CreateIncomingCollectionMandateCreditor'
-      description: The SEPA Direct Debit collection mandate. Allow you to provide mandate information that will be used for the transaction. If not provided, default values will be used.
-    CreateIncomingCollectionMandateCreditor:
-      type: object
-      properties:
-        name:
-          maxLength: 256
-          minLength: 1
-          type: string
-          description: Name of the creditor.
-          example: John Doe
-        iban:
-          pattern: ^[A-Z]{2}[0-9]{2}[a-zA-Z0-9]{1,30}$
-          type: string
-          description: IBAN of the creditor.
-          example: FR2512739000308553756377J95
-        sepa_identifier:
-          pattern: ^([A-Z]{2})([0-9]{2})ZZZ([A-Z0-9]{4,})$
-          type: string
-          description: SEPA identifier of the creditor.
-          example: FR18ZZZ002305
-      description: The creditor associated with this mandate.
-    CreateIncomingCollection:
-      required:
-      - amount
-      - local_iban
-      type: object
-      properties:
-        amount:
-          minimum: 1
-          type: integer
-          description: Amount of the transfer, in cents. The currency is always EURO.
-          format: int64
-          example: 500
-        local_iban:
-          pattern: ^[A-Z]{2}[0-9]{2}[a-zA-Z0-9]{1,30}$
-          type: string
-          description: Existing IBAN to be used as the destination of the transfer. Can be the main IBAN of an account or a virtual IBAN.
-          example: FR6430003000509825397888D64
-        message:
-          maxLength: 140
-          minLength: 1
-          type: string
-          description: Message attached to this transfer, visible to all involved parties.
-          example: invoice no12345
-        end_to_end_id:
-          maxLength: 35
-          minLength: 1
-          pattern: '[a-zA-Z0-9\-\?\:\(\)\.\,\''\+\ ]{1,35}'
-          type: string
-          description: Unique identification to unambiguously identify the transaction. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the transaction.
-          example: b0bfb42baa2642c2af0ca3e880fcd590
-        mandate:
-          $ref: '#/components/schemas/CreateIncomingCollectionMandate'
 x-topics:
 - title: Getting started
   content: 'To get started with our Premium Bank API, talk to your banker first. He or she needs  to activate the API feature on your Memo Bank workspace.

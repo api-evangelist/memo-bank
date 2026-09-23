@@ -1,13 +1,11 @@
 openapi: 3.2.0
 info:
-  title: Memo Bank Collections API
-  description: '**Welcome!** You can use our [Premium Bank API](https://memo.bank/produit/api/)  to check your company’s accounts, fetch your transactions, make SEPA transfers,  initiate SEPA direct debit collections, create virtual IBANs, and access most of Memo Bank features.
+  title: Memo Bank Collections API
+  description: '**Welcome!** You can use our Premium Bank API to check your company’s accounts, fetch your transactions, make SEPA transfers, initiate SEPA direct debit collections, create virtual IBANs, and access most of Memo Bank features.
 
     > info
 
-    > If you are a **third-party payment service provider** complying with PSD2, you may be more interested in our [NextGenPSD2 API](https://docs-nextgenpsd2.api.memo.bank).
-
-    '
+    > If you are a **third-party payment service provider** complying with PSD2, you may be more interested in our NextGenPSD2 API.'
   version: '2.0'
 servers:
 - url: https://api.memo.bank
@@ -16,7 +14,7 @@ servers:
   description: Sandbox
 tags:
 - name: Collections
-  description: "Collections are SEPA direct debit collections, including SEPA CORE direct debits and SEPA B2B direct debits. \n\nTo initiate a direct debit, a **mandate** signed by the debtor is required.  You have the option to use our [signature request](endpoint-mandate-signature-requests)  workflow, which handles this signature, or you can choose to manage it  yourself. Whichever method you select, you will only need to provide  the mandate information when setting up the direct debit, not the signed  document itself.\n\nThey can be initiated asynchronously, one by one or in bulk. \n\nUnlike [transfers](#endpoint-transfers), collections can only be scheduled for a date in the future.  As a result, their lifecycle is also simplified.\n\n<img src=\"https://assets.memo.bank/memobankapi/collections-lifecycle-api-v3.png\" alt=\"Collections lifecycle\" width=\"750\">\n"
+  description: Collections are SEPA direct debit collections, including SEPA CORE direct debits and SEPA B2B direct debits.
 paths:
   /v2/collections/{id}:
     get:
@@ -214,16 +212,6 @@ paths:
       - JWT: []
 components:
   schemas:
-    CreateBulkCollections:
-      required:
-      - collections
-      type: object
-      properties:
-        collections:
-          type: array
-          description: Collection creations to execute. There should not be more than 5000 collections in a single bulk, and there should be at least one.
-          items:
-            $ref: '#/components/schemas/CreateCollection'
     Collection:
       required:
       - amount
@@ -332,6 +320,44 @@ components:
           description: If the collection is returned, ID of the corresponding debit transaction.
           format: uuid
           example: 94faf5c3-b76e-4173-b2e9-ed27d988a92a
+    CollectionMandateDebtorAddress:
+      required:
+      - city
+      - country
+      - postal_code
+      - street
+      type: object
+      properties:
+        street:
+          maxLength: 256
+          minLength: 1
+          type: string
+          description: Name of the street.
+          example: rue de la Boétie
+        building_number:
+          maxLength: 256
+          minLength: 1
+          type: string
+          description: Number of the building or house.
+          example: '42'
+        postal_code:
+          maxLength: 256
+          minLength: 1
+          type: string
+          description: Postal or zip code.
+          example: '75008'
+        city:
+          maxLength: 256
+          minLength: 1
+          type: string
+          description: Name of the city.
+          example: Paris
+        country:
+          pattern: ^[A-Z]{2}$
+          type: string
+          description: ISO3166-1 alpha-2 country code.
+          example: FR
+      description: The debtor's address. Mandatory only when the debtor's bank — more specifically, its BIC — is located in a non-EEA SEPA country or territory.
     BulkCollections:
       required:
       - collections_canceled
@@ -374,6 +400,56 @@ components:
           enum:
           - pending
           - completed
+    CollectionMandate:
+      required:
+      - reference
+      - scheme
+      type: object
+      properties:
+        reference:
+          type: string
+          description: The unique mandate reference.
+          example: ABC123DEF
+        scheme:
+          type: string
+          description: The mandate scheme.
+          example: core
+          enum:
+          - b2b
+          - core
+      description: The SEPA Direct Debit collection mandate used.
+    CreateCollectionMandate:
+      required:
+      - reference
+      - scheme
+      type: object
+      properties:
+        reference:
+          pattern: ^[A-Za-z0-9+?/\-:().,'\s]{1,35}$
+          type: string
+          description: The unique mandate reference.
+          example: ABC123DEF
+        scheme:
+          type: string
+          description: The mandate scheme.
+          example: core
+          enum:
+          - b2b
+          - core
+        signature_date:
+          type: string
+          description: The mandate signature date, in ISO8601 format. The date must not be in the future. This field is only required in case of a new mandate. If there is an existing mandate matching the scheme and with the same reference, this field will be ignored.
+          format: date
+          example: 2022-12-01
+        debtor:
+          $ref: '#/components/schemas/CollectionMandateDebtor'
+        contract_reference:
+          maxLength: 256
+          minLength: 1
+          type: string
+          description: The contract reference attached to this mandate. This is optional metadata.If there is an existing mandate matching the scheme and with the same reference, this field will be ignored when provided.
+          example: CUST-1234
+      description: The SEPA Direct Debit collection mandate to be used.
     CollectionMandateDebtor:
       required:
       - iban
@@ -424,94 +500,16 @@ components:
           description: Token to fetch the previous page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no previous page.
           nullable: true
           example: eyJwIjoxfQ
-    CreateCollectionMandate:
+    CreateBulkCollections:
       required:
-      - reference
-      - scheme
+      - collections
       type: object
       properties:
-        reference:
-          pattern: ^[A-Za-z0-9+?/\-:().,'\s]{1,35}$
-          type: string
-          description: The unique mandate reference.
-          example: ABC123DEF
-        scheme:
-          type: string
-          description: The mandate scheme.
-          example: core
-          enum:
-          - b2b
-          - core
-        signature_date:
-          type: string
-          description: The mandate signature date, in ISO8601 format. The date must not be in the future. This field is only required in case of a new mandate. If there is an existing mandate matching the scheme and with the same reference, this field will be ignored.
-          format: date
-          example: 2022-12-01
-        debtor:
-          $ref: '#/components/schemas/CollectionMandateDebtor'
-        contract_reference:
-          maxLength: 256
-          minLength: 1
-          type: string
-          description: The contract reference attached to this mandate. This is optional metadata.If there is an existing mandate matching the scheme and with the same reference, this field will be ignored when provided.
-          example: CUST-1234
-      description: The SEPA Direct Debit collection mandate to be used.
-    CollectionMandate:
-      required:
-      - reference
-      - scheme
-      type: object
-      properties:
-        reference:
-          type: string
-          description: The unique mandate reference.
-          example: ABC123DEF
-        scheme:
-          type: string
-          description: The mandate scheme.
-          example: core
-          enum:
-          - b2b
-          - core
-      description: The SEPA Direct Debit collection mandate used.
-    CollectionMandateDebtorAddress:
-      required:
-      - city
-      - country
-      - postal_code
-      - street
-      type: object
-      properties:
-        street:
-          maxLength: 256
-          minLength: 1
-          type: string
-          description: Name of the street.
-          example: rue de la Boétie
-        building_number:
-          maxLength: 256
-          minLength: 1
-          type: string
-          description: Number of the building or house.
-          example: '42'
-        postal_code:
-          maxLength: 256
-          minLength: 1
-          type: string
-          description: Postal or zip code.
-          example: '75008'
-        city:
-          maxLength: 256
-          minLength: 1
-          type: string
-          description: Name of the city.
-          example: Paris
-        country:
-          pattern: ^[A-Z]{2}$
-          type: string
-          description: ISO3166-1 alpha-2 country code.
-          example: FR
-      description: The debtor's address. Mandatory only when the debtor's bank — more specifically, its BIC — is located in a non-EEA SEPA country or territory.
+        collections:
+          type: array
+          description: Collection creations to execute. There should not be more than 5000 collections in a single bulk, and there should be at least one.
+          items:
+            $ref: '#/components/schemas/CreateCollection'
     CreateCollection:
       required:
       - amount

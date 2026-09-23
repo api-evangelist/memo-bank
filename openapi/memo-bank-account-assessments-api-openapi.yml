@@ -1,13 +1,11 @@
 openapi: 3.2.0
 info:
-  title: Memo Bank Account assessments API
-  description: '**Welcome!** You can use our [Premium Bank API](https://memo.bank/produit/api/)  to check your company’s accounts, fetch your transactions, make SEPA transfers,  initiate SEPA direct debit collections, create virtual IBANs, and access most of Memo Bank features.
+  title: Memo Bank Account assessments API
+  description: '**Welcome!** You can use our Premium Bank API to check your company’s accounts, fetch your transactions, make SEPA transfers, initiate SEPA direct debit collections, create virtual IBANs, and access most of Memo Bank features.
 
     > info
 
-    > If you are a **third-party payment service provider** complying with PSD2, you may be more interested in our [NextGenPSD2 API](https://docs-nextgenpsd2.api.memo.bank).
-
-    '
+    > If you are a **third-party payment service provider** complying with PSD2, you may be more interested in our NextGenPSD2 API.'
   version: '2.0'
 servers:
 - url: https://api.memo.bank
@@ -16,22 +14,7 @@ servers:
   description: Sandbox
 tags:
 - name: Account assessments
-  description: 'Account assessments allow you to assess SEPA counterparty accounts before initiating transactions with them. An assessment provides:
-
-
-    * **Risk indicators**: Detection of fraudulent activity, suspicious patterns, and other risk signals.
-
-    * **Identification matching**: Verify that the account name or other identifiers match the value known by the account holder.
-
-    * **Account reachability**: Information about which payment schemes are supported by the account holder.
-
-
-    Account assessments are processed asynchronously: you need to listen to `account_assessment_completed` and `account_assessment_failed` webhook  events to know when its time to retrieve the assessment results.
-
-
-    This feature is subject to specific pricing, please reach out to your banker to get more information.
-
-    '
+  description: Account assessments allow you to assess SEPA counterparty accounts before initiating transactions with them.
 paths:
   /v2/account_assessments:
     post:
@@ -95,206 +78,6 @@ paths:
       - JWT: []
 components:
   schemas:
-    NameIdentification:
-      required:
-      - type
-      - value
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/IdentificationDiscriminator'
-      - type: object
-        properties:
-          value:
-            maxLength: 140
-            minLength: 1
-            type: string
-            description: Name to match.
-            example: John Doe
-    AccountAssessmentDiscriminator:
-      required:
-      - iban
-      - id
-      - status
-      type: object
-      properties:
-        id:
-          type: string
-          description: ID of the account assessment.
-          format: uuid
-          example: 61ccd037-8d95-4856-89e7-b043fb84ca26
-        status:
-          type: string
-          description: Status of the account assessment.
-          enum:
-          - pending
-          - completed
-          - failed
-        iban:
-          type: string
-          description: IBAN from the request.
-          example: FR7617338000014606038580616
-    CreateAccountAssessment:
-      required:
-      - iban
-      type: object
-      properties:
-        iban:
-          pattern: ^[A-Z]{2}[0-9]{2}[a-zA-Z0-9]{1,30}$
-          type: string
-          description: IBAN of the account to assess.
-          example: FR7617338000014606038580616
-        identifications:
-          type: array
-          description: List of identifications to match against the account.
-          items:
-            $ref: '#/components/schemas/Identification'
-          default: []
-    LeiIdentification:
-      required:
-      - type
-      - value
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/IdentificationDiscriminator'
-      - type: object
-        properties:
-          value:
-            pattern: ^[0-9A-Z]{18}[0-9]{2}$
-            type: string
-            description: LEI to match.
-            example: 984500F8B951A45B4034
-    SirenIdentification:
-      required:
-      - type
-      - value
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/IdentificationDiscriminator'
-      - type: object
-        properties:
-          value:
-            pattern: ^\d{9}$
-            type: string
-            description: SIREN to match.
-            example: '133535310'
-    NameIdentificationMatch:
-      required:
-      - identification
-      - status
-      - type
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/IdentificationMatchDiscriminator'
-      - type: object
-        properties:
-          status:
-            type: string
-            description: Status of the name match result.
-            enum:
-            - match
-            - close_match
-            - no_match
-            - no_answer_possible
-          matched_name:
-            type: string
-            description: Matched name, only present when status is `close_match` or `match`.
-            example: John Doe
-    SirenIdentificationMatch:
-      required:
-      - identification
-      - status
-      - type
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/IdentificationMatchDiscriminator'
-      - type: object
-        properties:
-          status:
-            type: string
-            description: Status of the match result.
-            enum:
-            - match
-            - no_match
-            - no_answer_possible
-    PendingAccountAssessment:
-      required:
-      - iban
-      - id
-      - status
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/AccountAssessmentDiscriminator'
-    LeiIdentificationMatch:
-      required:
-      - identification
-      - status
-      - type
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/IdentificationMatchDiscriminator'
-      - type: object
-        properties:
-          status:
-            type: string
-            description: Status of the match result.
-            enum:
-            - match
-            - no_match
-            - no_answer_possible
-    Identification:
-      type: object
-      discriminator:
-        propertyName: type
-        mapping:
-          name: '#/components/schemas/NameIdentification'
-          siren: '#/components/schemas/SirenIdentification'
-          lei: '#/components/schemas/LeiIdentification'
-      oneOf:
-      - $ref: '#/components/schemas/NameIdentification'
-      - $ref: '#/components/schemas/SirenIdentification'
-      - $ref: '#/components/schemas/LeiIdentification'
-    IdentificationMatch:
-      type: object
-      discriminator:
-        propertyName: type
-        mapping:
-          name: '#/components/schemas/NameIdentificationMatch'
-          siren: '#/components/schemas/SirenIdentificationMatch'
-          lei: '#/components/schemas/LeiIdentificationMatch'
-      oneOf:
-      - $ref: '#/components/schemas/NameIdentificationMatch'
-      - $ref: '#/components/schemas/SirenIdentificationMatch'
-      - $ref: '#/components/schemas/LeiIdentificationMatch'
-    IdentificationMatchDiscriminator:
-      required:
-      - identification
-      - type
-      type: object
-      properties:
-        type:
-          type: string
-          description: Type of matched identification.
-          enum:
-          - name
-          - siren
-          - lei
-        identification:
-          type: string
-          description: Matched identification.
-    IdentificationDiscriminator:
-      required:
-      - type
-      type: object
-      properties:
-        value:
-          type: string
-        type:
-          type: string
-          description: Type of identification to match.
-          enum:
-          - name
-          - siren
-          - lei
     Capability:
       required:
       - can_credit
@@ -318,6 +101,125 @@ components:
           type: boolean
           description: Whether the account's financial institution supports crediting accounts through this scheme.
           example: true
+    NameIdentificationMatch:
+      required:
+      - identification
+      - status
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/IdentificationMatchDiscriminator'
+      - type: object
+        properties:
+          status:
+            type: string
+            description: Status of the name match result.
+            enum:
+            - match
+            - close_match
+            - no_match
+            - no_answer_possible
+          matched_name:
+            type: string
+            description: Matched name, only present when status is `close_match` or `match`.
+            example: John Doe
+    SirenIdentification:
+      required:
+      - type
+      - value
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/IdentificationDiscriminator'
+      - type: object
+        properties:
+          value:
+            pattern: ^\d{9}$
+            type: string
+            description: SIREN to match.
+            example: '133535310'
+    AccountAssessmentDiscriminator:
+      required:
+      - iban
+      - id
+      - status
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the account assessment.
+          format: uuid
+          example: 61ccd037-8d95-4856-89e7-b043fb84ca26
+        status:
+          type: string
+          description: Status of the account assessment.
+          enum:
+          - pending
+          - completed
+          - failed
+        iban:
+          type: string
+          description: IBAN from the request.
+          example: FR7617338000014606038580616
+    NameIdentification:
+      required:
+      - type
+      - value
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/IdentificationDiscriminator'
+      - type: object
+        properties:
+          value:
+            maxLength: 140
+            minLength: 1
+            type: string
+            description: Name to match.
+            example: John Doe
+    IdentificationMatchDiscriminator:
+      required:
+      - identification
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of matched identification.
+          enum:
+          - name
+          - siren
+          - lei
+        identification:
+          type: string
+          description: Matched identification.
+    SirenIdentificationMatch:
+      required:
+      - identification
+      - status
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/IdentificationMatchDiscriminator'
+      - type: object
+        properties:
+          status:
+            type: string
+            description: Status of the match result.
+            enum:
+            - match
+            - no_match
+            - no_answer_possible
+    IdentificationMatch:
+      type: object
+      discriminator:
+        propertyName: type
+        mapping:
+          name: '#/components/schemas/NameIdentificationMatch'
+          siren: '#/components/schemas/SirenIdentificationMatch'
+          lei: '#/components/schemas/LeiIdentificationMatch'
+      oneOf:
+      - $ref: '#/components/schemas/NameIdentificationMatch'
+      - $ref: '#/components/schemas/SirenIdentificationMatch'
+      - $ref: '#/components/schemas/LeiIdentificationMatch'
     CompletedAccountAssessment:
       required:
       - bic
@@ -399,6 +301,42 @@ components:
             description: List of transaction types supported by the account's financial institution. Please note that if an institution supports a transaction type, it does not necessarily mean that the account itself supports it.
             items:
               $ref: '#/components/schemas/Capability'
+    CreateAccountAssessment:
+      required:
+      - iban
+      type: object
+      properties:
+        iban:
+          pattern: ^[A-Z]{2}[0-9]{2}[a-zA-Z0-9]{1,30}$
+          type: string
+          description: IBAN of the account to assess.
+          example: FR7617338000014606038580616
+        identifications:
+          type: array
+          description: List of identifications to match against the account.
+          items:
+            $ref: '#/components/schemas/Identification'
+          default: []
+    PendingAccountAssessment:
+      required:
+      - iban
+      - id
+      - status
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/AccountAssessmentDiscriminator'
+    Identification:
+      type: object
+      discriminator:
+        propertyName: type
+        mapping:
+          name: '#/components/schemas/NameIdentification'
+          siren: '#/components/schemas/SirenIdentification'
+          lei: '#/components/schemas/LeiIdentification'
+      oneOf:
+      - $ref: '#/components/schemas/NameIdentification'
+      - $ref: '#/components/schemas/SirenIdentification'
+      - $ref: '#/components/schemas/LeiIdentification'
     FailedAccountAssessment:
       required:
       - failure_code
@@ -415,6 +353,51 @@ components:
             description: Code that represents the failure reason when the account assessment has failed.
             enum:
             - invalid_iban
+    IdentificationDiscriminator:
+      required:
+      - type
+      type: object
+      properties:
+        value:
+          type: string
+        type:
+          type: string
+          description: Type of identification to match.
+          enum:
+          - name
+          - siren
+          - lei
+    LeiIdentificationMatch:
+      required:
+      - identification
+      - status
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/IdentificationMatchDiscriminator'
+      - type: object
+        properties:
+          status:
+            type: string
+            description: Status of the match result.
+            enum:
+            - match
+            - no_match
+            - no_answer_possible
+    LeiIdentification:
+      required:
+      - type
+      - value
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/IdentificationDiscriminator'
+      - type: object
+        properties:
+          value:
+            pattern: ^[0-9A-Z]{18}[0-9]{2}$
+            type: string
+            description: LEI to match.
+            example: 984500F8B951A45B4034
 x-topics:
 - title: Getting started
   content: 'To get started with our Premium Bank API, talk to your banker first. He or she needs  to activate the API feature on your Memo Bank workspace.

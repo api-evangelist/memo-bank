@@ -1,13 +1,11 @@
 openapi: 3.2.0
 info:
-  title: Memo Bank Accounts API
-  description: '**Welcome!** You can use our [Premium Bank API](https://memo.bank/produit/api/)  to check your company’s accounts, fetch your transactions, make SEPA transfers,  initiate SEPA direct debit collections, create virtual IBANs, and access most of Memo Bank features.
+  title: Memo Bank Accounts API
+  description: '**Welcome!** You can use our Premium Bank API to check your company’s accounts, fetch your transactions, make SEPA transfers, initiate SEPA direct debit collections, create virtual IBANs, and access most of Memo Bank features.
 
     > info
 
-    > If you are a **third-party payment service provider** complying with PSD2, you may be more interested in our [NextGenPSD2 API](https://docs-nextgenpsd2.api.memo.bank).
-
-    '
+    > If you are a **third-party payment service provider** complying with PSD2, you may be more interested in our NextGenPSD2 API.'
   version: '2.0'
 servers:
 - url: https://api.memo.bank
@@ -16,9 +14,7 @@ servers:
   description: Sandbox
 tags:
 - name: Accounts
-  description: 'Accounts are any bank account that your company owns: current account, ring-fenced account,  settlement account, specially dedicated account, trust account, meal voucher account,  booster account, etc. They boil down to a list of [transactions](#endpoint-transactions) and a balance.
-
-    '
+  description: 'Accounts are any bank account that your company owns: current account, ring-fenced account, settlement account, specially dedicated account, trust account, meal voucher account, booster account, etc. They boil down to a list of transactions and a balance.'
 paths:
   /v2/accounts/{id}:
     get:
@@ -86,6 +82,36 @@ paths:
       - JWT: []
 components:
   schemas:
+    AccountPage:
+      required:
+      - has_next
+      - has_prev
+      - results
+      type: object
+      properties:
+        results:
+          type: array
+          description: Elements of the page.
+          items:
+            $ref: '#/components/schemas/Account'
+        has_prev:
+          type: boolean
+          description: Flag indicating if there is a previous page. Deprecated, use `prev_page_token` instead.
+          deprecated: true
+        has_next:
+          type: boolean
+          description: Flag indicating if there is a next page. Deprecated, use `next_page_token` instead.
+          deprecated: true
+        next_page_token:
+          type: string
+          description: Token to fetch the next page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no next page.
+          nullable: true
+          example: eyJwIjozfQ
+        prev_page_token:
+          type: string
+          description: Token to fetch the previous page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no previous page.
+          nullable: true
+          example: eyJwIjoxfQ
     Account:
       required:
       - balance
@@ -144,36 +170,6 @@ components:
         is_main:
           type: boolean
           description: 'Flag indicating if this account is the main account of your workspace. '
-    AccountPage:
-      required:
-      - has_next
-      - has_prev
-      - results
-      type: object
-      properties:
-        results:
-          type: array
-          description: Elements of the page.
-          items:
-            $ref: '#/components/schemas/Account'
-        has_prev:
-          type: boolean
-          description: Flag indicating if there is a previous page. Deprecated, use `prev_page_token` instead.
-          deprecated: true
-        has_next:
-          type: boolean
-          description: Flag indicating if there is a next page. Deprecated, use `next_page_token` instead.
-          deprecated: true
-        next_page_token:
-          type: string
-          description: Token to fetch the next page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no next page.
-          nullable: true
-          example: eyJwIjozfQ
-        prev_page_token:
-          type: string
-          description: Token to fetch the previous page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no previous page.
-          nullable: true
-          example: eyJwIjoxfQ
 x-topics:
 - title: Getting started
   content: 'To get started with our Premium Bank API, talk to your banker first. He or she needs  to activate the API feature on your Memo Bank workspace.

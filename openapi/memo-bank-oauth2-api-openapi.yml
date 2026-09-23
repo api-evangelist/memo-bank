@@ -1,7 +1,13 @@
 openapi: 3.2.0
 info:
-  title: Memo Bank Marketplace O Auth2 API
-  description: "The Memo Bank Marketplace allows third-party developers to build integrations for Memo Bank customers. \n\nMarketplace applications use the same API as our customers, with an OAuth2 layer on top to access resources on their behalf.\n\nThis documentation only covers the marketplace-specific concerns. For the remaining API reference, see the [Memo Bank API documentation](https://docs.api.memo.bank).\n"
+  title: Memo Bank Marketplace O Auth2 API
+  description: 'The Memo Bank Marketplace allows third-party developers to build integrations for Memo Bank customers.
+
+
+    Marketplace applications use the same API as our customers, with an OAuth2 layer on top to access resources on their behalf.
+
+
+    This documentation only covers the marketplace-specific concerns. For the remaining API reference, see the Memo Bank API documentation.'
   version: '1.0'
 servers:
 - url: https://api.memo.bank
@@ -10,9 +16,7 @@ servers:
   description: Sandbox
 tags:
 - name: OAuth2
-  description: 'OAuth2 token management endpoints.
-
-    '
+  description: OAuth2 token management endpoints.
 paths:
   /oauth2/token:
     post:
@@ -45,36 +49,6 @@ paths:
       - JWT: []
 components:
   schemas:
-    CreateOauth2TokenDTODiscriminator:
-      required:
-      - grant_type
-      type: object
-      properties:
-        grant_type:
-          type: string
-    AuthorizationCodeGrant:
-      required:
-      - client_id
-      - client_secret
-      - code
-      - redirect_uri
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/CreateOauth2TokenDTODiscriminator'
-      - type: object
-        properties:
-          code:
-            type: string
-            description: Authorization code received from the authorization endpoint.
-          redirect_uri:
-            type: string
-            description: Redirect URI used in the authorization request.
-          client_id:
-            type: string
-            description: OAuth2 client identifier.
-          client_secret:
-            type: string
-            description: OAuth2 client secret.
     OAuth2Token:
       required:
       - access_token
@@ -107,6 +81,13 @@ components:
           type: string
           description: ID of the connection this token is linked to.
           format: uuid
+    CreateOauth2TokenDTODiscriminator:
+      required:
+      - grant_type
+      type: object
+      properties:
+        grant_type:
+          type: string
     RefreshTokenGrant:
       required:
       - client_id
@@ -129,6 +110,29 @@ components:
           scope:
             type: string
             description: Space-separated list of scopes. Must be a subset of original scopes.
+    AuthorizationCodeGrant:
+      required:
+      - client_id
+      - client_secret
+      - code
+      - redirect_uri
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/CreateOauth2TokenDTODiscriminator'
+      - type: object
+        properties:
+          code:
+            type: string
+            description: Authorization code received from the authorization endpoint.
+          redirect_uri:
+            type: string
+            description: Redirect URI used in the authorization request.
+          client_id:
+            type: string
+            description: OAuth2 client identifier.
+          client_secret:
+            type: string
+            description: OAuth2 client secret.
 x-topics:
 - title: Getting started
   content: '[Contact us](mailto:openbanking@memo.bank) to apply for a marketplace application registration.

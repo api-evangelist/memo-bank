@@ -4,12 +4,10 @@ info:
   description: '**Memo Bank NextGenPSD2 API** allows Third Party Providers to access account information and initiate payments on behalf of customers.
 
 
-    The API follows [BerlinGroup NextGenPSD2 Implementation Guidelines](https://www.berlin-group.org/nextgenpsd2-downloads) as of version 1.3.11. This document describe our implementation choices and where we have drifted away from the guidelines.
+    The API follows BerlinGroup NextGenPSD2 Implementation Guidelines as of version 1.3.11. This document describe our implementation choices and where we have drifted away from the guidelines.
 
 
-    All non-absolute paths described in this document are relatives to the base URL of the server (e.g. https://api.memo.bank/nextgenpsd2 for the production environment).
-
-    '
+    All non-absolute paths described in this document are relatives to the base URL of the server (e.g. https://api.memo.bank/nextgenpsd2 for the production environment).'
   version: '1.0'
 servers:
 - url: https://api.memo.bank/nextgenpsd2
@@ -18,7 +16,7 @@ servers:
   description: Sandbox environment
 tags:
 - name: AIS
-  description: "Account Information Service.\n\n\nConsent is given using the **OAuth2 as a pre-step** authentication flow described in NextGenPSD2 specifications.\nThis means you don't have to manage consents using the dedicated endpoints (which are not implemented), \nbut only to redirect the PSU to our authorisation page (using `AIS` as OAuth2 scope).\nAfter performing a strong customer authentication, the PSU will be redirected to your redirect URI with an \n**authorisation code** that you can then exchange for an **access token**.\n\n\nThis **access token** will let you authenticate at the XS2A interface to request the PSU accounts balances and \ntransactions history.\n"
+  description: Account Information Service.
 paths:
   /v1/accounts/{accountId}/balances:
     get:
@@ -343,18 +341,6 @@ components:
       properties:
         transactionsDetails:
           $ref: '#/components/schemas/Transactions'
-    Amount:
-      required:
-      - amount
-      - currency
-      type: object
-      properties:
-        currency:
-          pattern: ^[A-Z]{3}$
-          type: string
-        amount:
-          pattern: ^-?[0-9]{1,14}(\.[0-9]{1,3})?$
-          type: string
     AccountReference:
       type: object
       properties:
@@ -370,17 +356,76 @@ components:
           type: string
         cashAccountType:
           type: string
-    LinksAccountReport:
+    TransactionExtras:
       required:
-      - account
+      - counterpartyAndRemittanceInformationUnstructured
+      type: object
+      properties:
+        counterpartyAndRemittanceInformationUnstructured:
+          type: string
+          description: Concatenates the counterparty name with the remittance information, to be used by consumers which only wants one field for both information.
+    CardAccountReport:
+      required:
+      - _links
+      type: object
+      properties:
+        _links:
+          $ref: '#/components/schemas/LinksCardAccountReport'
+        booked:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardTransaction'
+        pending:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardTransaction'
+    Address:
+      required:
+      - country
+      type: object
+      properties:
+        country:
+          pattern: ^[A-Z]{2}$
+          type: string
+        streetName:
+          maxLength: 70
+          minLength: 0
+          type: string
+        townName:
+          type: string
+        postCode:
+          type: string
+    CardAccountTransactionListResponse:
+      type: object
+      properties:
+        cardAccount:
+          $ref: '#/components/schemas/AccountReference'
+        debitAccounting:
+          type: boolean
+        cardTransactions:
+          $ref: '#/components/schemas/CardAccountReport'
+        balances:
+          type: array
+          items:
+            $ref: '#/components/schemas/Balance'
+    AccountBalancesResponse:
+      required:
+      - balances
       type: object
       properties:
         account:
-          $ref: '#/components/schemas/HrefType'
-        next:
-          $ref: '#/components/schemas/HrefType'
-        previous:
-          $ref: '#/components/schemas/HrefType'
+          $ref: '#/components/schemas/AccountReference'
+        balances:
+          type: array
+          items:
+            $ref: '#/components/schemas/Balance'
+    CardAccountDetailsResponse:
+      required:
+      - cardAccount
+      type: object
+      properties:
+        cardAccount:
+          $ref: '#/components/schemas/CardAccountDetails'
     LinksCardAccountReport:
       type: object
       properties:
@@ -390,13 +435,69 @@ components:
           $ref: '#/components/schemas/HrefType'
         previous:
           $ref: '#/components/schemas/HrefType'
-    AccountDetailsResponse:
+    CardAccountBalancesResponse:
       required:
-      - account
+      - balances
       type: object
       properties:
-        account:
-          $ref: '#/components/schemas/AccountDetails'
+        balances:
+          type: array
+          items:
+            $ref: '#/components/schemas/Balance'
+        cardAccount:
+          $ref: '#/components/schemas/AccountReference'
+        debitAccounting:
+          type: boolean
+    ReportExchangeRate:
+      required:
+      - exchangeRate
+      - quotationDate
+      - sourceCurrency
+      - targetCurrency
+      - unitCurrency
+      type: object
+      properties:
+        sourceCurrency:
+          pattern: ^[A-Z]{3}$
+          type: string
+        exchangeRate:
+          type: string
+        unitCurrency:
+          pattern: ^[A-Z]{3}$
+          type: string
+        targetCurrency:
+          pattern: ^[A-Z]{3}$
+          type: string
+        quotationDate:
+          type: string
+          format: date
+    Amount:
+      required:
+      - amount
+      - currency
+      type: object
+      properties:
+        currency:
+          pattern: ^[A-Z]{3}$
+          type: string
+        amount:
+          pattern: ^-?[0-9]{1,14}(\.[0-9]{1,3})?$
+          type: string
+    HrefType:
+      type: object
+      properties:
+        href:
+          type: string
+    LinksAccountDetails:
+      required:
+      - balances
+      - transactions
+      type: object
+      properties:
+        balances:
+          $ref: '#/components/schemas/HrefType'
+        transactions:
+          $ref: '#/components/schemas/HrefType'
     Transactions:
       required:
       - _extras
@@ -459,42 +560,17 @@ components:
           type: string
         _extras:
           $ref: '#/components/schemas/TransactionExtras'
-    ReportExchangeRate:
-      required:
-      - exchangeRate
-      - quotationDate
-      - sourceCurrency
-      - targetCurrency
-      - unitCurrency
+    TransactionListResponse:
       type: object
       properties:
-        sourceCurrency:
-          pattern: ^[A-Z]{3}$
-          type: string
-        exchangeRate:
-          type: string
-        unitCurrency:
-          pattern: ^[A-Z]{3}$
-          type: string
-        targetCurrency:
-          pattern: ^[A-Z]{3}$
-          type: string
-        quotationDate:
-          type: string
-          format: date
-    CardAccountTransactionListResponse:
-      type: object
-      properties:
-        cardAccount:
+        account:
           $ref: '#/components/schemas/AccountReference'
-        debitAccounting:
-          type: boolean
-        cardTransactions:
-          $ref: '#/components/schemas/CardAccountReport'
         balances:
           type: array
           items:
             $ref: '#/components/schemas/Balance'
+        transactions:
+          $ref: '#/components/schemas/AccountReport'
     AccountReport:
       type: object
       properties:
@@ -508,87 +584,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Transactions'
-    CardTransaction:
-      required:
-      - cardAcceptorAddress
-      - cardTransactionId
-      - markupFee
-      - markupFeePercentage
-      - maskedPAN
-      - merchantCategoryCode
-      - transactionAmount
-      - transactionDate
-      - transactionDetails
-      type: object
-      properties:
-        transactionAmount:
-          $ref: '#/components/schemas/Amount'
-        cardTransactionId:
-          type: string
-        transactionDate:
-          type: string
-          format: date
-        bookingDate:
-          type: string
-          format: date
-        valueDate:
-          type: string
-          format: date
-        currencyExchange:
-          type: array
-          items:
-            $ref: '#/components/schemas/ReportExchangeRate'
-        originalAmount:
-          $ref: '#/components/schemas/Amount'
-        markupFee:
-          $ref: '#/components/schemas/Amount'
-        markupFeePercentage:
-          type: string
-        cardAcceptorId:
-          maxLength: 35
-          minLength: 0
-          type: string
-        cardAcceptorAddress:
-          $ref: '#/components/schemas/Address'
-        merchantCategoryCode:
-          maxLength: 4
-          minLength: 4
-          type: string
-        maskedPAN:
-          maxLength: 35
-          minLength: 0
-          type: string
-        transactionDetails:
-          maxLength: 1000
-          minLength: 0
-          type: string
-    Address:
-      required:
-      - country
-      type: object
-      properties:
-        country:
-          pattern: ^[A-Z]{2}$
-          type: string
-        streetName:
-          maxLength: 70
-          minLength: 0
-          type: string
-        townName:
-          type: string
-        postCode:
-          type: string
-    TransactionListResponse:
-      type: object
-      properties:
-        account:
-          $ref: '#/components/schemas/AccountReference'
-        balances:
-          type: array
-          items:
-            $ref: '#/components/schemas/Balance'
-        transactions:
-          $ref: '#/components/schemas/AccountReport'
     Balance:
       required:
       - balanceAmount
@@ -614,50 +609,6 @@ components:
         referenceDate:
           type: string
           format: date
-    TransactionExtras:
-      required:
-      - counterpartyAndRemittanceInformationUnstructured
-      type: object
-      properties:
-        counterpartyAndRemittanceInformationUnstructured:
-          type: string
-          description: Concatenates the counterparty name with the remittance information, to be used by consumers which only wants one field for both information.
-    AccountBalancesResponse:
-      required:
-      - balances
-      type: object
-      properties:
-        account:
-          $ref: '#/components/schemas/AccountReference'
-        balances:
-          type: array
-          items:
-            $ref: '#/components/schemas/Balance'
-    CardAccountReport:
-      required:
-      - _links
-      type: object
-      properties:
-        _links:
-          $ref: '#/components/schemas/LinksCardAccountReport'
-        booked:
-          type: array
-          items:
-            $ref: '#/components/schemas/CardTransaction'
-        pending:
-          type: array
-          items:
-            $ref: '#/components/schemas/CardTransaction'
-    LinksAccountDetails:
-      required:
-      - balances
-      - transactions
-      type: object
-      properties:
-        balances:
-          $ref: '#/components/schemas/HrefType'
-        transactions:
-          $ref: '#/components/schemas/HrefType'
     AccountDetails:
       required:
       - _links
@@ -722,15 +673,69 @@ components:
           maxLength: 140
           minLength: 0
           type: string
-    CardAccountListResponse:
+    CardTransaction:
       required:
-      - cardAccounts
+      - cardAcceptorAddress
+      - cardTransactionId
+      - markupFee
+      - markupFeePercentage
+      - maskedPAN
+      - merchantCategoryCode
+      - transactionAmount
+      - transactionDate
+      - transactionDetails
       type: object
       properties:
-        cardAccounts:
+        transactionAmount:
+          $ref: '#/components/schemas/Amount'
+        cardTransactionId:
+          type: string
+        transactionDate:
+          type: string
+          format: date
+        bookingDate:
+          type: string
+          format: date
+        valueDate:
+          type: string
+          format: date
+        currencyExchange:
           type: array
           items:
-            $ref: '#/components/schemas/CardAccountDetails'
+            $ref: '#/components/schemas/ReportExchangeRate'
+        originalAmount:
+          $ref: '#/components/schemas/Amount'
+        markupFee:
+          $ref: '#/components/schemas/Amount'
+        markupFeePercentage:
+          type: string
+        cardAcceptorId:
+          maxLength: 35
+          minLength: 0
+          type: string
+        cardAcceptorAddress:
+          $ref: '#/components/schemas/Address'
+        merchantCategoryCode:
+          maxLength: 4
+          minLength: 4
+          type: string
+        maskedPAN:
+          maxLength: 35
+          minLength: 0
+          type: string
+        transactionDetails:
+          maxLength: 1000
+          minLength: 0
+          type: string
+    AccountListResponse:
+      required:
+      - accounts
+      type: object
+      properties:
+        accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountDetails'
     CardAccountDetails:
       required:
       - _links
@@ -795,40 +800,33 @@ components:
             $ref: '#/components/schemas/Balance'
         _links:
           $ref: '#/components/schemas/LinksAccountDetails'
-    CardAccountDetailsResponse:
+    AccountDetailsResponse:
       required:
-      - cardAccount
+      - account
       type: object
       properties:
-        cardAccount:
-          $ref: '#/components/schemas/CardAccountDetails'
-    CardAccountBalancesResponse:
+        account:
+          $ref: '#/components/schemas/AccountDetails'
+    CardAccountListResponse:
       required:
-      - balances
+      - cardAccounts
       type: object
       properties:
-        balances:
+        cardAccounts:
           type: array
           items:
-            $ref: '#/components/schemas/Balance'
-        cardAccount:
-          $ref: '#/components/schemas/AccountReference'
-        debitAccounting:
-          type: boolean
-    AccountListResponse:
+            $ref: '#/components/schemas/CardAccountDetails'
+    LinksAccountReport:
       required:
-      - accounts
+      - account
       type: object
       properties:
-        accounts:
-          type: array
-          items:
-            $ref: '#/components/schemas/AccountDetails'
-    HrefType:
-      type: object
-      properties:
-        href:
-          type: string
+        account:
+          $ref: '#/components/schemas/HrefType'
+        next:
+          $ref: '#/components/schemas/HrefType'
+        previous:
+          $ref: '#/components/schemas/HrefType'
   securitySchemes:
     OAuth2:
       type: oauth2

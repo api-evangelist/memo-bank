@@ -1,0 +1,55 @@
+{
+  "provider": "memo-bank",
+  "sources": [
+    "_original/memo-bank-marketplace-api-openapi.yml",
+    "_original/memo-bank-nextgenpsd2-api-openapi.yml",
+    "_original/memo-bank-premium-bank-api-openapi.yml"
+  ],
+  "outputs": [
+    "memo-bank-oauth2-api-openapi.yml",
+    "memo-bank-ais-api-openapi.yml",
+    "memo-bank-pis-api-openapi.yml",
+    "memo-bank-account-assessments-api-openapi.yml",
+    "memo-bank-accounts-api-openapi.yml",
+    "memo-bank-attachments-api-openapi.yml",
+    "memo-bank-collections-api-openapi.yml",
+    "memo-bank-ibans-api-openapi.yml",
+    "memo-bank-mandate-signature-requests-api-openapi.yml",
+    "memo-bank-sandbox-api-openapi.yml",
+    "memo-bank-transactions-api-openapi.yml",
+    "memo-bank-transfers-api-openapi.yml",
+    "memo-bank-webhook-api-openapi.yml",
+    "memo-bank-webhooks-api-openapi.yml",
+    "memo-bank-wire-transfers-api-openapi.yml"
+  ],
+  "archived": [
+    "deleted 2 superseded output(s) from the previous generation"
+  ],
+  "errors": [],
+  "warnings": [],
+  "notes": [
+    "sourced from openapi/_original/ (3 archived document(s)); previously refined output at the top level was skipped rather than re-split",
+    "memo-bank-marketplace-api-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "memo-bank-nextgenpsd2-api-openapi.yml: upgraded openapi 3.0.1 -> OpenAPI 3.2.0",
+    "memo-bank-premium-bank-api-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "superseded outputs removed: memo-bank-iba-ns-api-openapi.yml, memo-bank-o-auth2-api-openapi.yml",
+    "apis.yml register: written (+2 apis, 15 total)"
+  ],
+  "skipped": [
+    "memo-bank-account-assessments-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "memo-bank-accounts-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "memo-bank-ais-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "memo-bank-attachments-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "memo-bank-collections-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "memo-bank-iba-ns-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "memo-bank-mandate-signature-requests-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "memo-bank-o-auth2-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "memo-bank-pis-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "memo-bank-sandbox-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "memo-bank-transactions-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "memo-bank-transfers-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "memo-bank-webhook-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "memo-bank-webhooks-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "memo-bank-wire-transfers-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
+}

@@ -1,13 +1,11 @@
 openapi: 3.2.0
 info:
-  title: Memo Bank IBA Ns API
-  description: '**Welcome!** You can use our [Premium Bank API](https://memo.bank/produit/api/)  to check your company’s accounts, fetch your transactions, make SEPA transfers,  initiate SEPA direct debit collections, create virtual IBANs, and access most of Memo Bank features.
+  title: Memo Bank IBA Ns API
+  description: '**Welcome!** You can use our Premium Bank API to check your company’s accounts, fetch your transactions, make SEPA transfers, initiate SEPA direct debit collections, create virtual IBANs, and access most of Memo Bank features.
 
     > info
 
-    > If you are a **third-party payment service provider** complying with PSD2, you may be more interested in our [NextGenPSD2 API](https://docs-nextgenpsd2.api.memo.bank).
-
-    '
+    > If you are a **third-party payment service provider** complying with PSD2, you may be more interested in our NextGenPSD2 API.'
   version: '2.0'
 servers:
 - url: https://api.memo.bank
@@ -16,16 +14,7 @@ servers:
   description: Sandbox
 tags:
 - name: IBANs
-  description: 'IBANs are identifiers for bank accounts. There are two types of IBANs at Memo Bank:
-
-    * Main IBANs, which act as primary identifiers for a bank account.  There is exactly one main IBAN per bank account. You cannot delete it. When an account is closed, its main IBAN remains active only for  incoming transactions, which will be automatically rerouted to the  main account.
-
-    * Virtual IBANs, which are aliases for the main IBAN. They can be created, deactivated, and reactivated at will. When the account they are attached to  is closed, they get reattached to the main account.
-
-
-    All operations on IBANs are synchronous and effective immediately,  meaning that you can use a new IBAN to send or receive money right  after its creation.
-
-    '
+  description: IBANs are identifiers for bank accounts.
 paths:
   /v2/ibans:
     get:
@@ -183,36 +172,27 @@ paths:
       - JWT: []
 components:
   schemas:
-    IbanPage:
-      required:
-      - has_next
-      - has_prev
-      - results
+    UpdateIban:
       type: object
       properties:
-        results:
-          type: array
-          description: Elements of the page.
-          items:
-            $ref: '#/components/schemas/Iban'
-        has_prev:
-          type: boolean
-          description: Flag indicating if there is a previous page. Deprecated, use `prev_page_token` instead.
-          deprecated: true
-        has_next:
-          type: boolean
-          description: Flag indicating if there is a next page. Deprecated, use `next_page_token` instead.
-          deprecated: true
-        next_page_token:
+        name:
           type: string
-          description: Token to fetch the next page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no next page.
-          nullable: true
-          example: eyJwIjozfQ
-        prev_page_token:
+          description: New IBAN name.
+          example: customer no12345
+        status:
           type: string
-          description: Token to fetch the previous page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no previous page.
-          nullable: true
-          example: eyJwIjoxfQ
+          description: New IBAN status.
+          enum:
+          - active
+          - inactive
+        allow_collections:
+          type: boolean
+          description: New value for whether or not to accept incoming collections on this IBAN.
+        account_id:
+          type: string
+          description: ID of the account to which the IBAN should point.
+          format: uuid
+          example: 29883c3d-0b11-4c38-91b0-af9018cc5b14
     Iban:
       required:
       - account_id
@@ -265,6 +245,36 @@ components:
           type: boolean
           description: Whether or not this IBAN has been deleted.
           example: false
+    IbanPage:
+      required:
+      - has_next
+      - has_prev
+      - results
+      type: object
+      properties:
+        results:
+          type: array
+          description: Elements of the page.
+          items:
+            $ref: '#/components/schemas/Iban'
+        has_prev:
+          type: boolean
+          description: Flag indicating if there is a previous page. Deprecated, use `prev_page_token` instead.
+          deprecated: true
+        has_next:
+          type: boolean
+          description: Flag indicating if there is a next page. Deprecated, use `next_page_token` instead.
+          deprecated: true
+        next_page_token:
+          type: string
+          description: Token to fetch the next page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no next page.
+          nullable: true
+          example: eyJwIjozfQ
+        prev_page_token:
+          type: string
+          description: Token to fetch the previous page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no previous page.
+          nullable: true
+          example: eyJwIjoxfQ
     CreateIban:
       required:
       - account_id
@@ -284,27 +294,6 @@ components:
           type: boolean
           description: Whether or not to accept incoming collections on this IBAN.
           default: true
-    UpdateIban:
-      type: object
-      properties:
-        name:
-          type: string
-          description: New IBAN name.
-          example: customer no12345
-        status:
-          type: string
-          description: New IBAN status.
-          enum:
-          - active
-          - inactive
-        allow_collections:
-          type: boolean
-          description: New value for whether or not to accept incoming collections on this IBAN.
-        account_id:
-          type: string
-          description: ID of the account to which the IBAN should point.
-          format: uuid
-          example: 29883c3d-0b11-4c38-91b0-af9018cc5b14
 x-topics:
 - title: Getting started
   content: 'To get started with our Premium Bank API, talk to your banker first. He or she needs  to activate the API feature on your Memo Bank workspace.

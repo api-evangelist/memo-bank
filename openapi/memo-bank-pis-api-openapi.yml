@@ -4,12 +4,10 @@ info:
   description: '**Memo Bank NextGenPSD2 API** allows Third Party Providers to access account information and initiate payments on behalf of customers.
 
 
-    The API follows [BerlinGroup NextGenPSD2 Implementation Guidelines](https://www.berlin-group.org/nextgenpsd2-downloads) as of version 1.3.11. This document describe our implementation choices and where we have drifted away from the guidelines.
+    The API follows BerlinGroup NextGenPSD2 Implementation Guidelines as of version 1.3.11. This document describe our implementation choices and where we have drifted away from the guidelines.
 
 
-    All non-absolute paths described in this document are relatives to the base URL of the server (e.g. https://api.memo.bank/nextgenpsd2 for the production environment).
-
-    '
+    All non-absolute paths described in this document are relatives to the base URL of the server (e.g. https://api.memo.bank/nextgenpsd2 for the production environment).'
   version: '1.0'
 servers:
 - url: https://api.memo.bank/nextgenpsd2
@@ -18,7 +16,7 @@ servers:
   description: Sandbox environment
 tags:
 - name: PIS
-  description: "Payment Initiation Service.\n\n\nPayment initiation is done using the **integrated OAuth2** authentication flow described in NextGenPSD2\nspecifications.\nThis means you first have to initiate a payment using the dedicated endpoint, then redirect the PSU to our \nauthorisation page following the link present in the response (using `PIS:{paymentId}` as OAuth2 scope).\nAfter performing a strong customer authentication, the PSU will be redirected to your redirect URI with an\n**authorisation code** that you can then exchange for an **access token**.\n\n\nThis **access token** is only needed to cancel a payment on behalf a PSU (this does not require a strong\ncustomer authentication). It is not needed to retrieve the current status of a payment.\n"
+  description: Payment Initiation Service.
 paths:
   /v1/{payment-service}/{payment-product}/{paymentId}:
     get:
@@ -65,7 +63,7 @@ paths:
     delete:
       tags:
       - PIS
-      summary: Cancel a payment.
+      summary: Cancel a payment
       operationId: cancelPayment
       parameters:
       - name: payment-service
@@ -188,106 +186,22 @@ paths:
                 $ref: '#/components/schemas/PaymentInitationRequestResponseMinus201'
 components:
   schemas:
-    PaymentInitiationCancelResponseMinus202:
+    Address:
       required:
-      - transactionStatus
+      - country
       type: object
       properties:
-        transactionStatus:
+        country:
+          pattern: ^[A-Z]{2}$
           type: string
-          enum:
-          - ACSC
-          - RCVD
-          - PDNG
-          - RJCT
-          - CANC
-          - ACFC
-          - PART
-    LinksPaymentInitiation:
-      type: object
-      properties:
-        self:
-          $ref: '#/components/schemas/HrefType'
-        status:
-          $ref: '#/components/schemas/HrefType'
-    Amount:
-      required:
-      - amount
-      - currency
-      type: object
-      properties:
-        currency:
-          pattern: ^[A-Z]{3}$
-          type: string
-        amount:
-          pattern: ^-?[0-9]{1,14}(\.[0-9]{1,3})?$
-          type: string
-    AccountReference:
-      type: object
-      properties:
-        iban:
-          pattern: ^[A-Z]{2}[0-9]{2}[a-zA-Z0-9]{1,30}$
-          type: string
-        maskedPan:
-          maxLength: 35
-          minLength: 0
-          type: string
-        currency:
-          pattern: ^[A-Z]{3}$
-          type: string
-        cashAccountType:
-          type: string
-    PaymentInitiationBulkElementJson:
-      required:
-      - creditorAccount
-      - creditorName
-      - instructedAmount
-      type: object
-      properties:
-        instructedAmount:
-          $ref: '#/components/schemas/Amount'
-        creditorAccount:
-          $ref: '#/components/schemas/AccountReference'
-        creditorName:
+        streetName:
           maxLength: 70
           minLength: 0
           type: string
-        endToEndIdentification:
-          maxLength: 35
-          minLength: 0
+        townName:
           type: string
-        creditorAddress:
-          $ref: '#/components/schemas/Address'
-        remittanceInformationUnstructured:
-          maxLength: 140
-          minLength: 0
+        postCode:
           type: string
-    BulkPaymentInitiationWithStatusResponse:
-      required:
-      - debtorAccount
-      - payments
-      - transactionStatus
-      type: object
-      properties:
-        debtorAccount:
-          $ref: '#/components/schemas/AccountReference'
-        payments:
-          type: array
-          items:
-            $ref: '#/components/schemas/PaymentInitiationBulkElementJson'
-        requestedExecutionDate:
-          type: string
-          format: date
-        transactionStatus:
-          type: string
-          enum:
-          - ACSC
-          - RCVD
-          - PDNG
-          - RJCT
-          - CANC
-          - ACFC
-          - PART
     BulkPaymentInitiationJson:
       required:
       - debtorAccount
@@ -334,7 +248,119 @@ components:
         requestedExecutionDate:
           type: string
           format: date
-    PaymentInitiationStatusResponseMinus200Json:
+    PaymentInitiationBulkElementJson:
+      required:
+      - creditorAccount
+      - creditorName
+      - instructedAmount
+      type: object
+      properties:
+        instructedAmount:
+          $ref: '#/components/schemas/Amount'
+        creditorAccount:
+          $ref: '#/components/schemas/AccountReference'
+        creditorName:
+          maxLength: 70
+          minLength: 0
+          type: string
+        endToEndIdentification:
+          maxLength: 35
+          minLength: 0
+          type: string
+        creditorAddress:
+          $ref: '#/components/schemas/Address'
+        remittanceInformationUnstructured:
+          maxLength: 140
+          minLength: 0
+          type: string
+    HrefType:
+      type: object
+      properties:
+        href:
+          type: string
+    PaymentInitationRequestResponseMinus201:
+      required:
+      - _links
+      - paymentId
+      - transactionStatus
+      type: object
+      properties:
+        transactionStatus:
+          type: string
+          enum:
+          - ACSC
+          - RCVD
+          - PDNG
+          - RJCT
+          - CANC
+          - ACFC
+          - PART
+        paymentId:
+          type: string
+        _links:
+          $ref: '#/components/schemas/LinksPaymentInitiation'
+        psuMessage:
+          maxLength: 500
+          minLength: 0
+          type: string
+        tppMessages:
+          type: array
+          items:
+            $ref: '#/components/schemas/TppMessage'
+    BulkPaymentInitiationWithStatusResponse:
+      required:
+      - debtorAccount
+      - payments
+      - transactionStatus
+      type: object
+      properties:
+        debtorAccount:
+          $ref: '#/components/schemas/AccountReference'
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentInitiationBulkElementJson'
+        requestedExecutionDate:
+          type: string
+          format: date
+        transactionStatus:
+          type: string
+          enum:
+          - ACSC
+          - RCVD
+          - PDNG
+          - RJCT
+          - CANC
+          - ACFC
+          - PART
+    AccountReference:
+      type: object
+      properties:
+        iban:
+          pattern: ^[A-Z]{2}[0-9]{2}[a-zA-Z0-9]{1,30}$
+          type: string
+        maskedPan:
+          maxLength: 35
+          minLength: 0
+          type: string
+        currency:
+          pattern: ^[A-Z]{3}$
+          type: string
+        cashAccountType:
+          type: string
+    Amount:
+      required:
+      - amount
+      - currency
+      type: object
+      properties:
+        currency:
+          pattern: ^[A-Z]{3}$
+          type: string
+        amount:
+          pattern: ^-?[0-9]{1,14}(\.[0-9]{1,3})?$
+          type: string
+    PaymentInitiationCancelResponseMinus202:
       required:
       - transactionStatus
       type: object
@@ -349,14 +375,6 @@ components:
           - CANC
           - ACFC
           - PART
-        psuMessage:
-          maxLength: 500
-          minLength: 0
-          type: string
-        tppMessage:
-          type: array
-          items:
-            $ref: '#/components/schemas/TppMessage'
     PaymentInitiationWithStatusResponse:
       required:
       - creditorAccount
@@ -457,10 +475,15 @@ components:
           maxLength: 500
           minLength: 0
           type: string
-    PaymentInitationRequestResponseMinus201:
+    LinksPaymentInitiation:
+      type: object
+      properties:
+        self:
+          $ref: '#/components/schemas/HrefType'
+        status:
+          $ref: '#/components/schemas/HrefType'
+    PaymentInitiationStatusResponseMinus200Json:
       required:
-      - _links
-      - paymentId
       - transactionStatus
       type: object
       properties:
@@ -474,39 +497,14 @@ components:
           - CANC
           - ACFC
           - PART
-        paymentId:
-          type: string
-        _links:
-          $ref: '#/components/schemas/LinksPaymentInitiation'
         psuMessage:
           maxLength: 500
           minLength: 0
           type: string
-        tppMessages:
+        tppMessage:
           type: array
           items:
             $ref: '#/components/schemas/TppMessage'
-    Address:
-      required:
-      - country
-      type: object
-      properties:
-        country:
-          pattern: ^[A-Z]{2}$
-          type: string
-        streetName:
-          maxLength: 70
-          minLength: 0
-          type: string
-        townName:
-          type: string
-        postCode:
-          type: string
-    HrefType:
-      type: object
-      properties:
-        href:
-          type: string
   securitySchemes:
     OAuth2:
       type: oauth2

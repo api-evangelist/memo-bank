@@ -1,13 +1,11 @@
 openapi: 3.2.0
 info:
-  title: Memo Bank Webhooks API
-  description: '**Welcome!** You can use our [Premium Bank API](https://memo.bank/produit/api/)  to check your company’s accounts, fetch your transactions, make SEPA transfers,  initiate SEPA direct debit collections, create virtual IBANs, and access most of Memo Bank features.
+  title: Memo Bank Webhooks API
+  description: '**Welcome!** You can use our Premium Bank API to check your company’s accounts, fetch your transactions, make SEPA transfers, initiate SEPA direct debit collections, create virtual IBANs, and access most of Memo Bank features.
 
     > info
 
-    > If you are a **third-party payment service provider** complying with PSD2, you may be more interested in our [NextGenPSD2 API](https://docs-nextgenpsd2.api.memo.bank).
-
-    '
+    > If you are a **third-party payment service provider** complying with PSD2, you may be more interested in our NextGenPSD2 API.'
   version: '2.0'
 servers:
 - url: https://api.memo.bank
@@ -19,9 +17,7 @@ tags:
   description: 'Manage webhooks for your application. Webhooks allow you to receive real-time notifications when events occur on your Memo Bank workspace.
 
 
-    Please refer to the [Webhook](https://docs.api.memo.bank/group/webhook-webhook) section for more information.
-
-    '
+    Please refer to the Webhook section for more information.'
 paths:
   /v2/webhooks:
     get:
@@ -129,6 +125,31 @@ paths:
       - JWT: []
 components:
   schemas:
+    Webhook:
+      required:
+      - bearer_token
+      - id
+      - name
+      - url
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the webhook.
+          format: uuid
+          example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+        name:
+          type: string
+          description: Name of the webhook.
+          example: My Webhook
+        url:
+          type: string
+          description: URL to which webhook events are delivered.
+          example: https://example.com/webhooks
+        bearer_token:
+          type: string
+          description: Bearer token included in the Authorization header of webhook deliveries.
+          example: HlbgX7FlE8MlgYQjIu8U0WKaW
     WebhookPage:
       required:
       - has_next
@@ -159,31 +180,6 @@ components:
           description: Token to fetch the previous page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no previous page.
           nullable: true
           example: eyJwIjoxfQ
-    Webhook:
-      required:
-      - bearer_token
-      - id
-      - name
-      - url
-      type: object
-      properties:
-        id:
-          type: string
-          description: ID of the webhook.
-          format: uuid
-          example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
-        name:
-          type: string
-          description: Name of the webhook.
-          example: My Webhook
-        url:
-          type: string
-          description: URL to which webhook events are delivered.
-          example: https://example.com/webhooks
-        bearer_token:
-          type: string
-          description: Bearer token included in the Authorization header of webhook deliveries.
-          example: HlbgX7FlE8MlgYQjIu8U0WKaW
     CreateWebhook:
       required:
       - name
