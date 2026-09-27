@@ -1,6 +1,6 @@
 openapi: 3.2.0
 info:
-  title: Memo Bank IBA Ns API
+  title: Memo Bank IBANs API
   description: '**Welcome!** You can use our Premium Bank API to check your company’s accounts, fetch your transactions, make SEPA transfers, initiate SEPA direct debit collections, create virtual IBANs, and access most of Memo Bank features.
 
     > info
@@ -172,27 +172,6 @@ paths:
       - JWT: []
 components:
   schemas:
-    UpdateIban:
-      type: object
-      properties:
-        name:
-          type: string
-          description: New IBAN name.
-          example: customer no12345
-        status:
-          type: string
-          description: New IBAN status.
-          enum:
-          - active
-          - inactive
-        allow_collections:
-          type: boolean
-          description: New value for whether or not to accept incoming collections on this IBAN.
-        account_id:
-          type: string
-          description: ID of the account to which the IBAN should point.
-          format: uuid
-          example: 29883c3d-0b11-4c38-91b0-af9018cc5b14
     Iban:
       required:
       - account_id
@@ -275,6 +254,27 @@ components:
           description: Token to fetch the previous page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no previous page.
           nullable: true
           example: eyJwIjoxfQ
+    UpdateIban:
+      type: object
+      properties:
+        name:
+          type: string
+          description: New IBAN name.
+          example: customer no12345
+        status:
+          type: string
+          description: New IBAN status.
+          enum:
+          - active
+          - inactive
+        allow_collections:
+          type: boolean
+          description: New value for whether or not to accept incoming collections on this IBAN.
+        account_id:
+          type: string
+          description: ID of the account to which the IBAN should point.
+          format: uuid
+          example: 29883c3d-0b11-4c38-91b0-af9018cc5b14
     CreateIban:
       required:
       - account_id

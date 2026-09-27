@@ -60,26 +60,45 @@ paths:
         description: Sandbox
 components:
   schemas:
-    CreateIncomingCollectionMandateCreditor:
+    CreateIncomingTransfer:
+      required:
+      - amount
+      - local_iban
       type: object
       properties:
-        name:
-          maxLength: 256
-          minLength: 1
-          type: string
-          description: Name of the creditor.
-          example: John Doe
-        iban:
+        amount:
+          minimum: 1
+          type: integer
+          description: Amount of the transfer, in cents. The currency is always EURO.
+          format: int64
+          example: 500
+        local_iban:
           pattern: ^[A-Z]{2}[0-9]{2}[a-zA-Z0-9]{1,30}$
           type: string
-          description: IBAN of the creditor.
-          example: FR2512739000308553756377J95
-        sepa_identifier:
-          pattern: ^([A-Z]{2})([0-9]{2})ZZZ([A-Z0-9]{4,})$
+          description: Existing IBAN to be used as the destination of the transfer. Can be the main IBAN of an account or a virtual IBAN.
+          example: FR6430003000509825397888D64
+        message:
+          maxLength: 140
+          minLength: 1
           type: string
-          description: SEPA identifier of the creditor.
-          example: FR18ZZZ002305
-      description: The creditor associated with this mandate.
+          description: Message attached to this transfer, visible to all involved parties.
+          example: invoice no12345
+        end_to_end_id:
+          maxLength: 35
+          minLength: 1
+          pattern: '[a-zA-Z0-9\-\?\:\(\)\.\,\''\+\ ]{1,35}'
+          type: string
+          description: Unique identification to unambiguously identify the transaction. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the transaction.
+          example: b0bfb42baa2642c2af0ca3e880fcd590
+        counterparty_name:
+          type: string
+          description: Name of the debtor. Allow you to provide the name that will be used for the transaction. If not provided, a default value will be used.
+          example: John Doe
+        counterparty_iban:
+          pattern: ^[A-Z]{2}[0-9]{2}[a-zA-Z0-9]{1,30}$
+          type: string
+          description: IBAN of the debtor. Allow you to provide the IBAN that will be used for the transaction. If not provided, a default value will be used.
+          example: FR2512739000308553756377J95
     CreateIncomingCollectionMandate:
       type: object
       properties:
@@ -123,45 +142,26 @@ components:
           example: b0bfb42baa2642c2af0ca3e880fcd590
         mandate:
           $ref: '#/components/schemas/CreateIncomingCollectionMandate'
-    CreateIncomingTransfer:
-      required:
-      - amount
-      - local_iban
+    CreateIncomingCollectionMandateCreditor:
       type: object
       properties:
-        amount:
-          minimum: 1
-          type: integer
-          description: Amount of the transfer, in cents. The currency is always EURO.
-          format: int64
-          example: 500
-        local_iban:
-          pattern: ^[A-Z]{2}[0-9]{2}[a-zA-Z0-9]{1,30}$
-          type: string
-          description: Existing IBAN to be used as the destination of the transfer. Can be the main IBAN of an account or a virtual IBAN.
-          example: FR6430003000509825397888D64
-        message:
-          maxLength: 140
+        name:
+          maxLength: 256
           minLength: 1
           type: string
-          description: Message attached to this transfer, visible to all involved parties.
-          example: invoice no12345
-        end_to_end_id:
-          maxLength: 35
-          minLength: 1
-          pattern: '[a-zA-Z0-9\-\?\:\(\)\.\,\''\+\ ]{1,35}'
-          type: string
-          description: Unique identification to unambiguously identify the transaction. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the transaction.
-          example: b0bfb42baa2642c2af0ca3e880fcd590
-        counterparty_name:
-          type: string
-          description: Name of the debtor. Allow you to provide the name that will be used for the transaction. If not provided, a default value will be used.
+          description: Name of the creditor.
           example: John Doe
-        counterparty_iban:
+        iban:
           pattern: ^[A-Z]{2}[0-9]{2}[a-zA-Z0-9]{1,30}$
           type: string
-          description: IBAN of the debtor. Allow you to provide the IBAN that will be used for the transaction. If not provided, a default value will be used.
+          description: IBAN of the creditor.
           example: FR2512739000308553756377J95
+        sepa_identifier:
+          pattern: ^([A-Z]{2})([0-9]{2})ZZZ([A-Z0-9]{4,})$
+          type: string
+          description: SEPA identifier of the creditor.
+          example: FR18ZZZ002305
+      description: The creditor associated with this mandate.
 x-topics:
 - title: Getting started
   content: 'To get started with our Premium Bank API, talk to your banker first. He or she needs  to activate the API feature on your Memo Bank workspace.

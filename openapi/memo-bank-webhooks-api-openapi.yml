@@ -150,6 +150,20 @@ components:
           type: string
           description: Bearer token included in the Authorization header of webhook deliveries.
           example: HlbgX7FlE8MlgYQjIu8U0WKaW
+    CreateWebhook:
+      required:
+      - name
+      - url
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the webhook.
+          example: My Webhook
+        url:
+          type: string
+          description: URL to which webhook events will be delivered. Must use HTTPS.
+          example: https://example.com/webhooks
     WebhookPage:
       required:
       - has_next
@@ -180,20 +194,6 @@ components:
           description: Token to fetch the previous page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no previous page.
           nullable: true
           example: eyJwIjoxfQ
-    CreateWebhook:
-      required:
-      - name
-      - url
-      type: object
-      properties:
-        name:
-          type: string
-          description: Name of the webhook.
-          example: My Webhook
-        url:
-          type: string
-          description: URL to which webhook events will be delivered. Must use HTTPS.
-          example: https://example.com/webhooks
 x-topics:
 - title: Getting started
   content: 'To get started with our Premium Bank API, talk to your banker first. He or she needs  to activate the API feature on your Memo Bank workspace.
