@@ -49,6 +49,13 @@ paths:
       - JWT: []
 components:
   schemas:
+    CreateOauth2TokenDTODiscriminator:
+      required:
+      - grant_type
+      type: object
+      properties:
+        grant_type:
+          type: string
     RefreshTokenGrant:
       required:
       - client_id
@@ -71,29 +78,6 @@ components:
           scope:
             type: string
             description: Space-separated list of scopes. Must be a subset of original scopes.
-    AuthorizationCodeGrant:
-      required:
-      - client_id
-      - client_secret
-      - code
-      - redirect_uri
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/CreateOauth2TokenDTODiscriminator'
-      - type: object
-        properties:
-          code:
-            type: string
-            description: Authorization code received from the authorization endpoint.
-          redirect_uri:
-            type: string
-            description: Redirect URI used in the authorization request.
-          client_id:
-            type: string
-            description: OAuth2 client identifier.
-          client_secret:
-            type: string
-            description: OAuth2 client secret.
     OAuth2Token:
       required:
       - access_token
@@ -126,13 +110,29 @@ components:
           type: string
           description: ID of the connection this token is linked to.
           format: uuid
-    CreateOauth2TokenDTODiscriminator:
+    AuthorizationCodeGrant:
       required:
-      - grant_type
+      - client_id
+      - client_secret
+      - code
+      - redirect_uri
       type: object
-      properties:
-        grant_type:
-          type: string
+      allOf:
+      - $ref: '#/components/schemas/CreateOauth2TokenDTODiscriminator'
+      - type: object
+        properties:
+          code:
+            type: string
+            description: Authorization code received from the authorization endpoint.
+          redirect_uri:
+            type: string
+            description: Redirect URI used in the authorization request.
+          client_id:
+            type: string
+            description: OAuth2 client identifier.
+          client_secret:
+            type: string
+            description: OAuth2 client secret.
 x-topics:
 - title: Getting started
   content: '[Contact us](mailto:openbanking@memo.bank) to apply for a marketplace application registration.

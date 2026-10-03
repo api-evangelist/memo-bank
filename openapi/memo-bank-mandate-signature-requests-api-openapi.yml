@@ -315,6 +315,66 @@ paths:
       - JWT: []
 components:
   schemas:
+    CreateEmailMandateSignatureRequest:
+      required:
+      - debtor_email
+      - mode
+      - reference
+      - scheme
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/CreateMandateSignatureRequestDiscriminator'
+      - type: object
+        properties:
+          email_custom_message:
+            maxLength: 3000
+            minLength: 1
+            pattern: ^[a-zA-Zà-üÀ-Ü0-9€@&;.,?!()+\-'’"\s]*$
+            type: string
+            description: Custom text message that will be included in the email sent to the debtor.
+            example: Hi John Doe, here's a collection mandate to sign.
+    Address:
+      required:
+      - city
+      - country
+      - postal_code
+      - street
+      type: object
+      properties:
+        street:
+          type: string
+          description: Debtor's street name.
+          example: 1 rue Rivoli
+        postal_code:
+          type: string
+          description: Debtor's postal code.
+          example: '75004'
+        city:
+          type: string
+          description: Debtor's city.
+          example: Paris
+        country:
+          type: string
+          description: Debtor's country code.
+          example: FR
+      description: Debtor's address.
+    CreateMandateSignatureRequestDebtor:
+      type: object
+      properties:
+        name:
+          maxLength: 256
+          minLength: 1
+          type: string
+          description: Name of the debtor.
+          example: John Doe
+        iban:
+          pattern: ^[A-Z]{2}[0-9]{2}[a-zA-Z0-9]{1,30}$
+          type: string
+          description: IBAN of the debtor.
+          example: FR2512739000308553756377J95
+        address:
+          $ref: '#/components/schemas/CreateMandateSignatureRequestDebtorAddress'
+      description: Debtor data used to prefill the signing form. All fields are optional; the debtor can still edit them before signing.
     CreateRedirectMandateSignatureRequest:
       required:
       - debtor_email
@@ -383,58 +443,6 @@ components:
           type: string
           description: The email address of the debtor.
           example: foo@bar.com
-    CreateEmailMandateSignatureRequest:
-      required:
-      - debtor_email
-      - mode
-      - reference
-      - scheme
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/CreateMandateSignatureRequestDiscriminator'
-      - type: object
-        properties:
-          email_custom_message:
-            maxLength: 3000
-            minLength: 1
-            pattern: ^[a-zA-Zà-üÀ-Ü0-9€@&;.,?!()+\-'’"\s]*$
-            type: string
-            description: Custom text message that will be included in the email sent to the debtor.
-            example: Hi John Doe, here's a collection mandate to sign.
-    MandateSignatureRequestDebtor:
-      required:
-      - iban
-      - name
-      type: object
-      properties:
-        name:
-          type: string
-          description: Debtor's name.
-          example: John Doe
-        iban:
-          type: string
-          description: Debtor's IBAN.
-          example: FR2512739000308553756377J95
-        address:
-          $ref: '#/components/schemas/Address'
-      description: Debtor information filled when the request was signed. This is available when the request is completed.
-    CreateMandateSignatureRequestDebtor:
-      type: object
-      properties:
-        name:
-          maxLength: 256
-          minLength: 1
-          type: string
-          description: Name of the debtor.
-          example: John Doe
-        iban:
-          pattern: ^[A-Z]{2}[0-9]{2}[a-zA-Z0-9]{1,30}$
-          type: string
-          description: IBAN of the debtor.
-          example: FR2512739000308553756377J95
-        address:
-          $ref: '#/components/schemas/CreateMandateSignatureRequestDebtorAddress'
-      description: Debtor data used to prefill the signing form. All fields are optional; the debtor can still edit them before signing.
     CreateMandateSignatureRequestDebtorAddress:
       type: object
       properties:
@@ -462,6 +470,44 @@ components:
           description: ISO3166-1 alpha-2 country code.
           example: FR
       description: Debtor address used to prefill the signing form. All fields are optional.
+    MandateSignatureRequestPage:
+      required:
+      - has_next
+      - has_prev
+      - results
+      type: object
+      properties:
+        results:
+          type: array
+          description: Elements of the page.
+          items:
+            type: object
+            discriminator:
+              propertyName: mode
+              mapping:
+                email: '#/components/schemas/EmailMandateSignatureRequest'
+                redirect: '#/components/schemas/RedirectMandateSignatureRequest'
+            oneOf:
+            - $ref: '#/components/schemas/EmailMandateSignatureRequest'
+            - $ref: '#/components/schemas/RedirectMandateSignatureRequest'
+        has_prev:
+          type: boolean
+          description: Flag indicating if there is a previous page. Deprecated, use `prev_page_token` instead.
+          deprecated: true
+        has_next:
+          type: boolean
+          description: Flag indicating if there is a next page. Deprecated, use `next_page_token` instead.
+          deprecated: true
+        next_page_token:
+          type: string
+          description: Token to fetch the next page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no next page.
+          nullable: true
+          example: eyJwIjozfQ
+        prev_page_token:
+          type: string
+          description: Token to fetch the previous page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no previous page.
+          nullable: true
+          example: eyJwIjoxfQ
     EmailMandateSignatureRequest:
       required:
       - debtor_email
@@ -481,31 +527,6 @@ components:
             type: string
             description: Custom text message included in the email sent to the debtor.
             example: Hi John Doe, here's a collection mandate to sign.
-    Address:
-      required:
-      - city
-      - country
-      - postal_code
-      - street
-      type: object
-      properties:
-        street:
-          type: string
-          description: Debtor's street name.
-          example: 1 rue Rivoli
-        postal_code:
-          type: string
-          description: Debtor's postal code.
-          example: '75004'
-        city:
-          type: string
-          description: Debtor's city.
-          example: Paris
-        country:
-          type: string
-          description: Debtor's country code.
-          example: FR
-      description: Debtor's address.
     MandateSignatureRequestDiscriminator:
       required:
       - debtor_email
@@ -571,44 +592,6 @@ components:
           type: string
           description: The email address of the debtor.
           example: foo@bar.com
-    MandateSignatureRequestPage:
-      required:
-      - has_next
-      - has_prev
-      - results
-      type: object
-      properties:
-        results:
-          type: array
-          description: Elements of the page.
-          items:
-            type: object
-            discriminator:
-              propertyName: mode
-              mapping:
-                email: '#/components/schemas/EmailMandateSignatureRequest'
-                redirect: '#/components/schemas/RedirectMandateSignatureRequest'
-            oneOf:
-            - $ref: '#/components/schemas/EmailMandateSignatureRequest'
-            - $ref: '#/components/schemas/RedirectMandateSignatureRequest'
-        has_prev:
-          type: boolean
-          description: Flag indicating if there is a previous page. Deprecated, use `prev_page_token` instead.
-          deprecated: true
-        has_next:
-          type: boolean
-          description: Flag indicating if there is a next page. Deprecated, use `next_page_token` instead.
-          deprecated: true
-        next_page_token:
-          type: string
-          description: Token to fetch the next page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no next page.
-          nullable: true
-          example: eyJwIjozfQ
-        prev_page_token:
-          type: string
-          description: Token to fetch the previous page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no previous page.
-          nullable: true
-          example: eyJwIjoxfQ
     RedirectMandateSignatureRequest:
       required:
       - debtor_email
@@ -634,6 +617,23 @@ components:
             type: string
             description: URL the debtor is redirected to after signing.
             example: https://example.com/signed
+    MandateSignatureRequestDebtor:
+      required:
+      - iban
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+          description: Debtor's name.
+          example: John Doe
+        iban:
+          type: string
+          description: Debtor's IBAN.
+          example: FR2512739000308553756377J95
+        address:
+          $ref: '#/components/schemas/Address'
+      description: Debtor information filled when the request was signed. This is available when the request is completed.
 x-topics:
 - title: Getting started
   content: 'To get started with our Premium Bank API, talk to your banker first. He or she needs  to activate the API feature on your Memo Bank workspace.

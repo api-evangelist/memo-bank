@@ -125,6 +125,36 @@ paths:
       - JWT: []
 components:
   schemas:
+    WebhookPage:
+      required:
+      - has_next
+      - has_prev
+      - results
+      type: object
+      properties:
+        results:
+          type: array
+          description: Elements of the page.
+          items:
+            $ref: '#/components/schemas/Webhook'
+        has_prev:
+          type: boolean
+          description: Flag indicating if there is a previous page. Deprecated, use `prev_page_token` instead.
+          deprecated: true
+        has_next:
+          type: boolean
+          description: Flag indicating if there is a next page. Deprecated, use `next_page_token` instead.
+          deprecated: true
+        next_page_token:
+          type: string
+          description: Token to fetch the next page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no next page.
+          nullable: true
+          example: eyJwIjozfQ
+        prev_page_token:
+          type: string
+          description: Token to fetch the previous page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no previous page.
+          nullable: true
+          example: eyJwIjoxfQ
     Webhook:
       required:
       - bearer_token
@@ -164,36 +194,6 @@ components:
           type: string
           description: URL to which webhook events will be delivered. Must use HTTPS.
           example: https://example.com/webhooks
-    WebhookPage:
-      required:
-      - has_next
-      - has_prev
-      - results
-      type: object
-      properties:
-        results:
-          type: array
-          description: Elements of the page.
-          items:
-            $ref: '#/components/schemas/Webhook'
-        has_prev:
-          type: boolean
-          description: Flag indicating if there is a previous page. Deprecated, use `prev_page_token` instead.
-          deprecated: true
-        has_next:
-          type: boolean
-          description: Flag indicating if there is a next page. Deprecated, use `next_page_token` instead.
-          deprecated: true
-        next_page_token:
-          type: string
-          description: Token to fetch the next page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no next page.
-          nullable: true
-          example: eyJwIjozfQ
-        prev_page_token:
-          type: string
-          description: Token to fetch the previous page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no previous page.
-          nullable: true
-          example: eyJwIjoxfQ
 x-topics:
 - title: Getting started
   content: 'To get started with our Premium Bank API, talk to your banker first. He or she needs  to activate the API feature on your Memo Bank workspace.

@@ -334,6 +334,49 @@ paths:
         - AIS
 components:
   schemas:
+    AccountDetailsResponse:
+      required:
+      - account
+      type: object
+      properties:
+        account:
+          $ref: '#/components/schemas/AccountDetails'
+    AccountBalancesResponse:
+      required:
+      - balances
+      type: object
+      properties:
+        account:
+          $ref: '#/components/schemas/AccountReference'
+        balances:
+          type: array
+          items:
+            $ref: '#/components/schemas/Balance'
+    Balance:
+      required:
+      - balanceAmount
+      - balanceType
+      - creditLimitIncluded
+      - referenceDate
+      type: object
+      properties:
+        balanceAmount:
+          $ref: '#/components/schemas/Amount'
+        balanceType:
+          type: string
+          enum:
+          - closingBooked
+          - expected
+          - openingBooked
+          - interimAvailable
+          - interimBooked
+          - forwardAvailable
+          - nonInvoiced
+        creditLimitIncluded:
+          type: boolean
+        referenceDate:
+          type: string
+          format: date
     Amount:
       required:
       - amount
@@ -346,25 +389,29 @@ components:
         amount:
           pattern: ^-?[0-9]{1,14}(\.[0-9]{1,3})?$
           type: string
-    LinksAccountDetails:
+    TransactionExtras:
       required:
-      - balances
-      - transactions
+      - counterpartyAndRemittanceInformationUnstructured
       type: object
       properties:
-        balances:
-          $ref: '#/components/schemas/HrefType'
-        transactions:
-          $ref: '#/components/schemas/HrefType'
-    LinksCardAccountReport:
+        counterpartyAndRemittanceInformationUnstructured:
+          type: string
+          description: Concatenates the counterparty name with the remittance information, to be used by consumers which only wants one field for both information.
+    CardAccountReport:
+      required:
+      - _links
       type: object
       properties:
-        cardAccount:
-          $ref: '#/components/schemas/HrefType'
-        next:
-          $ref: '#/components/schemas/HrefType'
-        previous:
-          $ref: '#/components/schemas/HrefType'
+        _links:
+          $ref: '#/components/schemas/LinksCardAccountReport'
+        booked:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardTransaction'
+        pending:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardTransaction'
     ReportExchangeRate:
       required:
       - exchangeRate
@@ -388,206 +435,6 @@ components:
         quotationDate:
           type: string
           format: date
-    Transactions:
-      required:
-      - _extras
-      - batchIndicator
-      - bookingDate
-      - creditorName
-      - transactionAmount
-      - transactionId
-      - valueDate
-      type: object
-      properties:
-        transactionAmount:
-          $ref: '#/components/schemas/Amount'
-        transactionId:
-          type: string
-        endToEndId:
-          maxLength: 35
-          minLength: 0
-          type: string
-        batchIndicator:
-          type: boolean
-        batchNumberOfTransactions:
-          type: integer
-          format: int32
-        mandateId:
-          maxLength: 35
-          minLength: 0
-          type: string
-        bookingDate:
-          type: string
-          format: date
-        valueDate:
-          type: string
-          format: date
-        currencyExchange:
-          type: array
-          items:
-            $ref: '#/components/schemas/ReportExchangeRate'
-        creditorName:
-          maxLength: 70
-          minLength: 0
-          type: string
-        creditorAccount:
-          $ref: '#/components/schemas/AccountReference'
-        creditorAgent:
-          pattern: ^[A-Z]{6}[A-Z2-9][A-NP-Z0-9]([A-Z0-9]{3})?$
-          type: string
-        debtorName:
-          maxLength: 70
-          minLength: 0
-          type: string
-        debtorAccount:
-          $ref: '#/components/schemas/AccountReference'
-        debtorAgent:
-          pattern: ^[A-Z]{6}[A-Z2-9][A-NP-Z0-9]([A-Z0-9]{3})?$
-          type: string
-        remittanceInformationUnstructured:
-          maxLength: 140
-          minLength: 0
-          type: string
-        _extras:
-          $ref: '#/components/schemas/TransactionExtras'
-    CardAccountBalancesResponse:
-      required:
-      - balances
-      type: object
-      properties:
-        balances:
-          type: array
-          items:
-            $ref: '#/components/schemas/Balance'
-        cardAccount:
-          $ref: '#/components/schemas/AccountReference'
-        debitAccounting:
-          type: boolean
-    TransactionExtras:
-      required:
-      - counterpartyAndRemittanceInformationUnstructured
-      type: object
-      properties:
-        counterpartyAndRemittanceInformationUnstructured:
-          type: string
-          description: Concatenates the counterparty name with the remittance information, to be used by consumers which only wants one field for both information.
-    TransactionListResponse:
-      type: object
-      properties:
-        account:
-          $ref: '#/components/schemas/AccountReference'
-        balances:
-          type: array
-          items:
-            $ref: '#/components/schemas/Balance'
-        transactions:
-          $ref: '#/components/schemas/AccountReport'
-    TransactionDetailsResponse:
-      required:
-      - transactionsDetails
-      type: object
-      properties:
-        transactionsDetails:
-          $ref: '#/components/schemas/Transactions'
-    CardAccountDetails:
-      required:
-      - _links
-      - creditLimit
-      - currency
-      - debitAccounting
-      - displayName
-      - maskedPan
-      - name
-      - ownerName
-      - product
-      - resourceId
-      - status
-      - usage
-      type: object
-      properties:
-        maskedPan:
-          maxLength: 35
-          minLength: 0
-          type: string
-        currency:
-          pattern: ^[A-Z]{3}$
-          type: string
-        resourceId:
-          type: string
-        ownerName:
-          maxLength: 140
-          minLength: 0
-          type: string
-        name:
-          maxLength: 70
-          minLength: 0
-          type: string
-        displayName:
-          maxLength: 70
-          minLength: 0
-          type: string
-        product:
-          maxLength: 35
-          minLength: 0
-          type: string
-        debitAccounting:
-          type: boolean
-        status:
-          type: string
-          enum:
-          - enabled
-          - deleted
-          - blocked
-        usage:
-          maxLength: 4
-          minLength: 0
-          type: string
-          enum:
-          - PRIV
-          - ORGA
-        creditLimit:
-          $ref: '#/components/schemas/Amount'
-        balances:
-          type: array
-          items:
-            $ref: '#/components/schemas/Balance'
-        _links:
-          $ref: '#/components/schemas/LinksAccountDetails'
-    AccountDetailsResponse:
-      required:
-      - account
-      type: object
-      properties:
-        account:
-          $ref: '#/components/schemas/AccountDetails'
-    AccountReport:
-      type: object
-      properties:
-        _links:
-          $ref: '#/components/schemas/LinksAccountReport'
-        booked:
-          type: array
-          items:
-            $ref: '#/components/schemas/Transactions'
-        pending:
-          type: array
-          items:
-            $ref: '#/components/schemas/Transactions'
-    CardAccountReport:
-      required:
-      - _links
-      type: object
-      properties:
-        _links:
-          $ref: '#/components/schemas/LinksCardAccountReport'
-        booked:
-          type: array
-          items:
-            $ref: '#/components/schemas/CardTransaction'
-        pending:
-          type: array
-          items:
-            $ref: '#/components/schemas/CardTransaction'
     AccountDetails:
       required:
       - _links
@@ -652,6 +499,174 @@ components:
           maxLength: 140
           minLength: 0
           type: string
+    CardAccountTransactionListResponse:
+      type: object
+      properties:
+        cardAccount:
+          $ref: '#/components/schemas/AccountReference'
+        debitAccounting:
+          type: boolean
+        cardTransactions:
+          $ref: '#/components/schemas/CardAccountReport'
+        balances:
+          type: array
+          items:
+            $ref: '#/components/schemas/Balance'
+    CardAccountBalancesResponse:
+      required:
+      - balances
+      type: object
+      properties:
+        balances:
+          type: array
+          items:
+            $ref: '#/components/schemas/Balance'
+        cardAccount:
+          $ref: '#/components/schemas/AccountReference'
+        debitAccounting:
+          type: boolean
+    Transactions:
+      required:
+      - _extras
+      - batchIndicator
+      - bookingDate
+      - creditorName
+      - transactionAmount
+      - transactionId
+      - valueDate
+      type: object
+      properties:
+        transactionAmount:
+          $ref: '#/components/schemas/Amount'
+        transactionId:
+          type: string
+        endToEndId:
+          maxLength: 35
+          minLength: 0
+          type: string
+        batchIndicator:
+          type: boolean
+        batchNumberOfTransactions:
+          type: integer
+          format: int32
+        mandateId:
+          maxLength: 35
+          minLength: 0
+          type: string
+        bookingDate:
+          type: string
+          format: date
+        valueDate:
+          type: string
+          format: date
+        currencyExchange:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportExchangeRate'
+        creditorName:
+          maxLength: 70
+          minLength: 0
+          type: string
+        creditorAccount:
+          $ref: '#/components/schemas/AccountReference'
+        creditorAgent:
+          pattern: ^[A-Z]{6}[A-Z2-9][A-NP-Z0-9]([A-Z0-9]{3})?$
+          type: string
+        debtorName:
+          maxLength: 70
+          minLength: 0
+          type: string
+        debtorAccount:
+          $ref: '#/components/schemas/AccountReference'
+        debtorAgent:
+          pattern: ^[A-Z]{6}[A-Z2-9][A-NP-Z0-9]([A-Z0-9]{3})?$
+          type: string
+        remittanceInformationUnstructured:
+          maxLength: 140
+          minLength: 0
+          type: string
+        _extras:
+          $ref: '#/components/schemas/TransactionExtras'
+    Address:
+      required:
+      - country
+      type: object
+      properties:
+        country:
+          pattern: ^[A-Z]{2}$
+          type: string
+        streetName:
+          maxLength: 70
+          minLength: 0
+          type: string
+        townName:
+          type: string
+        postCode:
+          type: string
+    CardAccountDetails:
+      required:
+      - _links
+      - creditLimit
+      - currency
+      - debitAccounting
+      - displayName
+      - maskedPan
+      - name
+      - ownerName
+      - product
+      - resourceId
+      - status
+      - usage
+      type: object
+      properties:
+        maskedPan:
+          maxLength: 35
+          minLength: 0
+          type: string
+        currency:
+          pattern: ^[A-Z]{3}$
+          type: string
+        resourceId:
+          type: string
+        ownerName:
+          maxLength: 140
+          minLength: 0
+          type: string
+        name:
+          maxLength: 70
+          minLength: 0
+          type: string
+        displayName:
+          maxLength: 70
+          minLength: 0
+          type: string
+        product:
+          maxLength: 35
+          minLength: 0
+          type: string
+        debitAccounting:
+          type: boolean
+        status:
+          type: string
+          enum:
+          - enabled
+          - deleted
+          - blocked
+        usage:
+          maxLength: 4
+          minLength: 0
+          type: string
+          enum:
+          - PRIV
+          - ORGA
+        creditLimit:
+          $ref: '#/components/schemas/Amount'
+        balances:
+          type: array
+          items:
+            $ref: '#/components/schemas/Balance'
+        _links:
+          $ref: '#/components/schemas/LinksAccountDetails'
     CardTransaction:
       required:
       - cardAcceptorAddress
@@ -706,16 +721,60 @@ components:
           maxLength: 1000
           minLength: 0
           type: string
-    CardAccountDetailsResponse:
+    LinksAccountDetails:
       required:
-      - cardAccount
+      - balances
+      - transactions
+      type: object
+      properties:
+        balances:
+          $ref: '#/components/schemas/HrefType'
+        transactions:
+          $ref: '#/components/schemas/HrefType'
+    AccountReport:
+      type: object
+      properties:
+        _links:
+          $ref: '#/components/schemas/LinksAccountReport'
+        booked:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transactions'
+        pending:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transactions'
+    HrefType:
+      type: object
+      properties:
+        href:
+          type: string
+    LinksCardAccountReport:
       type: object
       properties:
         cardAccount:
-          $ref: '#/components/schemas/CardAccountDetails'
-    AccountBalancesResponse:
+          $ref: '#/components/schemas/HrefType'
+        next:
+          $ref: '#/components/schemas/HrefType'
+        previous:
+          $ref: '#/components/schemas/HrefType'
+    TransactionDetailsResponse:
       required:
-      - balances
+      - transactionsDetails
+      type: object
+      properties:
+        transactionsDetails:
+          $ref: '#/components/schemas/Transactions'
+    AccountListResponse:
+      required:
+      - accounts
+      type: object
+      properties:
+        accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountDetails'
+    TransactionListResponse:
       type: object
       properties:
         account:
@@ -724,19 +783,24 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Balance'
-    CardAccountTransactionListResponse:
+        transactions:
+          $ref: '#/components/schemas/AccountReport'
+    CardAccountDetailsResponse:
+      required:
+      - cardAccount
       type: object
       properties:
         cardAccount:
-          $ref: '#/components/schemas/AccountReference'
-        debitAccounting:
-          type: boolean
-        cardTransactions:
-          $ref: '#/components/schemas/CardAccountReport'
-        balances:
+          $ref: '#/components/schemas/CardAccountDetails'
+    CardAccountListResponse:
+      required:
+      - cardAccounts
+      type: object
+      properties:
+        cardAccounts:
           type: array
           items:
-            $ref: '#/components/schemas/Balance'
+            $ref: '#/components/schemas/CardAccountDetails'
     LinksAccountReport:
       required:
       - account
@@ -748,54 +812,6 @@ components:
           $ref: '#/components/schemas/HrefType'
         previous:
           $ref: '#/components/schemas/HrefType'
-    CardAccountListResponse:
-      required:
-      - cardAccounts
-      type: object
-      properties:
-        cardAccounts:
-          type: array
-          items:
-            $ref: '#/components/schemas/CardAccountDetails'
-    Balance:
-      required:
-      - balanceAmount
-      - balanceType
-      - creditLimitIncluded
-      - referenceDate
-      type: object
-      properties:
-        balanceAmount:
-          $ref: '#/components/schemas/Amount'
-        balanceType:
-          type: string
-          enum:
-          - closingBooked
-          - expected
-          - openingBooked
-          - interimAvailable
-          - interimBooked
-          - forwardAvailable
-          - nonInvoiced
-        creditLimitIncluded:
-          type: boolean
-        referenceDate:
-          type: string
-          format: date
-    HrefType:
-      type: object
-      properties:
-        href:
-          type: string
-    AccountListResponse:
-      required:
-      - accounts
-      type: object
-      properties:
-        accounts:
-          type: array
-          items:
-            $ref: '#/components/schemas/AccountDetails'
     AccountReference:
       type: object
       properties:
@@ -810,22 +826,6 @@ components:
           pattern: ^[A-Z]{3}$
           type: string
         cashAccountType:
-          type: string
-    Address:
-      required:
-      - country
-      type: object
-      properties:
-        country:
-          pattern: ^[A-Z]{2}$
-          type: string
-        streetName:
-          maxLength: 70
-          minLength: 0
-          type: string
-        townName:
-          type: string
-        postCode:
           type: string
   securitySchemes:
     OAuth2:
