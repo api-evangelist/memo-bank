@@ -1,0 +1,12 @@
+{
+ "url": "https://docs-marketplace.api.memo.bank/topic/marketplace-openapi-source.yaml",
+ "requested_url": "https://docs-marketplace.api.memo.bank/topic/marketplace-openapi-source.yaml",
+ "status": 200,
+ "content_type": "text/yaml; charset=utf-8",
+ "bytes": 9672,
+ "sha256": "ba994aa3e7d99c73cd04c3a1fcf91689c367be7301993827d8eb130fce3ec48e",
+ "fetched_at": "2026-10-04",
+ "fetched_by": "APIEvangelist-Harvest/1.0 (+https://apievangelist.com)",
+ "match": "byte-identical",
+ "note": "Re-fetched from the provider by verify-openapi-sources.py; the archived file is byte-identical to what the provider serves."
+}

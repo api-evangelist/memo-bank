@@ -1,0 +1,12 @@
+{
+ "url": "https://docs.api.memo.bank/topic/api-openapi-source.json",
+ "requested_url": "https://docs.api.memo.bank/topic/api-openapi-source.json",
+ "status": 200,
+ "content_type": "application/json; charset=utf-8",
+ "bytes": 177510,
+ "sha256": "e061d54903d8dc66427dcc6048e3dbb2109bb4932a9e47fa3bfecffd252db233",
+ "fetched_at": "2026-10-04",
+ "fetched_by": "APIEvangelist-Harvest/1.0 (+https://apievangelist.com)",
+ "match": "equivalent",
+ "note": "Re-fetched from the provider by verify-openapi-sources.py; the provider's current document describes the same operations (Jaccard 1.0), but the bytes differ, so the archive is an earlier or reformatted copy."
+}
