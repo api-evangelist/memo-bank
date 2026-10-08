@@ -90,3 +90,24 @@ gaps:
 - Transaction fees are PDF-only and not on the pricing page.
 - No self-serve signup or free trial for the API; a banker must activate it.
 - Two different uptime targets are published for the same service (99.9% and 99.99%).
+x-canonical:
+  generated: '2026-10-08'
+  vocabulary: all/0-working/economics/plans-canonical.yml
+  models:
+  - hybrid
+  units: []
+  plans:
+  - name: Payments Core
+    access: other
+    model: hybrid
+    model_how: derived
+    units: []
+    periods:
+    - month
+  - name: Payments Scale
+    access: other
+    model: hybrid
+    model_how: derived
+    units: []
+    periods:
+    - month
