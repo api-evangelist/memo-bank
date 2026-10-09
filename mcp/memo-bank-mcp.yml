@@ -189,3 +189,16 @@ constraints:
   agentic_note: 'A deliberately narrow agent surface for a bank: six read tools plus one additive write
     (attach a document). Payment initiation stays in the JWT-authenticated Premium Bank API and is not
     exposed to MCP clients.'
+rfc9728:
+  endpoint: https://api.memo.bank/api/apps/mcp/server
+  metadata_url: https://api.memo.bank/.well-known/oauth-protected-resource/api/apps/mcp/server
+  discovered_via: WWW-Authenticate resource_metadata on an anonymous POST initialize
+  fetched: '2026-09-25'
+  http_status: 200
+  content_type: application/json
+  document:
+    resource: https://api.memo.bank/api/apps/mcp/server
+    authorization_servers:
+    - https://api.memo.bank/api/apps/mcp/server
+    bearer_methods_supported:
+    - header
