@@ -1,17 +1,15 @@
 ---
-name: Authenticate a Memo Bank API request
-description: >-
-  Mint the per-request RS256 JWT that every Memo Bank Premium Bank API call requires, including the
-  request-binding claims that make the token single-use. Read this before any other Memo Bank skill - all of
-  them depend on it and none repeat it.
+name: memo-bank-authenticate-a-request
+description: Mint the per-request RS256 JWT that every Memo Bank Premium Bank API call requires, including the request-binding claims that make the token single-use. Read this before any other Memo Bank skill - all of them depend on it and none repeat it.
 api: openapi/memo-bank-premium-bank-api-openapi.yml
 operations:
-  - listAccounts
+- listAccounts
 generated: '2026-08-17'
 method: generated
 source:
-  - https://docs.api.memo.bank/authentication
-  - https://docs.api.memo.bank/topic/topic-getting-started
+- https://docs.api.memo.bank/authentication
+- https://docs.api.memo.bank/topic/topic-getting-started
+title: Authenticate a Memo Bank API request
 ---
 
 # Authenticate a Memo Bank API request

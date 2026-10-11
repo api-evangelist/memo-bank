@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/memo-bank/main/json-schema/memo-bank-failed-account-assessment-schema.json",
+  "title": "FailedAccountAssessment",
+  "x-generated": "2026-10-12",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/memo-bank-account-assessments-api-openapi.yml#/components/schemas/FailedAccountAssessment",
+  "required": [
+    "failure_code",
+    "iban",
+    "id",
+    "status"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "#/$defs/AccountAssessmentDiscriminator"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "failure_code": {
+          "type": "string",
+          "description": "Code that represents the failure reason when the account assessment has failed.",
+          "enum": [
+            "invalid_iban"
+          ]
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "AccountAssessmentDiscriminator": {
+      "required": [
+        "iban",
+        "id",
+        "status"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "ID of the account assessment.",
+          "format": "uuid"
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the account assessment.",
+          "enum": [
+            "pending",
+            "completed",
+            "failed"
+          ]
+        },
+        "iban": {
+          "type": "string",
+          "description": "IBAN from the request."
+        }
+      }
+    }
+  }
+}

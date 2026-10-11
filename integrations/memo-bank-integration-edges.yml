@@ -1,5 +1,5 @@
 generated: '2026-10-12'
-method: none
+method: searched
 source:
 - https://zapier.com/apps/memo-bank/integrations
 - https://n8n.io/integrations/memo-bank/
@@ -7,10 +7,743 @@ source:
 - https://monid.ai/tools/memo-bank
 checked:
 - https://composio.dev/toolkits/memo-bank
+- https://memo.bank/en/integrations
 - https://monid.ai/tools/memo-bank
 - https://n8n.io/integrations/memo-bank/
+- https://www.make.com/en/integrations/memo-bank
 - https://zapier.com/apps/memo-bank/integrations
-summary: null
+summary: 81 accounting/treasury tools named on Memo Bank's own integrations page, each connected through a listed
+  channel (EBICS, Bridge, Powens, Ponto, Jedeclare.com, Salt Edge). No Zapier/n8n/Make app listing found (Zapier
+  404, n8n 404, Make 403).
 marketplace_apps: []
-edges: []
+edges:
+- partner_name: Acasi
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Bridge (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Accountable
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Powens (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: ACD
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Jedeclare.com (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: ADP
+  partner: adp
+  partner_match: name-exact
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Jedeclare.com (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Agicap
+  partner: agicap
+  partner_match: name-exact
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Bridge (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Agiris
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Jedeclare.com (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Akuiteo
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Bridge (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Audaxis
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Ponto (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Azopio
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Powens (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Axonaut
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Bridge (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Bizyness
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Bridge (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Bobbee
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Powens (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Ça compte pour moi
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via EBICS (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Cashlab
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Powens (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Cegid
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via EBICS (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Cegid Exabanque
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via EBICS (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Cegid Loop
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via EBICS (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Cegid Quadra
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via EBICS (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Cegid Relations Bancaires
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via EBICS (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Chaintrust
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Bridge (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Clémentine
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via EBICS (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Cogilog
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Jedeclare.com (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Compta.com
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via EBICS (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Comptablib
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Powens (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Connexis
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via EBICS (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Cozy
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Powens (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: CPI Software
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via EBICS (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Dolibarr
+  partner: dolibarr
+  partner_match: name-exact
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Powens (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Dougs
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Powens (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: EBP
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Jedeclare.com (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: EIC
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Jedeclare.com (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Evoliz
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Bridge (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Finary
+  partner: finary
+  partner_match: name-exact
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Powens (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Fizen
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via EBICS (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Freebe
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Bridge (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Full
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Jedeclare.com (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Fygr
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Bridge (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Gest4u
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Powens (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Greenly
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Bridge (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Indy
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Bridge (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Inforce
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Jedeclare.com (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Ipaidthat
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Powens (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Iziago
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via EBICS (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Jedeclare.com
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Jedeclare.com (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: JePilote
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Powens (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Kafinea
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Powens (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Karlia
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Bridge (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Kyriba
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via EBICS (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Livli
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Powens (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Lucca
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Powens (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Macompta
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Powens (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Mata IO
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via EBICS (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Ma Tréso (Bpifrance)
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Powens (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: MEG
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Jedeclare.com (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Myunisoft
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Jedeclare.com (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Netcash
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via EBICS (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Netexcom
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Jedeclare.com (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Odoo
+  partner: odoo
+  partner_match: name-exact
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via EBICS (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Oracle NetSuite
+  partner: netsuite
+  partner_match: name-exact
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Salt Edge (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Pennylane
+  partner: pennylane
+  partner_match: name-exact
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via bridge (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Pulceo
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via EBICS (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Regate
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via EBICS (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Rocket Chart
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Powens (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Sage
+  partner: sage
+  partner_match: name-exact
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via EBICS (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Sage 1000
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via EBICS (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Sage 100
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via EBICS (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Sage Ciel
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via EBICS (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Sage Génération Experts
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via EBICS (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Sage X3
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via EBICS (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Sellsy
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Powens (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Silae
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Jedeclare.com (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Sinao
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Bridge (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Teogest
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Jedeclare.com (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Tiime
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Powens (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: transfertBANQUE
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Jedeclare.com (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: TurboPilot
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Bridge (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Turbo Suite Entreprise
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via EBICS (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Winancial
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Powens (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Zapier
+  partner: zapier
+  partner_match: name-exact
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Ponto (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Zenfirst
+  partner: null
+  partner_match: null
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Bridge (channel as listed on the Memo Bank integrations page)
+  operations: []
+- partner_name: Zoho Books
+  partner: zoho-books
+  partner_match: name-exact
+  type: claimed
+  evidence: https://memo.bank/en/integrations
+  direction: unknown
+  category: accounting-treasury bank feed
+  use_case: Bank feed connection via Ponto (channel as listed on the Memo Bank integrations page)
+  operations: []
 templates: []

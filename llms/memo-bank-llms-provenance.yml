@@ -1,0 +1,6 @@
+generated: '2026-10-12'
+method: probed
+generator: harvest-llms.py
+source: https://docs.api.memo.bank/llms.txt
+bytes: 6859
+note: saved verbatim; the provider's own document

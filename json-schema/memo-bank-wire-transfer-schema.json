@@ -1,0 +1,227 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/memo-bank/main/json-schema/memo-bank-wire-transfer-schema.json",
+  "title": "WireTransfer",
+  "x-generated": "2026-10-12",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/memo-bank-wire-transfers-api-openapi.yml#/components/schemas/WireTransfer",
+  "required": [
+    "beneficiary_account_identifier",
+    "id",
+    "instructed_amount",
+    "instructed_currency",
+    "local_iban",
+    "message",
+    "reference",
+    "status"
+  ],
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "ID of the wire transfer",
+      "format": "uuid"
+    },
+    "reference": {
+      "type": "string",
+      "description": "Unique reference, can be used to correlate with the resulting Transaction.",
+      "format": "uuid"
+    },
+    "instructed_amount": {
+      "type": "integer",
+      "description": "Amount of the wire transfer, in the smallest unit of the instructed currency.",
+      "format": "int64"
+    },
+    "instructed_currency": {
+      "type": "string",
+      "description": "Currency of the wire transfer, in ISO 4217 format."
+    },
+    "account_id": {
+      "type": "string",
+      "description": "ID of the account this wire transfer belongs to, it can be missing while we process it according to the local IBAN.",
+      "format": "uuid"
+    },
+    "local_iban": {
+      "type": "string",
+      "description": "IBAN used as a source of the wire transfer. It can be the main IBAN of an account or a virtual IBAN."
+    },
+    "beneficiary_account_identifier": {
+      "$ref": "#/$defs/AccountIdentifier"
+    },
+    "message": {
+      "type": "string",
+      "description": "Message attached to this wire transfer, visible to all involved parties."
+    },
+    "internal_note": {
+      "type": "string",
+      "description": "Internal note attached to this wire transfer, visible only in your Memo Bank workspace."
+    },
+    "uetr": {
+      "type": "string",
+      "description": "Unique End-to-end Transaction Reference for this wire transfer. This allows you to track and trace the transaction through tools like Swift GPI."
+    },
+    "custom_id": {
+      "type": "string",
+      "description": "Custom identifier attached to the transaction resulting from this wire transfer. It is not transmitted nor visible in your Memo Bank workspace. It can only be retrieved or used to search for transactions via Memo Bank API."
+    },
+    "custom_metadata": {
+      "type": "string",
+      "description": "Custom metadata attached to the transaction resulting from this wire transfer. It is not transmitted nor visible in your Memo Bank workspace and can only be retrieved via API."
+    },
+    "status": {
+      "type": "string",
+      "description": "Current status of the wire transfer.",
+      "enum": [
+        "pending",
+        "pending_attachment_required",
+        "authorized",
+        "confirmed",
+        "returned",
+        "failed"
+      ]
+    },
+    "failure_code": {
+      "type": "string",
+      "description": "Code that represents the failure reason when the wire transfer has failed.",
+      "enum": [
+        "insufficient_funds",
+        "execution_failure",
+        "maximum_amount_exceeded",
+        "current_account_not_found",
+        "transfer_to_same_account",
+        "transfer_to_owned_account_with_virtual_iban",
+        "transfer_from_saving_account_to_external_beneficiary",
+        "new_beneficiary_is_owned_iban",
+        "iban_and_bic_inconsistency",
+        "country_and_account_identifier_inconsistency",
+        "country_unavailable",
+        "currency_unavailable",
+        "amount_too_low",
+        "amount_too_high",
+        "invalid_account_identifier_for_country",
+        "invalid_currency_for_account",
+        "invalid_instructed_currency",
+        "wire_transfer_not_authorized_for_beneficiary",
+        "invalid_routing_code_for_country",
+        "missing_beneficiary_lei",
+        "beneficiary_bank_account_closed",
+        "beneficiary_bank_error",
+        "beneficiary_bank_invalid_bank_details",
+        "beneficiary_bank_refusal",
+        "intermediary_system_error",
+        "memo_error",
+        "memo_refusal",
+        "invalid_iban"
+      ]
+    }
+  },
+  "$defs": {
+    "AccountIdentifier": {
+      "type": "object",
+      "description": "Account identifier of the beneficiary.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/IbanAndBic"
+        },
+        {
+          "$ref": "#/$defs/AccountNumberAndBic"
+        },
+        {
+          "$ref": "#/$defs/AccountNumberAndRoutingCode"
+        }
+      ]
+    },
+    "AccountIdentifierDiscriminator": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "iban_and_bic",
+            "account_number_and_bic",
+            "account_number_and_routing_code"
+          ]
+        }
+      }
+    },
+    "AccountNumberAndBic": {
+      "required": [
+        "account_number",
+        "bic",
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/AccountIdentifierDiscriminator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "account_number": {
+              "type": "string"
+            },
+            "bic": {
+              "pattern": "^[A-Z0-9]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$",
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    "AccountNumberAndRoutingCode": {
+      "required": [
+        "account_number",
+        "routing_code",
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/AccountIdentifierDiscriminator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "account_number": {
+              "type": "string"
+            },
+            "routing_code": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    "IbanAndBic": {
+      "required": [
+        "bic",
+        "iban",
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/AccountIdentifierDiscriminator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "iban": {
+              "pattern": "^[A-Z]{2}[0-9]{2}[a-zA-Z0-9]{1,30}$",
+              "type": "string"
+            },
+            "bic": {
+              "pattern": "^[A-Z0-9]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$",
+              "type": "string"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

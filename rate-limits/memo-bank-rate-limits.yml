@@ -1,6 +1,7 @@
 generated: '2026-08-17'
 method: searched
 source: https://docs.api.memo.bank/topic/topic-rate-limiting
+name: Memo Bank API Rate Limits
 docs: https://docs.api.memo.bank/topic/topic-rate-limiting
 limit_count: 0
 note: >-

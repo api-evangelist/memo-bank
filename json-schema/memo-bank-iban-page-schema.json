@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/memo-bank/main/json-schema/memo-bank-iban-page-schema.json",
+  "title": "IbanPage",
+  "x-generated": "2026-10-12",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/memo-bank-ibans-api-openapi.yml#/components/schemas/IbanPage",
+  "required": [
+    "has_next",
+    "has_prev",
+    "results"
+  ],
+  "type": "object",
+  "properties": {
+    "results": {
+      "type": "array",
+      "description": "Elements of the page.",
+      "items": {
+        "$ref": "#/$defs/Iban"
+      }
+    },
+    "has_prev": {
+      "type": "boolean",
+      "description": "Flag indicating if there is a previous page. Deprecated, use `prev_page_token` instead.",
+      "deprecated": true
+    },
+    "has_next": {
+      "type": "boolean",
+      "description": "Flag indicating if there is a next page. Deprecated, use `next_page_token` instead.",
+      "deprecated": true
+    },
+    "next_page_token": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Token to fetch the next page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no next page."
+    },
+    "prev_page_token": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Token to fetch the previous page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no previous page."
+    }
+  },
+  "$defs": {
+    "Iban": {
+      "required": [
+        "account_id",
+        "allow_collections",
+        "iban",
+        "id",
+        "is_deleted",
+        "name",
+        "status",
+        "type"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "ID of the IBAN.",
+          "format": "uuid"
+        },
+        "account_id": {
+          "type": "string",
+          "description": "ID of the account this IBAN belongs to.",
+          "format": "uuid"
+        },
+        "iban": {
+          "type": "string",
+          "description": "Actual value of the IBAN."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the IBAN."
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the IBAN. It determines if an IBAN accepts incoming or outgoing transfers.",
+          "enum": [
+            "active",
+            "inactive"
+          ]
+        },
+        "type": {
+          "type": "string",
+          "description": "Flag indicating if this IBAN is the main IBAN of an account, or a virtual IBAN. Please note that main IBANs cannot be updated or deleted.",
+          "enum": [
+            "main",
+            "virtual"
+          ]
+        },
+        "allow_collections": {
+          "type": "boolean",
+          "description": "Whether or not this IBAN accepts incoming collections."
+        },
+        "is_deleted": {
+          "type": "boolean",
+          "description": "Whether or not this IBAN has been deleted."
+        }
+      }
+    }
+  }
+}

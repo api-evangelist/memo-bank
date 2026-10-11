@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/memo-bank/main/json-schema/memo-bank-refresh-token-grant-schema.json",
+  "title": "RefreshTokenGrant",
+  "x-generated": "2026-10-12",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/memo-bank-oauth2-api-openapi.yml#/components/schemas/RefreshTokenGrant",
+  "required": [
+    "client_id",
+    "client_secret",
+    "refresh_token"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "#/$defs/CreateOauth2TokenDTODiscriminator"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "refresh_token": {
+          "type": "string",
+          "description": "Refresh token received from a previous token request."
+        },
+        "client_id": {
+          "type": "string",
+          "description": "OAuth2 client identifier."
+        },
+        "client_secret": {
+          "type": "string",
+          "description": "OAuth2 client secret."
+        },
+        "scope": {
+          "type": "string",
+          "description": "Space-separated list of scopes. Must be a subset of original scopes."
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "CreateOauth2TokenDTODiscriminator": {
+      "required": [
+        "grant_type"
+      ],
+      "type": "object",
+      "properties": {
+        "grant_type": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/memo-bank/main/json-schema/memo-bank-create-email-mandate-signature-request-schema.json",
+  "title": "CreateEmailMandateSignatureRequest",
+  "x-generated": "2026-10-12",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/memo-bank-mandate-signature-requests-api-openapi.yml#/components/schemas/CreateEmailMandateSignatureRequest",
+  "required": [
+    "debtor_email",
+    "mode",
+    "reference",
+    "scheme"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "#/$defs/CreateMandateSignatureRequestDiscriminator"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "email_custom_message": {
+          "maxLength": 3000,
+          "minLength": 1,
+          "pattern": "^[a-zA-Zà-üÀ-Ü0-9€@&;.,?!()+\\-'’\"\\s]*$",
+          "type": "string",
+          "description": "Custom text message that will be included in the email sent to the debtor."
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "CreateMandateSignatureRequestDebtor": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string",
+          "description": "Name of the debtor."
+        },
+        "iban": {
+          "pattern": "^[A-Z]{2}[0-9]{2}[a-zA-Z0-9]{1,30}$",
+          "type": "string",
+          "description": "IBAN of the debtor."
+        },
+        "address": {
+          "$ref": "#/$defs/CreateMandateSignatureRequestDebtorAddress"
+        }
+      },
+      "description": "Debtor data used to prefill the signing form. All fields are optional; the debtor can still edit them before signing."
+    },
+    "CreateMandateSignatureRequestDebtorAddress": {
+      "type": "object",
+      "properties": {
+        "street": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string",
+          "description": "Name of the street."
+        },
+        "postal_code": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string",
+          "description": "Postal or zip code."
+        },
+        "city": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string",
+          "description": "Name of the city."
+        },
+        "country": {
+          "pattern": "^[A-Z]{2}$",
+          "type": "string",
+          "description": "ISO3166-1 alpha-2 country code."
+        }
+      },
+      "description": "Debtor address used to prefill the signing form. All fields are optional."
+    },
+    "CreateMandateSignatureRequestDiscriminator": {
+      "required": [
+        "debtor_email",
+        "mode",
+        "reference",
+        "scheme"
+      ],
+      "type": "object",
+      "properties": {
+        "reference": {
+          "pattern": "^[A-Za-z0-9+?/\\-:().,'\\s]{1,35}$",
+          "type": "string",
+          "description": "The unique mandate reference."
+        },
+        "scheme": {
+          "type": "string",
+          "description": "The mandate scheme.",
+          "enum": [
+            "b2b",
+            "core"
+          ]
+        },
+        "language": {
+          "type": "string",
+          "description": "The language used for the email and signature page for the debtor. This is optional.",
+          "default": "french",
+          "enum": [
+            "french",
+            "english"
+          ]
+        },
+        "mode": {
+          "type": "string",
+          "description": "Define the delivery strategy of this signature request.",
+          "enum": [
+            "email",
+            "redirect"
+          ]
+        },
+        "contract_reference": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string",
+          "description": "The contract reference that will be attached to the mandate. This is optional metadata."
+        },
+        "debtor": {
+          "$ref": "#/$defs/CreateMandateSignatureRequestDebtor"
+        },
+        "debtor_email": {
+          "maxLength": 256,
+          "minLength": 1,
+          "pattern": "^(?!.*\\.\\.)[a-zA-Z0-9._%+-]{1,250}@[a-zA-Z0-9.-]{2,250}\\.[a-zA-Z]{2,63}$",
+          "type": "string",
+          "description": "The email address of the debtor."
+        }
+      }
+    }
+  }
+}

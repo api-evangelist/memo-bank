@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/memo-bank/main/json-schema/memo-bank-create-incoming-collection-schema.json",
+  "title": "CreateIncomingCollection",
+  "x-generated": "2026-10-12",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/memo-bank-sandbox-api-openapi.yml#/components/schemas/CreateIncomingCollection",
+  "required": [
+    "amount",
+    "local_iban"
+  ],
+  "type": "object",
+  "properties": {
+    "amount": {
+      "minimum": 1,
+      "type": "integer",
+      "description": "Amount of the transfer, in cents. The currency is always EURO.",
+      "format": "int64"
+    },
+    "local_iban": {
+      "pattern": "^[A-Z]{2}[0-9]{2}[a-zA-Z0-9]{1,30}$",
+      "type": "string",
+      "description": "Existing IBAN to be used as the destination of the transfer. Can be the main IBAN of an account or a virtual IBAN."
+    },
+    "message": {
+      "maxLength": 140,
+      "minLength": 1,
+      "type": "string",
+      "description": "Message attached to this transfer, visible to all involved parties."
+    },
+    "end_to_end_id": {
+      "maxLength": 35,
+      "minLength": 1,
+      "pattern": "[a-zA-Z0-9\\-\\?\\:\\(\\)\\.\\,\\'\\+\\ ]{1,35}",
+      "type": "string",
+      "description": "Unique identification to unambiguously identify the transaction. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the transaction."
+    },
+    "mandate": {
+      "$ref": "#/$defs/CreateIncomingCollectionMandate"
+    }
+  },
+  "$defs": {
+    "CreateIncomingCollectionMandate": {
+      "type": "object",
+      "properties": {
+        "reference": {
+          "pattern": "^[A-Za-z0-9+?/\\-:().,'\\s]{1,35}$",
+          "type": "string",
+          "description": "The unique mandate reference."
+        },
+        "creditor": {
+          "$ref": "#/$defs/CreateIncomingCollectionMandateCreditor"
+        }
+      },
+      "description": "The SEPA Direct Debit collection mandate. Allow you to provide mandate information that will be used for the transaction. If not provided, default values will be used."
+    },
+    "CreateIncomingCollectionMandateCreditor": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string",
+          "description": "Name of the creditor."
+        },
+        "iban": {
+          "pattern": "^[A-Z]{2}[0-9]{2}[a-zA-Z0-9]{1,30}$",
+          "type": "string",
+          "description": "IBAN of the creditor."
+        },
+        "sepa_identifier": {
+          "pattern": "^([A-Z]{2})([0-9]{2})ZZZ([A-Z0-9]{4,})$",
+          "type": "string",
+          "description": "SEPA identifier of the creditor."
+        }
+      },
+      "description": "The creditor associated with this mandate."
+    }
+  }
+}

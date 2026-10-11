@@ -1,27 +1,25 @@
 ---
-name: Run a bulk payment batch
-description: >-
-  Submit thousands of Memo Bank transfers or collections as one batch, track aggregate and per-item progress,
-  and handle the validation errors that arrive asynchronously in bulk mode but synchronously for single
-  payments.
+name: memo-bank-run-a-bulk-payment-batch
+description: Submit thousands of Memo Bank transfers or collections as one batch, track aggregate and per-item progress, and handle the validation errors that arrive asynchronously in bulk mode but synchronously for single payments.
 api: openapi/memo-bank-premium-bank-api-openapi.yml
 operations:
-  - listAccounts
-  - listIbans
-  - createTransfersBulk
-  - getTransfersBulk
-  - getTransfersBulkItems
-  - createCollectionsBulk
-  - getCollectionsBulk
-  - getCollectionsBulkItems
-  - createWebhook
-  - getTransfer
-  - getCollection
+- listAccounts
+- listIbans
+- createTransfersBulk
+- getTransfersBulk
+- getTransfersBulkItems
+- createCollectionsBulk
+- getCollectionsBulk
+- getCollectionsBulkItems
+- createWebhook
+- getTransfer
+- getCollection
 generated: '2026-08-17'
 method: generated
 source:
-  - openapi/memo-bank-premium-bank-api-openapi.yml
-  - https://docs.api.memo.bank/topic/topic-idempotent-requests
+- openapi/memo-bank-premium-bank-api-openapi.yml
+- https://docs.api.memo.bank/topic/topic-idempotent-requests
+title: Run a bulk payment batch
 ---
 
 # Run a bulk payment batch

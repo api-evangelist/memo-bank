@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/memo-bank/main/json-schema/memo-bank-collection-schema.json",
+  "title": "Collection",
+  "x-generated": "2026-10-12",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/memo-bank-collections-api-openapi.yml#/components/schemas/Collection",
+  "required": [
+    "amount",
+    "currency",
+    "id",
+    "local_iban",
+    "mandate",
+    "reference",
+    "scheduled_date",
+    "status"
+  ],
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "ID of the collection.",
+      "format": "uuid"
+    },
+    "reference": {
+      "type": "string",
+      "description": "Unique reference, can be used to correlate with the resulting Transaction.",
+      "format": "uuid"
+    },
+    "amount": {
+      "type": "integer",
+      "description": "The collection amount, in cents.",
+      "format": "int64"
+    },
+    "currency": {
+      "type": "string",
+      "description": "Currency of the amount, in ISO 4217 format."
+    },
+    "mandate": {
+      "$ref": "#/$defs/CollectionMandate"
+    },
+    "scheduled_date": {
+      "type": "string",
+      "description": "The collection scheduled date, in ISO8601 format.",
+      "format": "date"
+    },
+    "local_iban": {
+      "type": "string",
+      "description": "IBAN credited or to be credited. It can be the main IBAN of an account or a virtual IBAN."
+    },
+    "account_id": {
+      "type": "string",
+      "description": "ID of the account this collection belongs to, it can be missing while we process it according to the local IBAN.",
+      "format": "uuid"
+    },
+    "status": {
+      "type": "string",
+      "description": "Current status of the collection.",
+      "enum": [
+        "pending",
+        "scheduled",
+        "confirmed",
+        "returned",
+        "canceled",
+        "failed"
+      ]
+    },
+    "failure_code": {
+      "type": "string",
+      "description": "Code that represents the failure reason when the collection has failed:\n- `invalid_mandate_iban`: The mandate's IBAN is invalid.\n- `unreachable_mandate_iban`: The mandate's IBAN is unreachable for the given scheme.\n- `missing_debtor_address`: The debtor address is missing and required for non-EEA SEPA countries.\n- `core_limit_exceeded`: The limit for CORE collections was exceeded.\n- `debtor_refusal`: The debtor has refused the collection.\n- `debtor_bank_account_closed`: The debtor's bank account is closed.\n- `debtor_bank_insufficient_funds`: The debtor's bank account has insufficient funds.\n- `debtor_bank_error`: The debtor's bank sent us an error.\n- `debtor_bank_invalid_bank_details`: The debtor's bank account does not exist or no longer exists.\n- `debtor_bank_refusal`: The debtor's bank has refused the collection.\n- `intermediary_system_error`: The interbank network sent us an error.\n- `memo_error`: Something went wrong on our side.\n- `memo_refusal`: We had to reject the collection.\n- `execution_failure`: Other or undefined pre-settlement execution failures.\n\nThe following codes can only be present on collections initiated as part of a bulk. \nWhen initiating a single collection, those codes will be returned as an error response \nand the collection won’t be created at all:\n- `account_cannot_receive_collections`: The account cannot receive collections.\n- `current_account_not_found`: The provided local IBAN does not exist.\n- `creditor_is_saving_account`: The provided local IBAN is a Booster account.\n- `no_sepa_creditor_identifier`: You need to setup a SEPA creditor identifier with your banker.\n- `mandate_info_missing`: New mandate information must be complete.\n- `mandate_iban_mismatch`: The mandate reference already exists but with a different IBAN.\n- `collection_to_same_account`: The local IBAN and the debtor IBAN can not be the same.\n",
+      "enum": [
+        "invalid_mandate_iban",
+        "unreachable_mandate_iban",
+        "missing_debtor_address",
+        "core_limit_exceeded",
+        "execution_failure",
+        "current_account_not_found",
+        "no_sepa_creditor_identifier",
+        "creditor_is_saving_account",
+        "mandate_info_missing",
+        "mandate_iban_mismatch",
+        "collection_to_same_account",
+        "debtor_refusal",
+        "debtor_bank_account_closed",
+        "debtor_bank_error",
+        "debtor_bank_insufficient_funds",
+        "debtor_bank_invalid_bank_details",
+        "debtor_bank_refusal",
+        "intermediary_system_error",
+        "memo_error",
+        "memo_refusal",
+        "account_cannot_receive_collections"
+      ]
+    },
+    "message": {
+      "type": "string",
+      "description": "Message attached to this collection, visible to all involved parties."
+    },
+    "end_to_end_id": {
+      "type": "string",
+      "description": "Unique identification to unambiguously identify the transaction. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the transaction."
+    },
+    "internal_note": {
+      "type": "string",
+      "description": "Internal note attached to this collection, visible only in your Memo Bank workspace."
+    },
+    "custom_id": {
+      "type": "string",
+      "description": "Custom identifier attached to the transaction resulting from this collection. It is not transmitted nor visible in your Memo Bank workspace. It can only be retrieved or used to search for transactions via Memo Bank API."
+    },
+    "custom_metadata": {
+      "type": "string",
+      "description": "Custom metadata attached to the transaction resulting from this collection. It is not transmitted nor visible in your Memo Bank workspace and can only be retrieved via API."
+    },
+    "return_transaction_id": {
+      "type": "string",
+      "description": "If the collection is returned, ID of the corresponding debit transaction.",
+      "format": "uuid"
+    }
+  },
+  "$defs": {
+    "CollectionMandate": {
+      "required": [
+        "reference",
+        "scheme"
+      ],
+      "type": "object",
+      "properties": {
+        "reference": {
+          "type": "string",
+          "description": "The unique mandate reference."
+        },
+        "scheme": {
+          "type": "string",
+          "description": "The mandate scheme.",
+          "enum": [
+            "b2b",
+            "core"
+          ]
+        }
+      },
+      "description": "The SEPA Direct Debit collection mandate used."
+    }
+  }
+}

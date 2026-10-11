@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/memo-bank/main/json-schema/memo-bank-create-webhook-schema.json",
+  "title": "CreateWebhook",
+  "x-generated": "2026-10-12",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/memo-bank-webhooks-api-openapi.yml#/components/schemas/CreateWebhook",
+  "required": [
+    "name",
+    "url"
+  ],
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the webhook."
+    },
+    "url": {
+      "type": "string",
+      "description": "URL to which webhook events will be delivered. Must use HTTPS."
+    }
+  }
+}

@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/memo-bank/main/json-schema/memo-bank-redirect-mandate-signature-request-schema.json",
+  "title": "RedirectMandateSignatureRequest",
+  "x-generated": "2026-10-12",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/memo-bank-mandate-signature-requests-api-openapi.yml#/components/schemas/RedirectMandateSignatureRequest",
+  "required": [
+    "debtor_email",
+    "id",
+    "is_deleted",
+    "language",
+    "mode",
+    "redirect_uri",
+    "reference",
+    "scheme",
+    "signature_url",
+    "status"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "#/$defs/MandateSignatureRequestDiscriminator"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "signature_url": {
+          "type": "string",
+          "description": "URL the debtor must visit to sign the mandate."
+        },
+        "redirect_uri": {
+          "type": "string",
+          "description": "URL the debtor is redirected to after signing."
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "Address": {
+      "required": [
+        "city",
+        "country",
+        "postal_code",
+        "street"
+      ],
+      "type": "object",
+      "properties": {
+        "street": {
+          "type": "string",
+          "description": "Debtor's street name."
+        },
+        "postal_code": {
+          "type": "string",
+          "description": "Debtor's postal code."
+        },
+        "city": {
+          "type": "string",
+          "description": "Debtor's city."
+        },
+        "country": {
+          "type": "string",
+          "description": "Debtor's country code."
+        }
+      },
+      "description": "Debtor's address."
+    },
+    "MandateSignatureRequestDebtor": {
+      "required": [
+        "iban",
+        "name"
+      ],
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Debtor's name."
+        },
+        "iban": {
+          "type": "string",
+          "description": "Debtor's IBAN."
+        },
+        "address": {
+          "$ref": "#/$defs/Address"
+        }
+      },
+      "description": "Debtor information filled when the request was signed. This is available when the request is completed."
+    },
+    "MandateSignatureRequestDiscriminator": {
+      "required": [
+        "debtor_email",
+        "id",
+        "is_deleted",
+        "language",
+        "mode",
+        "reference",
+        "scheme",
+        "status"
+      ],
+      "type": "object",
+      "properties": {
+        "reference": {
+          "pattern": "^[A-Za-z0-9+?/\\-:().,'\\s]{1,35}$",
+          "type": "string",
+          "description": "The unique mandate reference."
+        },
+        "id": {
+          "type": "string",
+          "description": "ID of the mandate signature request.",
+          "format": "uuid"
+        },
+        "scheme": {
+          "type": "string",
+          "description": "The mandate scheme.",
+          "enum": [
+            "b2b",
+            "core"
+          ]
+        },
+        "language": {
+          "type": "string",
+          "description": "The language used for the email and signature page for the debtor.",
+          "default": "french",
+          "enum": [
+            "french",
+            "english"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "description": "Current status of the mandate signature request.",
+          "enum": [
+            "sent",
+            "expired",
+            "completed"
+          ]
+        },
+        "mode": {
+          "type": "string",
+          "description": "Define the delivery strategy of this signature request.",
+          "enum": [
+            "email",
+            "redirect"
+          ]
+        },
+        "contract_reference": {
+          "type": "string",
+          "description": "The contract reference attached to the mandate. This is optional metadata."
+        },
+        "is_deleted": {
+          "type": "boolean",
+          "description": "Whether or not this mandate signature request has been deleted."
+        },
+        "debtor": {
+          "$ref": "#/$defs/MandateSignatureRequestDebtor"
+        },
+        "debtor_email": {
+          "type": "string",
+          "description": "The email address of the debtor."
+        }
+      }
+    }
+  }
+}

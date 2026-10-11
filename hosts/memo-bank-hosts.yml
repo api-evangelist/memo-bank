@@ -1,0 +1,104 @@
+generated: '2026-10-12'
+method: derived
+source: the pre-flight dossier, apis.yml pointers, spec servers, well-known, vendors -- nothing fetched here
+generator: derive-hosts.py
+summary:
+  hosts: 7
+  own: 6
+  other_domain: 0
+  platform: 1
+  roles:
+  - api
+  - identity
+  - portal
+  - source
+  - status
+  - support
+  - website
+hosts:
+- host: aide.memo.bank
+  found_by:
+  - pointer
+  - vendor-detect
+  types:
+  - Support
+  serves:
+  - support
+  vendor: helpscout
+  registrable_domain: memo.bank
+  role: support
+  relation: own
+- host: api.memo.bank
+  found_by:
+  - apis[]
+  types: []
+  serves:
+  - api
+  registrable_domain: memo.bank
+  role: api
+  relation: own
+- host: client.memo.bank
+  found_by:
+  - pointer
+  types:
+  - Login
+  serves: []
+  registrable_domain: memo.bank
+  role: identity
+  relation: own
+- host: docs.api.memo.bank
+  found_by:
+  - pointer
+  - apis[]
+  - vendor-detect
+  types:
+  - DeveloperPortal
+  - Documentation
+  - APIReference
+  - GettingStarted
+  - ChangeLog
+  - Deprecation
+  serves:
+  - docs
+  - cdn
+  vendor: cloudflare
+  registrable_domain: memo.bank
+  role: portal
+  relation: own
+- host: github.com
+  found_by:
+  - pointer
+  types:
+  - GitHubOrganization
+  serves: []
+  registrable_domain: github.com
+  role: source
+  relation: platform
+- host: memo.bank
+  found_by:
+  - pointer
+  - vendor-detect
+  types:
+  - Newsroom
+  - Website
+  - Blog
+  - Pricing
+  - SignUp
+  - TermsOfService
+  - PrivacyPolicy
+  - Compliance
+  serves:
+  - cdn
+  vendor: cloudfront
+  registrable_domain: memo.bank
+  role: website
+  relation: own
+- host: status.memo.bank
+  found_by:
+  - pointer
+  types:
+  - StatusPage
+  serves: []
+  registrable_domain: memo.bank
+  role: status
+  relation: own

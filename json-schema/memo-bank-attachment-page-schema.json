@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/memo-bank/main/json-schema/memo-bank-attachment-page-schema.json",
+  "title": "AttachmentPage",
+  "x-generated": "2026-10-12",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/memo-bank-attachments-api-openapi.yml#/components/schemas/AttachmentPage",
+  "required": [
+    "has_next",
+    "has_prev",
+    "results"
+  ],
+  "type": "object",
+  "properties": {
+    "results": {
+      "type": "array",
+      "description": "Elements of the page.",
+      "items": {
+        "$ref": "#/$defs/Attachment"
+      }
+    },
+    "has_prev": {
+      "type": "boolean",
+      "description": "Flag indicating if there is a previous page. Deprecated, use `prev_page_token` instead.",
+      "deprecated": true
+    },
+    "has_next": {
+      "type": "boolean",
+      "description": "Flag indicating if there is a next page. Deprecated, use `next_page_token` instead.",
+      "deprecated": true
+    },
+    "next_page_token": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Token to fetch the next page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no next page."
+    },
+    "prev_page_token": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Token to fetch the previous page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no previous page."
+    }
+  },
+  "$defs": {
+    "Attachment": {
+      "required": [
+        "date",
+        "filename",
+        "id",
+        "is_deleted",
+        "mime_type",
+        "size",
+        "transaction_id"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "ID of the attachment.",
+          "format": "uuid"
+        },
+        "transaction_id": {
+          "type": "string",
+          "description": "ID of the transaction this document is attached to.",
+          "format": "uuid"
+        },
+        "filename": {
+          "type": "string",
+          "description": "Name of the attached file."
+        },
+        "size": {
+          "type": "integer",
+          "description": "Size of the attached file in bytes.",
+          "format": "int64"
+        },
+        "mime_type": {
+          "type": "string",
+          "description": "Mime type of the attached file."
+        },
+        "date": {
+          "type": "string",
+          "description": "Date at which the file has been attached to a transaction.",
+          "format": "date-time"
+        },
+        "is_deleted": {
+          "type": "boolean",
+          "description": "Whether or not this attachment has been deleted."
+        }
+      }
+    }
+  }
+}

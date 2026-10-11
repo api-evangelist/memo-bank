@@ -4,7 +4,7 @@ OpenAPI file: https://docs.api.memo.bank/source.yaml
 
 ## Description
 
-This is version `2.0` of this API documentation. Last update on Jul 31, 2026.
+This is version `2.0` of this API documentation. Last update on Sep 16, 2026.
 **Welcome!** You can use our [Premium Bank API](https://memo.bank/produit/api/)  to check your company’s accounts, fetch your transactions, make SEPA transfers,  initiate SEPA direct debit collections, create virtual IBANs, and access most of Memo Bank features.
 > info
 > If you are a **third-party payment service provider** complying with PSD2, you may be more interested in our [NextGenPSD2 API](https://docs-nextgenpsd2.api.memo.bank).
@@ -21,30 +21,21 @@ This is version `2.0` of this API documentation. Last update on Jul 31, 2026.
 
 ### [Getting started](https://docs.api.memo.bank/topic/topic-getting-started.md)
 
-
 ### [Authentication](https://docs.api.memo.bank/authentication.md)
-
 
 ### [Idempotent requests](https://docs.api.memo.bank/topic/topic-idempotent-requests.md)
 
-
 ### [Errors](https://docs.api.memo.bank/topic/topic-errors.md)
-
 
 ### [Versioning and backwards compatibility](https://docs.api.memo.bank/topic/topic-versioning-and-backwards-compatibility.md)
 
-
 ### [Rate limiting](https://docs.api.memo.bank/topic/topic-rate-limiting.md)
-
 
 ### [API recipes](https://docs.api.memo.bank/topic/topic-api-recipes.md)
 
-
 ### [FAQ](https://docs.api.memo.bank/topic/topic-faq.md)
 
-
 ### [Sandbox](https://docs.api.memo.bank/topic/topic-sandbox.md)
-
 
 
 ## Endpoints

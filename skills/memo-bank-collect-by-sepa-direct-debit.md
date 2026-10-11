@@ -1,28 +1,27 @@
 ---
-name: Collect by SEPA Direct Debit with a signed mandate
-description: >-
-  Run the full Memo Bank direct debit lifecycle - obtain a signed SEPA mandate through a signature request,
-  schedule single and bulk collections against it, and handle returns including the debtor refusal path.
+name: memo-bank-collect-by-sepa-direct-debit
+description: Run the full Memo Bank direct debit lifecycle - obtain a signed SEPA mandate through a signature request, schedule single and bulk collections against it, and handle returns including the debtor refusal path.
 api: openapi/memo-bank-premium-bank-api-openapi.yml
 operations:
-  - listAccounts
-  - listIbans
-  - createMandateSignatureRequest
-  - getMandateSignatureRequest
-  - listMandateSignatureRequests
-  - renewMandateSignatureRequest
-  - deleteMandateSignatureRequest
-  - createCollection
-  - getCollection
-  - cancelCollection
-  - createCollectionsBulk
-  - getCollectionsBulk
-  - getCollectionsBulkItems
+- listAccounts
+- listIbans
+- createMandateSignatureRequest
+- getMandateSignatureRequest
+- listMandateSignatureRequests
+- renewMandateSignatureRequest
+- deleteMandateSignatureRequest
+- createCollection
+- getCollection
+- cancelCollection
+- createCollectionsBulk
+- getCollectionsBulk
+- getCollectionsBulkItems
 generated: '2026-08-17'
 method: generated
 source:
-  - openapi/memo-bank-premium-bank-api-openapi.yml
-  - https://docs.api.memo.bank/topic/topic-idempotent-requests
+- openapi/memo-bank-premium-bank-api-openapi.yml
+- https://docs.api.memo.bank/topic/topic-idempotent-requests
+title: Collect by SEPA Direct Debit with a signed mandate
 ---
 
 # Collect by SEPA Direct Debit with a signed mandate

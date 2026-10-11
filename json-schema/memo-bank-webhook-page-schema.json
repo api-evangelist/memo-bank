@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/memo-bank/main/json-schema/memo-bank-webhook-page-schema.json",
+  "title": "WebhookPage",
+  "x-generated": "2026-10-12",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/memo-bank-webhooks-api-openapi.yml#/components/schemas/WebhookPage",
+  "required": [
+    "has_next",
+    "has_prev",
+    "results"
+  ],
+  "type": "object",
+  "properties": {
+    "results": {
+      "type": "array",
+      "description": "Elements of the page.",
+      "items": {
+        "$ref": "#/$defs/Webhook"
+      }
+    },
+    "has_prev": {
+      "type": "boolean",
+      "description": "Flag indicating if there is a previous page. Deprecated, use `prev_page_token` instead.",
+      "deprecated": true
+    },
+    "has_next": {
+      "type": "boolean",
+      "description": "Flag indicating if there is a next page. Deprecated, use `next_page_token` instead.",
+      "deprecated": true
+    },
+    "next_page_token": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Token to fetch the next page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no next page."
+    },
+    "prev_page_token": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Token to fetch the previous page, to be passed in subsequent requests as the `page_token` query parameter. `null` when there is no previous page."
+    }
+  },
+  "$defs": {
+    "Webhook": {
+      "required": [
+        "bearer_token",
+        "id",
+        "name",
+        "url"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "ID of the webhook.",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the webhook."
+        },
+        "url": {
+          "type": "string",
+          "description": "URL to which webhook events are delivered."
+        },
+        "bearer_token": {
+          "type": "string",
+          "description": "Bearer token included in the Authorization header of webhook deliveries."
+        }
+      }
+    }
+  }
+}

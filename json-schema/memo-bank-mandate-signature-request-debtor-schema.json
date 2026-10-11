@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/memo-bank/main/json-schema/memo-bank-mandate-signature-request-debtor-schema.json",
+  "title": "MandateSignatureRequestDebtor",
+  "description": "Debtor information filled when the request was signed. This is available when the request is completed.",
+  "x-generated": "2026-10-12",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/memo-bank-mandate-signature-requests-api-openapi.yml#/components/schemas/MandateSignatureRequestDebtor",
+  "required": [
+    "iban",
+    "name"
+  ],
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Debtor's name."
+    },
+    "iban": {
+      "type": "string",
+      "description": "Debtor's IBAN."
+    },
+    "address": {
+      "$ref": "#/$defs/Address"
+    }
+  },
+  "$defs": {
+    "Address": {
+      "required": [
+        "city",
+        "country",
+        "postal_code",
+        "street"
+      ],
+      "type": "object",
+      "properties": {
+        "street": {
+          "type": "string",
+          "description": "Debtor's street name."
+        },
+        "postal_code": {
+          "type": "string",
+          "description": "Debtor's postal code."
+        },
+        "city": {
+          "type": "string",
+          "description": "Debtor's city."
+        },
+        "country": {
+          "type": "string",
+          "description": "Debtor's country code."
+        }
+      },
+      "description": "Debtor's address."
+    }
+  }
+}

@@ -1,0 +1,440 @@
+generated: '2026-10-12'
+method: derived
+generator: derive-vocabulary.py
+source:
+- openapi/memo-bank-account-assessments-api-openapi.yml
+- openapi/memo-bank-accounts-api-openapi.yml
+- openapi/memo-bank-ais-api-openapi.yml
+- openapi/memo-bank-attachments-api-openapi.yml
+- openapi/memo-bank-collections-api-openapi.yml
+vocabulary:
+  name: Memo Bank Domain Vocabulary
+  description: 'Terms declared by Memo Bank''s own API contract: its resource groups, objects and enumerations, with the contract''s definitions.
+    Derived, not authored.'
+  version: '2026-10-12'
+  terms:
+  - term: Account assessments
+    definition: Account assessments allow you to assess SEPA counterparty accounts before initiating transactions with them.
+    tags:
+    - Resource Group
+    source: openapi/memo-bank-account-assessments-api-openapi.yml
+  - term: Accounts
+    definition: 'Accounts are any bank account that your company owns: current account, ring-fenced account, settlement account, specially dedicated
+      account, trust account, meal voucher account, booster account, etc. They boil down to a list of transactions and a balance.'
+    tags:
+    - Resource Group
+    source: openapi/memo-bank-accounts-api-openapi.yml
+  - term: AIS
+    definition: Account Information Service.
+    tags:
+    - Resource Group
+    source: openapi/memo-bank-ais-api-openapi.yml
+  - term: Attachments
+    definition: Documents attached to transactions.
+    tags:
+    - Resource Group
+    source: openapi/memo-bank-attachments-api-openapi.yml
+  - term: Collections
+    definition: Collections are SEPA direct debit collections, including SEPA CORE direct debits and SEPA B2B direct debits.
+    tags:
+    - Resource Group
+    source: openapi/memo-bank-collections-api-openapi.yml
+  - term: IBANs
+    definition: IBANs are identifiers for bank accounts.
+    tags:
+    - Resource Group
+    source: openapi/memo-bank-ibans-api-openapi.yml
+  - term: Mandate signature requests
+    definition: Mandate signature requests are a way to prepare and send collection mandates for signature. The mandate debtor receives an email
+      with a link so they can complete and sign the mandate. Once it has been signed, the resulting mandate becomes immediately available for
+      making collections. Dedicated webhook events can be used to track mandate signature requests state changes.
+    tags:
+    - Resource Group
+    source: openapi/memo-bank-mandate-signature-requests-api-openapi.yml
+  - term: OAuth2
+    definition: OAuth2 token management endpoints.
+    tags:
+    - Resource Group
+    source: openapi/memo-bank-oauth2-api-openapi.yml
+  - term: PIS
+    definition: Payment Initiation Service.
+    tags:
+    - Resource Group
+    source: openapi/memo-bank-pis-api-openapi.yml
+  - term: Sandbox
+    definition: Sandbox only endpoints.
+    tags:
+    - Resource Group
+    source: openapi/memo-bank-sandbox-api-openapi.yml
+  - term: Transactions
+    definition: Transactions are any debit and credit operations on an account. Note that the status of the transaction indicates whether or not
+      it affects the account’s available balance. `debit` transactions impact the balance as soon as they reach the `authorized` state. `credit`
+      transactions impact it only when their status turns to `confirmed`.
+    tags:
+    - Resource Group
+    source: openapi/memo-bank-transactions-api-openapi.yml
+  - term: Transfers
+    definition: Transfers are transfers within the SEPA-zone, including SEPA standard transfers, SEPA instant transfers and Target 2 transfers.
+      They can be initiated asynchronously, one by one or in bulk. They have a similar lifecycle compared to transactions but note that there
+      are some minor differences for the `canceled` and `failed` states.
+    tags:
+    - Resource Group
+    source: openapi/memo-bank-transfers-api-openapi.yml
+  - term: Webhook
+    definition: '# Events When something interesting happens on your Memo Bank workspace, such as a new transaction being created, Memo Bank can
+      reach out to your application so that you can take action (such as sending an e-mail alert about the transaction to your user) automatically.'
+    tags:
+    - Resource Group
+    source: openapi/memo-bank-webhook-api-openapi.yml
+  - term: Webhooks
+    definition: Manage webhooks for your application. Webhooks allow you to receive real-time notifications when events occur on your Memo Bank
+      workspace. Please refer to the Webhook section for more information.
+    tags:
+    - Resource Group
+    source: openapi/memo-bank-webhooks-api-openapi.yml
+  - term: Wire Transfers
+    definition: Wire transfers are transfers going through Swift. They allow you to send funds outside the SEPA network and to transfer money
+      in foreign currencies. Initiating a wire transfer may require you to upload a supporting document. In such case the transfer will have a
+      `pending_attachment_required` status and you'll receive an event `wire_transfer_attachment_required` on your webhook. If no document is
+      r
+    tags:
+    - Resource Group
+    source: openapi/memo-bank-wire-transfers-api-openapi.yml
+  - term: CreateAccountAssessment
+    definition: 'Object declared by the contract with fields: iban, identifications.'
+    tags:
+    - Object
+    source: openapi/memo-bank-account-assessments-api-openapi.yml#/components/schemas/CreateAccountAssessment
+  - term: Capability
+    definition: 'Object declared by the contract with fields: type, can_debit, can_credit.'
+    tags:
+    - Object
+    source: openapi/memo-bank-account-assessments-api-openapi.yml#/components/schemas/Capability
+  - term: AccountAssessmentDiscriminator
+    definition: 'Object declared by the contract with fields: id, status, iban.'
+    tags:
+    - Object
+    source: openapi/memo-bank-account-assessments-api-openapi.yml#/components/schemas/AccountAssessmentDiscriminator
+  - term: IdentificationMatchDiscriminator
+    definition: 'Object declared by the contract with fields: type, identification.'
+    tags:
+    - Object
+    source: openapi/memo-bank-account-assessments-api-openapi.yml#/components/schemas/IdentificationMatchDiscriminator
+  - term: IdentificationDiscriminator
+    definition: 'Object declared by the contract with fields: value, type.'
+    tags:
+    - Object
+    source: openapi/memo-bank-account-assessments-api-openapi.yml#/components/schemas/IdentificationDiscriminator
+  - term: AccountPage
+    definition: 'Object declared by the contract with fields: results, has_prev, has_next, next_page_token, prev_page_token.'
+    tags:
+    - Object
+    source: openapi/memo-bank-accounts-api-openapi.yml#/components/schemas/AccountPage
+  - term: Account
+    definition: 'Object declared by the contract with fields: id, name, status, balance, currency, iban, type, is_main.'
+    tags:
+    - Object
+    source: openapi/memo-bank-accounts-api-openapi.yml#/components/schemas/Account
+  - term: AccountDetailsResponse
+    definition: 'Object declared by the contract with fields: account.'
+    tags:
+    - Object
+    source: openapi/memo-bank-ais-api-openapi.yml#/components/schemas/AccountDetailsResponse
+  - term: AccountBalancesResponse
+    definition: 'Object declared by the contract with fields: account, balances.'
+    tags:
+    - Object
+    source: openapi/memo-bank-ais-api-openapi.yml#/components/schemas/AccountBalancesResponse
+  - term: Balance
+    definition: 'Object declared by the contract with fields: balanceAmount, balanceType, creditLimitIncluded, referenceDate.'
+    tags:
+    - Object
+    source: openapi/memo-bank-ais-api-openapi.yml#/components/schemas/Balance
+  - term: Amount
+    definition: 'Object declared by the contract with fields: currency, amount.'
+    tags:
+    - Object
+    source: openapi/memo-bank-ais-api-openapi.yml#/components/schemas/Amount
+  - term: TransactionExtras
+    definition: 'Object declared by the contract with fields: counterpartyAndRemittanceInformationUnstructured.'
+    tags:
+    - Object
+    source: openapi/memo-bank-ais-api-openapi.yml#/components/schemas/TransactionExtras
+  - term: CardAccountReport
+    definition: 'Object declared by the contract with fields: _links, booked, pending.'
+    tags:
+    - Object
+    source: openapi/memo-bank-ais-api-openapi.yml#/components/schemas/CardAccountReport
+  - term: ReportExchangeRate
+    definition: 'Object declared by the contract with fields: sourceCurrency, exchangeRate, unitCurrency, targetCurrency, quotationDate.'
+    tags:
+    - Object
+    source: openapi/memo-bank-ais-api-openapi.yml#/components/schemas/ReportExchangeRate
+  - term: AccountDetails
+    definition: 'Object declared by the contract with fields: currency, resourceId, iban, name, displayName, product, cashAccountType, status,
+      bic, usage, balances, _links. (1 more)'
+    tags:
+    - Object
+    source: openapi/memo-bank-ais-api-openapi.yml#/components/schemas/AccountDetails
+  - term: CardAccountTransactionListResponse
+    definition: 'Object declared by the contract with fields: cardAccount, debitAccounting, cardTransactions, balances.'
+    tags:
+    - Object
+    source: openapi/memo-bank-ais-api-openapi.yml#/components/schemas/CardAccountTransactionListResponse
+  - term: CardAccountBalancesResponse
+    definition: 'Object declared by the contract with fields: balances, cardAccount, debitAccounting.'
+    tags:
+    - Object
+    source: openapi/memo-bank-ais-api-openapi.yml#/components/schemas/CardAccountBalancesResponse
+  - term: Address
+    definition: 'Object declared by the contract with fields: country, streetName, townName, postCode.'
+    tags:
+    - Object
+    source: openapi/memo-bank-ais-api-openapi.yml#/components/schemas/Address
+  - term: CardAccountDetails
+    definition: 'Object declared by the contract with fields: maskedPan, currency, resourceId, ownerName, name, displayName, product, debitAccounting,
+      status, usage, creditLimit, balances. (1 more)'
+    tags:
+    - Object
+    source: openapi/memo-bank-ais-api-openapi.yml#/components/schemas/CardAccountDetails
+  - term: CardTransaction
+    definition: 'Object declared by the contract with fields: transactionAmount, cardTransactionId, transactionDate, bookingDate, valueDate, currencyExchange,
+      originalAmount, markupFee, markupFeePercentage, cardAcceptorId, cardAcceptorAddress, merchantCategoryCode. (2 more)'
+    tags:
+    - Object
+    source: openapi/memo-bank-ais-api-openapi.yml#/components/schemas/CardTransaction
+  - term: LinksAccountDetails
+    definition: 'Object declared by the contract with fields: balances, transactions.'
+    tags:
+    - Object
+    source: openapi/memo-bank-ais-api-openapi.yml#/components/schemas/LinksAccountDetails
+  - term: AccountReport
+    definition: 'Object declared by the contract with fields: _links, booked, pending.'
+    tags:
+    - Object
+    source: openapi/memo-bank-ais-api-openapi.yml#/components/schemas/AccountReport
+  - term: HrefType
+    definition: 'Object declared by the contract with fields: href.'
+    tags:
+    - Object
+    source: openapi/memo-bank-ais-api-openapi.yml#/components/schemas/HrefType
+  - term: LinksCardAccountReport
+    definition: 'Object declared by the contract with fields: cardAccount, next, previous.'
+    tags:
+    - Object
+    source: openapi/memo-bank-ais-api-openapi.yml#/components/schemas/LinksCardAccountReport
+  - term: TransactionDetailsResponse
+    definition: 'Object declared by the contract with fields: transactionsDetails.'
+    tags:
+    - Object
+    source: openapi/memo-bank-ais-api-openapi.yml#/components/schemas/TransactionDetailsResponse
+  - term: AccountListResponse
+    definition: 'Object declared by the contract with fields: accounts.'
+    tags:
+    - Object
+    source: openapi/memo-bank-ais-api-openapi.yml#/components/schemas/AccountListResponse
+  - term: TransactionListResponse
+    definition: 'Object declared by the contract with fields: account, balances, transactions.'
+    tags:
+    - Object
+    source: openapi/memo-bank-ais-api-openapi.yml#/components/schemas/TransactionListResponse
+  - term: CardAccountDetailsResponse
+    definition: 'Object declared by the contract with fields: cardAccount.'
+    tags:
+    - Object
+    source: openapi/memo-bank-ais-api-openapi.yml#/components/schemas/CardAccountDetailsResponse
+  - term: CardAccountListResponse
+    definition: 'Object declared by the contract with fields: cardAccounts.'
+    tags:
+    - Object
+    source: openapi/memo-bank-ais-api-openapi.yml#/components/schemas/CardAccountListResponse
+  - term: LinksAccountReport
+    definition: 'Object declared by the contract with fields: account, next, previous.'
+    tags:
+    - Object
+    source: openapi/memo-bank-ais-api-openapi.yml#/components/schemas/LinksAccountReport
+  - term: AccountReference
+    definition: 'Object declared by the contract with fields: iban, maskedPan, currency, cashAccountType.'
+    tags:
+    - Object
+    source: openapi/memo-bank-ais-api-openapi.yml#/components/schemas/AccountReference
+  - term: AttachmentPage
+    definition: 'Object declared by the contract with fields: results, has_prev, has_next, next_page_token, prev_page_token.'
+    tags:
+    - Object
+    source: openapi/memo-bank-attachments-api-openapi.yml#/components/schemas/AttachmentPage
+  - term: Attachment
+    definition: 'Object declared by the contract with fields: id, transaction_id, filename, size, mime_type, date, is_deleted.'
+    tags:
+    - Object
+    source: openapi/memo-bank-attachments-api-openapi.yml#/components/schemas/Attachment
+  - term: CollectionMandateDebtorAddress
+    definition: The debtor's address. Mandatory only when the debtor's bank — more specifically, its BIC — is located in a non-EEA SEPA country
+      or territory.
+    tags:
+    - Object
+    source: openapi/memo-bank-collections-api-openapi.yml#/components/schemas/CollectionMandateDebtorAddress
+  - term: CollectionMandate
+    definition: The SEPA Direct Debit collection mandate used.
+    tags:
+    - Object
+    source: openapi/memo-bank-collections-api-openapi.yml#/components/schemas/CollectionMandate
+  - term: Collection
+    definition: 'Object declared by the contract with fields: id, reference, amount, currency, mandate, scheduled_date, local_iban, account_id,
+      status, failure_code, message, end_to_end_id. (4 more)'
+    tags:
+    - Object
+    source: openapi/memo-bank-collections-api-openapi.yml#/components/schemas/Collection
+  - term: CreateBulkCollections
+    definition: 'Object declared by the contract with fields: collections.'
+    tags:
+    - Object
+    source: openapi/memo-bank-collections-api-openapi.yml#/components/schemas/CreateBulkCollections
+  - term: BulkCollections
+    definition: 'Object declared by the contract with fields: id, collections_total, collections_confirmed, collections_canceled, collections_failed,
+      status.'
+    tags:
+    - Object
+    source: openapi/memo-bank-collections-api-openapi.yml#/components/schemas/BulkCollections
+  - term: CreateCollection
+    definition: 'Object declared by the contract with fields: amount, mandate, scheduled_date, local_iban, message, end_to_end_id, internal_note,
+      custom_id, custom_metadata.'
+    tags:
+    - Object
+    source: openapi/memo-bank-collections-api-openapi.yml#/components/schemas/CreateCollection
+  - term: CollectionPage
+    definition: 'Object declared by the contract with fields: results, has_prev, has_next, next_page_token, prev_page_token.'
+    tags:
+    - Object
+    source: openapi/memo-bank-collections-api-openapi.yml#/components/schemas/CollectionPage
+  - term: CollectionMandateDebtor
+    definition: The debtor associated with this mandate.This field is only required in case of a new mandate. If there is an existing mandate
+      with this reference and scheme, all information in this field will be ignored except for the debtor IBAN which needs to be the same as the
+      one in the existing mandate. Providing a different IBAN will produce a 400 error with the code `outgoing_collection_mandate_iban_mismat
+    tags:
+    - Object
+    source: openapi/memo-bank-collections-api-openapi.yml#/components/schemas/CollectionMandateDebtor
+  - term: CreateCollectionMandate
+    definition: The SEPA Direct Debit collection mandate to be used.
+    tags:
+    - Object
+    source: openapi/memo-bank-collections-api-openapi.yml#/components/schemas/CreateCollectionMandate
+  - term: Iban
+    definition: 'Object declared by the contract with fields: id, account_id, iban, name, status, type, allow_collections, is_deleted.'
+    tags:
+    - Object
+    source: openapi/memo-bank-ibans-api-openapi.yml#/components/schemas/Iban
+  - term: IbanPage
+    definition: 'Object declared by the contract with fields: results, has_prev, has_next, next_page_token, prev_page_token.'
+    tags:
+    - Object
+    source: openapi/memo-bank-ibans-api-openapi.yml#/components/schemas/IbanPage
+  - term: UpdateIban
+    definition: 'Object declared by the contract with fields: name, status, allow_collections, account_id.'
+    tags:
+    - Object
+    source: openapi/memo-bank-ibans-api-openapi.yml#/components/schemas/UpdateIban
+  - term: CreateIban
+    definition: 'Object declared by the contract with fields: account_id, name, allow_collections.'
+    tags:
+    - Object
+    source: openapi/memo-bank-ibans-api-openapi.yml#/components/schemas/CreateIban
+  - term: CreateMandateSignatureRequestDebtor
+    definition: Debtor data used to prefill the signing form. All fields are optional; the debtor can still edit them before signing.
+    tags:
+    - Object
+    source: openapi/memo-bank-mandate-signature-requests-api-openapi.yml#/components/schemas/CreateMandateSignatureRequestDebtor
+  - term: CreateMandateSignatureRequestDiscriminator
+    definition: 'Object declared by the contract with fields: reference, scheme, language, mode, contract_reference, debtor, debtor_email.'
+    tags:
+    - Object
+    source: openapi/memo-bank-mandate-signature-requests-api-openapi.yml#/components/schemas/CreateMandateSignatureRequestDiscriminator
+  - term: CreateMandateSignatureRequestDebtorAddress
+    definition: Debtor address used to prefill the signing form. All fields are optional.
+    tags:
+    - Object
+    source: openapi/memo-bank-mandate-signature-requests-api-openapi.yml#/components/schemas/CreateMandateSignatureRequestDebtorAddress
+  - term: MandateSignatureRequestPage
+    definition: 'Object declared by the contract with fields: results, has_prev, has_next, next_page_token, prev_page_token.'
+    tags:
+    - Object
+    source: openapi/memo-bank-mandate-signature-requests-api-openapi.yml#/components/schemas/MandateSignatureRequestPage
+  - term: MandateSignatureRequestDiscriminator
+    definition: 'Object declared by the contract with fields: reference, id, scheme, language, status, mode, contract_reference, is_deleted, debtor,
+      debtor_email.'
+    tags:
+    - Object
+    source: openapi/memo-bank-mandate-signature-requests-api-openapi.yml#/components/schemas/MandateSignatureRequestDiscriminator
+  - term: MandateSignatureRequestDebtor
+    definition: Debtor information filled when the request was signed. This is available when the request is completed.
+    tags:
+    - Object
+    source: openapi/memo-bank-mandate-signature-requests-api-openapi.yml#/components/schemas/MandateSignatureRequestDebtor
+  - term: CreateOauth2TokenDTODiscriminator
+    definition: 'Object declared by the contract with fields: grant_type.'
+    tags:
+    - Object
+    source: openapi/memo-bank-oauth2-api-openapi.yml#/components/schemas/CreateOauth2TokenDTODiscriminator
+  - term: OAuth2Token
+    definition: 'Object declared by the contract with fields: access_token, token_type, expires_in, refresh_token, scope, connection_id.'
+    tags:
+    - Object
+    source: openapi/memo-bank-oauth2-api-openapi.yml#/components/schemas/OAuth2Token
+  - term: LinksPaymentInitiation
+    definition: 'Object declared by the contract with fields: self, status.'
+    tags:
+    - Object
+    source: openapi/memo-bank-pis-api-openapi.yml#/components/schemas/LinksPaymentInitiation
+  - term: PaymentInitiationCancelResponseMinus202
+    definition: 'Object declared by the contract with fields: transactionStatus.'
+    tags:
+    - Object
+    source: openapi/memo-bank-pis-api-openapi.yml#/components/schemas/PaymentInitiationCancelResponseMinus202
+  - term: PaymentInitiationJson
+    definition: 'Object declared by the contract with fields: debtorAccount, instructedAmount, creditorAccount, creditorName, endToEndIdentification,
+      creditorAddress, remittanceInformationUnstructured, requestedExecutionDate.'
+    tags:
+    - Object
+    source: openapi/memo-bank-pis-api-openapi.yml#/components/schemas/PaymentInitiationJson
+  - term: PaymentInitationRequestResponseMinus201
+    definition: 'Object declared by the contract with fields: transactionStatus, paymentId, _links, psuMessage, tppMessages.'
+    tags:
+    - Object
+    source: openapi/memo-bank-pis-api-openapi.yml#/components/schemas/PaymentInitationRequestResponseMinus201
+  - term: BulkPaymentInitiationWithStatusResponse
+    definition: 'Object declared by the contract with fields: debtorAccount, payments, requestedExecutionDate, transactionStatus.'
+    tags:
+    - Object
+    source: openapi/memo-bank-pis-api-openapi.yml#/components/schemas/BulkPaymentInitiationWithStatusResponse
+  - term: PaymentInitiationBulkElementJson
+    definition: 'Object declared by the contract with fields: instructedAmount, creditorAccount, creditorName, endToEndIdentification, creditorAddress,
+      remittanceInformationUnstructured.'
+    tags:
+    - Object
+    source: openapi/memo-bank-pis-api-openapi.yml#/components/schemas/PaymentInitiationBulkElementJson
+  - term: PaymentInitiationWithStatusResponse
+    definition: 'Object declared by the contract with fields: debtorAccount, instructedAmount, creditorAccount, creditorName, endToEndIdentification,
+      remittanceInformationUnstructured, requestedExecutionDate, transactionStatus.'
+    tags:
+    - Object
+    source: openapi/memo-bank-pis-api-openapi.yml#/components/schemas/PaymentInitiationWithStatusResponse
+  - term: PaymentInitiationStatusResponseMinus200Json
+    definition: 'Object declared by the contract with fields: transactionStatus, psuMessage, tppMessage.'
+    tags:
+    - Object
+    source: openapi/memo-bank-pis-api-openapi.yml#/components/schemas/PaymentInitiationStatusResponseMinus200Json
+  - term: BulkPaymentInitiationJson
+    definition: 'Object declared by the contract with fields: debtorAccount, payments, requestedExecutionDate.'
+    tags:
+    - Object
+    source: openapi/memo-bank-pis-api-openapi.yml#/components/schemas/BulkPaymentInitiationJson
+  - term: TppMessage
+    definition: 'Object declared by the contract with fields: category, code, path, text.'
+    tags:
+    - Object
+    source: openapi/memo-bank-pis-api-openapi.yml#/components/schemas/TppMessage
+  - term: CreateIncomingCollectionMandateCreditor
+    definition: The creditor associated with this mandate.
+    tags:
+    - Object
+    source: openapi/memo-bank-sandbox-api-openapi.yml#/components/schemas/CreateIncomingCollectionMandateCreditor

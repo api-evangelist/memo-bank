@@ -1,0 +1,249 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/memo-bank/main/json-schema/memo-bank-completed-account-assessment-schema.json",
+  "title": "CompletedAccountAssessment",
+  "x-generated": "2026-10-12",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/memo-bank-account-assessments-api-openapi.yml#/components/schemas/CompletedAccountAssessment",
+  "required": [
+    "bic",
+    "capabilities",
+    "completed_date",
+    "iban",
+    "id",
+    "identification_matches",
+    "risk_indicators",
+    "status"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "#/$defs/AccountAssessmentDiscriminator"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "bic": {
+          "type": "string",
+          "description": "BIC deduced from the IBAN."
+        },
+        "completed_date": {
+          "type": "string",
+          "description": "Completion date of the assessment.",
+          "format": "date-time"
+        },
+        "risk_indicators": {
+          "uniqueItems": true,
+          "type": "array",
+          "description": "List of risk indicators. If an indicator is present, we advise you to proceed to further verification before initiating transactions to that account.\nPlease note that an empty list does not necessarily mean the account does not pose any risk.\nWe may add new indicators over time.\n\n- `frequent_returns`: the account is subject to frequent return requests.\n- `suspicious_activity`: the account is flagged as having a suspicious activity and is subject to frequent return requests.\n- `fraudulent_account`: the account is flagged as fraudulent.\n- `closed_account`: the account is closed.\n- `failed_identification_match`: at least one of the requested identifications did not match exactly.\n",
+          "items": {
+            "type": "string",
+            "description": "List of risk indicators. If an indicator is present, we advise you to proceed to further verification before initiating transactions to that account.\nPlease note that an empty list does not necessarily mean the account does not pose any risk.\nWe may add new indicators over time.\n\n- `frequent_returns`: the account is subject to frequent return requests.\n- `suspicious_activity`: the account is flagged as having a suspicious activity and is subject to frequent return requests.\n- `fraudulent_account`: the account is flagged as fraudulent.\n- `closed_account`: the account is closed.\n- `failed_identification_match`: at least one of the requested identifications did not match exactly.\n",
+            "enum": [
+              "frequent_returns",
+              "suspicious_activity",
+              "fraudulent_account",
+              "closed_account",
+              "failed_identification_match"
+            ]
+          }
+        },
+        "identification_matches": {
+          "type": "array",
+          "description": "List of identification matches. For each identification given in the request, a corresponding identification match will be present in this list.",
+          "items": {
+            "$ref": "#/$defs/IdentificationMatch"
+          }
+        },
+        "capabilities": {
+          "type": "array",
+          "description": "List of transaction types supported by the account's financial institution. Please note that if an institution supports a transaction type, it does not necessarily mean that the account itself supports it.",
+          "items": {
+            "$ref": "#/$defs/Capability"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "AccountAssessmentDiscriminator": {
+      "required": [
+        "iban",
+        "id",
+        "status"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "ID of the account assessment.",
+          "format": "uuid"
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the account assessment.",
+          "enum": [
+            "pending",
+            "completed",
+            "failed"
+          ]
+        },
+        "iban": {
+          "type": "string",
+          "description": "IBAN from the request."
+        }
+      }
+    },
+    "Capability": {
+      "required": [
+        "can_credit",
+        "can_debit",
+        "type"
+      ],
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Type of transaction.",
+          "enum": [
+            "standard_transfer",
+            "instant_transfer",
+            "core_collection",
+            "b2b_collection"
+          ]
+        },
+        "can_debit": {
+          "type": "boolean",
+          "description": "Whether the account's financial institution supports debiting accounts through this scheme."
+        },
+        "can_credit": {
+          "type": "boolean",
+          "description": "Whether the account's financial institution supports crediting accounts through this scheme."
+        }
+      }
+    },
+    "IdentificationMatch": {
+      "type": "object",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/NameIdentificationMatch"
+        },
+        {
+          "$ref": "#/$defs/SirenIdentificationMatch"
+        },
+        {
+          "$ref": "#/$defs/LeiIdentificationMatch"
+        }
+      ]
+    },
+    "IdentificationMatchDiscriminator": {
+      "required": [
+        "identification",
+        "type"
+      ],
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Type of matched identification.",
+          "enum": [
+            "name",
+            "siren",
+            "lei"
+          ]
+        },
+        "identification": {
+          "type": "string",
+          "description": "Matched identification."
+        }
+      }
+    },
+    "LeiIdentificationMatch": {
+      "required": [
+        "identification",
+        "status",
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/IdentificationMatchDiscriminator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "description": "Status of the match result.",
+              "enum": [
+                "match",
+                "no_match",
+                "no_answer_possible"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "NameIdentificationMatch": {
+      "required": [
+        "identification",
+        "status",
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/IdentificationMatchDiscriminator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "description": "Status of the name match result.",
+              "enum": [
+                "match",
+                "close_match",
+                "no_match",
+                "no_answer_possible"
+              ]
+            },
+            "matched_name": {
+              "type": "string",
+              "description": "Matched name, only present when status is `close_match` or `match`."
+            }
+          }
+        }
+      ]
+    },
+    "SirenIdentificationMatch": {
+      "required": [
+        "identification",
+        "status",
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/IdentificationMatchDiscriminator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "description": "Status of the match result.",
+              "enum": [
+                "match",
+                "no_match",
+                "no_answer_possible"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

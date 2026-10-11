@@ -1,31 +1,30 @@
 ---
-name: Handle Memo Bank webhook events
-description: >-
-  Register a webhook receiver with Memo Bank, authenticate deliveries, deduplicate on the event id, and route
-  all 34 event types across the 11 resource types to the right handler.
+name: memo-bank-handle-webhook-events
+description: Register a webhook receiver with Memo Bank, authenticate deliveries, deduplicate on the event id, and route all 34 event types across the 11 resource types to the right handler.
 api: openapi/memo-bank-premium-bank-api-openapi.yml
 operations:
-  - createWebhook
-  - listWebhooks
-  - getWebhook
-  - deleteWebhook
-  - getTransaction
-  - getTransfer
-  - getWireTransfer
-  - getCollection
-  - getAccount
-  - getIban
-  - getAttachment
-  - getMandateSignatureRequest
-  - getAccountAssessment
-  - getTransfersBulk
-  - getCollectionsBulk
+- createWebhook
+- listWebhooks
+- getWebhook
+- deleteWebhook
+- getTransaction
+- getTransfer
+- getWireTransfer
+- getCollection
+- getAccount
+- getIban
+- getAttachment
+- getMandateSignatureRequest
+- getAccountAssessment
+- getTransfersBulk
+- getCollectionsBulk
 generated: '2026-08-17'
 method: generated
 source:
-  - openapi/memo-bank-premium-bank-api-openapi.yml
-  - https://docs.api.memo.bank/group/webhook-webhook
-  - https://docs-marketplace.api.memo.bank/topic/topic-webhooks
+- openapi/memo-bank-premium-bank-api-openapi.yml
+- https://docs.api.memo.bank/group/webhook-webhook
+- https://docs-marketplace.api.memo.bank/topic/topic-webhooks
+title: Handle Memo Bank webhook events
 ---
 
 # Handle Memo Bank webhook events

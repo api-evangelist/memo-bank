@@ -1,0 +1,1774 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/memo-bank/main/json-schema/memo-bank-transaction-schema.json",
+  "title": "Transaction",
+  "x-generated": "2026-10-12",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/memo-bank-transactions-api-openapi.yml#/components/schemas/Transaction",
+  "required": [
+    "account_id",
+    "amount",
+    "attachment_count",
+    "counterparty_name",
+    "currency",
+    "direction",
+    "execution_date",
+    "id",
+    "link",
+    "local_iban",
+    "reference",
+    "request_date",
+    "source",
+    "status"
+  ],
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique ID of the transaction.",
+      "format": "uuid"
+    },
+    "link": {
+      "type": "string",
+      "description": "Link to this transaction in your Memo Bank workspace."
+    },
+    "reference": {
+      "type": "string",
+      "description": "Reference of the money movement. In case you initiate a transfer between two of your own accounts, both transactions (`debit` and `credit`) will have the same reference, it can be safely used to correlate them.",
+      "format": "uuid"
+    },
+    "account_id": {
+      "type": "string",
+      "description": "ID of the account this transaction belongs to.",
+      "format": "uuid"
+    },
+    "amount": {
+      "type": "integer",
+      "description": "Amount of the transaction, in the smallest unit of the `currency`. The amount is always positive, use `direction` to give it a sign.",
+      "format": "int64"
+    },
+    "local_iban": {
+      "type": "string",
+      "description": "IBAN through which this transaction got in or out of the account. Can be the main IBAN of the account or a virtual IBAN."
+    },
+    "currency": {
+      "type": "string",
+      "description": "Currency of the transaction amount, in ISO 4217 format."
+    },
+    "direction": {
+      "type": "string",
+      "description": "Direction of the transaction.",
+      "enum": [
+        "debit",
+        "credit"
+      ]
+    },
+    "request_date": {
+      "type": "string",
+      "description": "Date at which the transaction has been requested, in ISO8601 format. Usually the same as the execution date, except for scheduled transfers and transfer requests.",
+      "format": "date-time"
+    },
+    "execution_date": {
+      "type": "string",
+      "description": "Date at which the transaction processing has started or will start, in ISO8601 format. For debits, that’s when the money is removed from the available balance of the account.",
+      "format": "date-time"
+    },
+    "accounting_date": {
+      "type": "string",
+      "description": "Date at which the transaction has been confirmed, in ISO8601 format. For credits, that’s when the money is credited from the available balance of the account.",
+      "format": "date-time"
+    },
+    "counterparty_name": {
+      "type": "string",
+      "description": "Name of the counterparty."
+    },
+    "internal_note": {
+      "type": "string",
+      "description": "Internal note attached to this transaction, visible only in your Memo Bank workspace."
+    },
+    "status": {
+      "type": "string",
+      "description": "Current status of the transaction.",
+      "enum": [
+        "scheduled",
+        "authorized",
+        "confirmed",
+        "rejected",
+        "canceled"
+      ]
+    },
+    "batch_id": {
+      "type": "string",
+      "description": "ID of the batch this transaction belongs to, if any.",
+      "format": "uuid"
+    },
+    "custom_id": {
+      "type": "string",
+      "description": "Custom identifier attached to the transaction. It is not transmitted nor visible in your Memo Bank workspace. It can only be retrieved or used to search for transactions via Memo Bank API."
+    },
+    "custom_metadata": {
+      "type": "string",
+      "description": "Custom metadata attached to the transaction. It is not transmitted nor visible in your Memo Bank workspace and can only be retrieved via API."
+    },
+    "attachment_count": {
+      "type": "integer",
+      "description": "Number of documents attached to this transaction.",
+      "format": "int32"
+    },
+    "source": {
+      "$ref": "#/$defs/TransactionSource"
+    }
+  },
+  "$defs": {
+    "BankAccountRemunerationSource": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        }
+      ]
+    },
+    "CardCreditSource": {
+      "required": [
+        "settlement_amount",
+        "settlement_currency",
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "settlement_amount": {
+              "type": "integer",
+              "description": "Settlement amount of the transaction, in the smallest unit of the settlement currency. The amount is always positive, use `direction` to give it a sign.",
+              "format": "int64"
+            },
+            "settlement_currency": {
+              "type": "string",
+              "description": "Settlement currency of the transaction amount, in ISO 4217 format."
+            }
+          }
+        }
+      ]
+    },
+    "CardDebitSource": {
+      "required": [
+        "settlement_amount",
+        "settlement_currency",
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "settlement_amount": {
+              "type": "integer",
+              "description": "Settlement amount of the transaction, in the smallest unit of the settlement currency. The amount is always positive, use `direction` to give it a sign.",
+              "format": "int64"
+            },
+            "settlement_currency": {
+              "type": "string",
+              "description": "Settlement currency of the transaction amount, in ISO 4217 format."
+            }
+          }
+        }
+      ]
+    },
+    "CardDeferredSource": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        }
+      ]
+    },
+    "CardWithdrawalSource": {
+      "required": [
+        "settlement_amount",
+        "settlement_currency",
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "settlement_amount": {
+              "type": "integer",
+              "description": "Settlement amount of the transaction, in the smallest unit of the settlement currency. The amount is always positive, use `direction` to give it a sign.",
+              "format": "int64"
+            },
+            "settlement_currency": {
+              "type": "string",
+              "description": "Settlement currency of the transaction amount, in ISO 4217 format."
+            }
+          }
+        }
+      ]
+    },
+    "CollectionIncomingReturnSource": {
+      "required": [
+        "returned_collection_reference",
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "counterparty_iban": {
+              "type": "string",
+              "description": "IBAN of the counterparty. Can be null on old transactions for legacy reasons."
+            },
+            "counterparty_bank_bic": {
+              "type": "string",
+              "description": "BIC of the counterparty's bank. Can be null on old transactions for legacy reasons."
+            },
+            "message": {
+              "type": "string",
+              "description": "Message attached to this collection, visible to all involved parties."
+            },
+            "end_to_end_id": {
+              "type": "string",
+              "description": "Unique identification to unambiguously identify the collection. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the collection. For example, if a collection is returned, its return will share the same endToEndId."
+            },
+            "returned_collection_reference": {
+              "type": "string",
+              "description": "Reference of the original collection being returned."
+            },
+            "reason": {
+              "type": "string",
+              "description": "Reason for the return of the original collection. Can be null on old transactions for legacy reasons.",
+              "enum": [
+                "bank_identifier_incorrect",
+                "blocked_account",
+                "closed_account",
+                "correspondent_bank_not_possible",
+                "creditor_bank_is_not_registered",
+                "creditor_psp_not_registered",
+                "customer_deceased",
+                "customer_disabled_direct_debit",
+                "debtor_psp_not_registered",
+                "disputed",
+                "duplication",
+                "end_customer_deceased",
+                "eri_option_not_supported",
+                "following_cancellation_request",
+                "fraudulent_originated",
+                "inactive_mandate",
+                "inconsistent_with_end_customer",
+                "incorrect_account_number",
+                "insufficient_funds",
+                "invalid_bank_operation_code",
+                "invalid_code_or_format",
+                "invalid_creditor_account_number",
+                "invalid_debtor_account",
+                "invalid_interbank_communication",
+                "invalid_transaction_code_or_invalid_file_format",
+                "mandate_mismatch",
+                "missing_creditors_name_or_address",
+                "missing_creditor_address",
+                "missing_creditor_name_or_address",
+                "missing_debtors_name_or_address",
+                "missing_debtor_account_or_identification",
+                "missing_debtor_name_or_address",
+                "missing_mandatory_information_mandate",
+                "no_mandate",
+                "no_mandate_on_scheme",
+                "not_specified_reason_agent_generated",
+                "not_specified_reason_customer_generated",
+                "psp_identifier_incorrect",
+                "refund_request_by_bank",
+                "refund_request_by_end_customer",
+                "regulatory_reason",
+                "requested_by_the_debtor",
+                "requested_by_customer",
+                "settlement_failed",
+                "specific_service_offered_by_debtor_psp",
+                "technical_problem",
+                "transaction_forbidden",
+                "transaction_unauthorized",
+                "unrecognized_initiating_party",
+                "wrong_amount"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "CollectionIncomingSource": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "counterparty_iban": {
+              "type": "string",
+              "description": "IBAN of the counterparty. Can be null on old transactions for legacy reasons."
+            },
+            "counterparty_bank_bic": {
+              "type": "string",
+              "description": "BIC of the counterparty's bank. Can be null on old transactions for legacy reasons."
+            },
+            "message": {
+              "type": "string",
+              "description": "Message attached to this collection, visible to all involved parties."
+            },
+            "end_to_end_id": {
+              "type": "string",
+              "description": "Unique identification to unambiguously identify the collection. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the collection. For example, if a collection is returned, its return will share the same endToEndId."
+            }
+          }
+        }
+      ]
+    },
+    "CollectionOutgoingReturnFeesSource": {
+      "required": [
+        "returned_collection_id",
+        "returned_collection_reference",
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "counterparty_iban": {
+              "type": "string",
+              "description": "IBAN of the counterparty. Can be null on old transactions for legacy reasons."
+            },
+            "counterparty_bank_bic": {
+              "type": "string",
+              "description": "BIC of the counterparty's bank. Can be null on old transactions for legacy reasons."
+            },
+            "message": {
+              "type": "string",
+              "description": "Message attached to this collection, visible to all involved parties."
+            },
+            "end_to_end_id": {
+              "type": "string",
+              "description": "Unique identification to unambiguously identify the collection. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the collection. For example, if a collection is returned, its return will share the same endToEndId."
+            },
+            "returned_collection_id": {
+              "type": "string",
+              "description": "ID of the original collection being returned.",
+              "format": "uuid"
+            },
+            "returned_collection_reference": {
+              "type": "string",
+              "description": "Reference of the original collection being returned."
+            },
+            "reason": {
+              "type": "string",
+              "description": "Reason for the return of the original collection. Can be null on old transactions for legacy reasons.",
+              "enum": [
+                "bank_identifier_incorrect",
+                "blocked_account",
+                "closed_account",
+                "correspondent_bank_not_possible",
+                "creditor_bank_is_not_registered",
+                "creditor_psp_not_registered",
+                "customer_deceased",
+                "customer_disabled_direct_debit",
+                "debtor_psp_not_registered",
+                "disputed",
+                "duplication",
+                "end_customer_deceased",
+                "eri_option_not_supported",
+                "following_cancellation_request",
+                "fraudulent_originated",
+                "inactive_mandate",
+                "inconsistent_with_end_customer",
+                "incorrect_account_number",
+                "insufficient_funds",
+                "invalid_bank_operation_code",
+                "invalid_code_or_format",
+                "invalid_creditor_account_number",
+                "invalid_debtor_account",
+                "invalid_interbank_communication",
+                "invalid_transaction_code_or_invalid_file_format",
+                "mandate_mismatch",
+                "missing_creditors_name_or_address",
+                "missing_creditor_address",
+                "missing_creditor_name_or_address",
+                "missing_debtors_name_or_address",
+                "missing_debtor_account_or_identification",
+                "missing_debtor_name_or_address",
+                "missing_mandatory_information_mandate",
+                "no_mandate",
+                "no_mandate_on_scheme",
+                "not_specified_reason_agent_generated",
+                "not_specified_reason_customer_generated",
+                "psp_identifier_incorrect",
+                "refund_request_by_bank",
+                "refund_request_by_end_customer",
+                "regulatory_reason",
+                "requested_by_the_debtor",
+                "requested_by_customer",
+                "settlement_failed",
+                "specific_service_offered_by_debtor_psp",
+                "technical_problem",
+                "transaction_forbidden",
+                "transaction_unauthorized",
+                "unrecognized_initiating_party",
+                "wrong_amount"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "CollectionOutgoingReturnSource": {
+      "required": [
+        "returned_collection_id",
+        "returned_collection_reference",
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "counterparty_iban": {
+              "type": "string",
+              "description": "IBAN of the counterparty. Can be null on old transactions for legacy reasons."
+            },
+            "counterparty_bank_bic": {
+              "type": "string",
+              "description": "BIC of the counterparty's bank. Can be null on old transactions for legacy reasons."
+            },
+            "message": {
+              "type": "string",
+              "description": "Message attached to this collection, visible to all involved parties."
+            },
+            "end_to_end_id": {
+              "type": "string",
+              "description": "Unique identification to unambiguously identify the collection. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the collection. For example, if a collection is returned, its return will share the same endToEndId."
+            },
+            "returned_collection_id": {
+              "type": "string",
+              "description": "ID of the original collection being returned.",
+              "format": "uuid"
+            },
+            "returned_collection_reference": {
+              "type": "string",
+              "description": "Reference of the original collection being returned."
+            },
+            "reason": {
+              "type": "string",
+              "description": "Reason for the return of the original collection. Can be null on old transactions for legacy reasons.",
+              "enum": [
+                "bank_identifier_incorrect",
+                "blocked_account",
+                "closed_account",
+                "correspondent_bank_not_possible",
+                "creditor_bank_is_not_registered",
+                "creditor_psp_not_registered",
+                "customer_deceased",
+                "customer_disabled_direct_debit",
+                "debtor_psp_not_registered",
+                "disputed",
+                "duplication",
+                "end_customer_deceased",
+                "eri_option_not_supported",
+                "following_cancellation_request",
+                "fraudulent_originated",
+                "inactive_mandate",
+                "inconsistent_with_end_customer",
+                "incorrect_account_number",
+                "insufficient_funds",
+                "invalid_bank_operation_code",
+                "invalid_code_or_format",
+                "invalid_creditor_account_number",
+                "invalid_debtor_account",
+                "invalid_interbank_communication",
+                "invalid_transaction_code_or_invalid_file_format",
+                "mandate_mismatch",
+                "missing_creditors_name_or_address",
+                "missing_creditor_address",
+                "missing_creditor_name_or_address",
+                "missing_debtors_name_or_address",
+                "missing_debtor_account_or_identification",
+                "missing_debtor_name_or_address",
+                "missing_mandatory_information_mandate",
+                "no_mandate",
+                "no_mandate_on_scheme",
+                "not_specified_reason_agent_generated",
+                "not_specified_reason_customer_generated",
+                "psp_identifier_incorrect",
+                "refund_request_by_bank",
+                "refund_request_by_end_customer",
+                "regulatory_reason",
+                "requested_by_the_debtor",
+                "requested_by_customer",
+                "settlement_failed",
+                "specific_service_offered_by_debtor_psp",
+                "technical_problem",
+                "transaction_forbidden",
+                "transaction_unauthorized",
+                "unrecognized_initiating_party",
+                "wrong_amount"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "CollectionOutgoingSource": {
+      "required": [
+        "collection_id",
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "counterparty_iban": {
+              "type": "string",
+              "description": "IBAN of the counterparty. Can be null on old transactions for legacy reasons."
+            },
+            "counterparty_bank_bic": {
+              "type": "string",
+              "description": "BIC of the counterparty's bank. Can be null on old transactions for legacy reasons."
+            },
+            "message": {
+              "type": "string",
+              "description": "Message attached to this collection, visible to all involved parties."
+            },
+            "end_to_end_id": {
+              "type": "string",
+              "description": "Unique identification to unambiguously identify the collection. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the collection. For example, if a collection is returned, its return will share the same endToEndId."
+            },
+            "collection_id": {
+              "type": "string",
+              "description": "ID of the collection that created this transaction.",
+              "format": "uuid"
+            }
+          }
+        }
+      ]
+    },
+    "DebtPurchaseApplicationFeesSource": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        }
+      ]
+    },
+    "DebtPurchaseDisbursementSource": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        }
+      ]
+    },
+    "DebtPurchaseInterestsSource": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        }
+      ]
+    },
+    "DebtPurchaseRepaymentSource": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        }
+      ]
+    },
+    "DiverseOperationSource": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        }
+      ]
+    },
+    "InvestmentRedemptionOrderDTO": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        }
+      ]
+    },
+    "InvestmentSubscriptionOrderDTO": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        }
+      ]
+    },
+    "LoanApplicationFeesSource": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        }
+      ]
+    },
+    "LoanDisbursementSource": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        }
+      ]
+    },
+    "LoanGuaranteeFeeSource": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        }
+      ]
+    },
+    "LoanReimbursementSource": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        }
+      ]
+    },
+    "LoanRepaymentSource": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        }
+      ]
+    },
+    "MaintenanceTransferSource": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        }
+      ]
+    },
+    "MaintenanceWireTransferSource": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        }
+      ]
+    },
+    "OverdraftAgiosSource": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        }
+      ]
+    },
+    "OverdraftApplicationFeesSource": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        }
+      ]
+    },
+    "RtgsTransferIncomingReturnSource": {
+      "required": [
+        "counterparty_account_number",
+        "reason",
+        "returned_transfer_reference",
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "counterparty_account_number": {
+              "type": "string",
+              "description": "Account number of the counterparty."
+            },
+            "counterparty_bank_bic": {
+              "type": "string",
+              "description": "BIC of the counterparty's bank."
+            },
+            "end_to_end_id": {
+              "type": "string",
+              "description": "Unique identification to unambiguously identify the transfer. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the transfer. For example, if a transfer is returned, its return will share the same endToEndId."
+            },
+            "returned_transfer_reference": {
+              "type": "string",
+              "description": "Reference of the original transfer being returned."
+            },
+            "reason": {
+              "type": "string",
+              "description": "Reason for the return of the original transfer.",
+              "enum": [
+                "bank_identifier_incorrect",
+                "blocked_account",
+                "closed_account",
+                "correspondent_bank_not_possible",
+                "creditor_bank_is_not_registered",
+                "creditor_psp_not_registered",
+                "customer_deceased",
+                "customer_disabled_direct_debit",
+                "debtor_psp_not_registered",
+                "disputed",
+                "duplication",
+                "end_customer_deceased",
+                "eri_option_not_supported",
+                "following_cancellation_request",
+                "fraudulent_originated",
+                "inactive_mandate",
+                "inconsistent_with_end_customer",
+                "incorrect_account_number",
+                "insufficient_funds",
+                "invalid_bank_operation_code",
+                "invalid_code_or_format",
+                "invalid_creditor_account_number",
+                "invalid_debtor_account",
+                "invalid_interbank_communication",
+                "invalid_transaction_code_or_invalid_file_format",
+                "mandate_mismatch",
+                "missing_creditors_name_or_address",
+                "missing_creditor_address",
+                "missing_creditor_name_or_address",
+                "missing_debtors_name_or_address",
+                "missing_debtor_account_or_identification",
+                "missing_debtor_name_or_address",
+                "missing_mandatory_information_mandate",
+                "no_mandate",
+                "no_mandate_on_scheme",
+                "not_specified_reason_agent_generated",
+                "not_specified_reason_customer_generated",
+                "psp_identifier_incorrect",
+                "refund_request_by_bank",
+                "refund_request_by_end_customer",
+                "regulatory_reason",
+                "requested_by_the_debtor",
+                "requested_by_customer",
+                "settlement_failed",
+                "specific_service_offered_by_debtor_psp",
+                "technical_problem",
+                "transaction_forbidden",
+                "transaction_unauthorized",
+                "unrecognized_initiating_party",
+                "wrong_amount"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "RtgsTransferIncomingSource": {
+      "required": [
+        "counterparty_account_number",
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "counterparty_account_number": {
+              "type": "string",
+              "description": "Account number of the counterparty."
+            },
+            "counterparty_bank_bic": {
+              "type": "string",
+              "description": "BIC of the counterparty's bank."
+            },
+            "end_to_end_id": {
+              "type": "string",
+              "description": "Unique identification to unambiguously identify the transfer. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the transfer. For example, if a transfer is returned, its return will share the same endToEndId."
+            },
+            "message": {
+              "type": "string",
+              "description": "Message attached to this transfer, visible to all involved parties."
+            }
+          }
+        }
+      ]
+    },
+    "RtgsTransferOutgoingReturnSource": {
+      "required": [
+        "counterparty_account_number",
+        "reason",
+        "returned_transfer_reference",
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "counterparty_account_number": {
+              "type": "string",
+              "description": "Account number of the counterparty."
+            },
+            "counterparty_bank_bic": {
+              "type": "string",
+              "description": "BIC of the counterparty's bank."
+            },
+            "end_to_end_id": {
+              "type": "string",
+              "description": "Unique identification to unambiguously identify the transfer. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the transfer. For example, if a transfer is returned, its return will share the same endToEndId."
+            },
+            "returned_transfer_reference": {
+              "type": "string",
+              "description": "Reference of the original transfer being returned."
+            },
+            "reason": {
+              "type": "string",
+              "description": "Reason for the return of the original transfer.",
+              "enum": [
+                "bank_identifier_incorrect",
+                "blocked_account",
+                "closed_account",
+                "correspondent_bank_not_possible",
+                "creditor_bank_is_not_registered",
+                "creditor_psp_not_registered",
+                "customer_deceased",
+                "customer_disabled_direct_debit",
+                "debtor_psp_not_registered",
+                "disputed",
+                "duplication",
+                "end_customer_deceased",
+                "eri_option_not_supported",
+                "following_cancellation_request",
+                "fraudulent_originated",
+                "inactive_mandate",
+                "inconsistent_with_end_customer",
+                "incorrect_account_number",
+                "insufficient_funds",
+                "invalid_bank_operation_code",
+                "invalid_code_or_format",
+                "invalid_creditor_account_number",
+                "invalid_debtor_account",
+                "invalid_interbank_communication",
+                "invalid_transaction_code_or_invalid_file_format",
+                "mandate_mismatch",
+                "missing_creditors_name_or_address",
+                "missing_creditor_address",
+                "missing_creditor_name_or_address",
+                "missing_debtors_name_or_address",
+                "missing_debtor_account_or_identification",
+                "missing_debtor_name_or_address",
+                "missing_mandatory_information_mandate",
+                "no_mandate",
+                "no_mandate_on_scheme",
+                "not_specified_reason_agent_generated",
+                "not_specified_reason_customer_generated",
+                "psp_identifier_incorrect",
+                "refund_request_by_bank",
+                "refund_request_by_end_customer",
+                "regulatory_reason",
+                "requested_by_the_debtor",
+                "requested_by_customer",
+                "settlement_failed",
+                "specific_service_offered_by_debtor_psp",
+                "technical_problem",
+                "transaction_forbidden",
+                "transaction_unauthorized",
+                "unrecognized_initiating_party",
+                "wrong_amount"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "RtgsTransferOutgoingSource": {
+      "required": [
+        "counterparty_account_number",
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "counterparty_account_number": {
+              "type": "string",
+              "description": "Account number of the counterparty."
+            },
+            "counterparty_bank_bic": {
+              "type": "string",
+              "description": "BIC of the counterparty's bank."
+            },
+            "end_to_end_id": {
+              "type": "string",
+              "description": "Unique identification to unambiguously identify the transfer. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the transfer. For example, if a transfer is returned, its return will share the same endToEndId."
+            },
+            "message": {
+              "type": "string",
+              "description": "Message attached to this transfer, visible to all involved parties."
+            }
+          }
+        }
+      ]
+    },
+    "SubscriptionSource": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        }
+      ]
+    },
+    "SweepTransferIncomingSource": {
+      "required": [
+        "counterparty_bank_bic",
+        "counterparty_iban",
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "counterparty_iban": {
+              "type": "string",
+              "description": "IBAN of the counterparty."
+            },
+            "counterparty_bank_bic": {
+              "type": "string",
+              "description": "BIC of the counterparty's bank."
+            }
+          }
+        }
+      ]
+    },
+    "SweepTransferOutgoingSource": {
+      "required": [
+        "counterparty_bank_bic",
+        "counterparty_iban",
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "counterparty_iban": {
+              "type": "string",
+              "description": "IBAN of the counterparty."
+            },
+            "counterparty_bank_bic": {
+              "type": "string",
+              "description": "BIC of the counterparty's bank."
+            }
+          }
+        }
+      ]
+    },
+    "TermDepositClosureSourceDTO": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        }
+      ]
+    },
+    "TermDepositCreationSourceDTO": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        }
+      ]
+    },
+    "TermDepositInterestPaymentSourceDTO": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        }
+      ]
+    },
+    "TermDepositWithdrawalSourceDTO": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        }
+      ]
+    },
+    "TransactionSource": {
+      "type": "object",
+      "description": "Source of the transaction. We may add additional source types over time; your application should be able to handle such additions gracefully.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/BankAccountRemunerationSource"
+        },
+        {
+          "$ref": "#/$defs/CardCreditSource"
+        },
+        {
+          "$ref": "#/$defs/CardDebitSource"
+        },
+        {
+          "$ref": "#/$defs/CardDeferredSource"
+        },
+        {
+          "$ref": "#/$defs/CardWithdrawalSource"
+        },
+        {
+          "$ref": "#/$defs/CollectionIncomingSource"
+        },
+        {
+          "$ref": "#/$defs/CollectionOutgoingSource"
+        },
+        {
+          "$ref": "#/$defs/CollectionIncomingReturnSource"
+        },
+        {
+          "$ref": "#/$defs/CollectionOutgoingReturnFeesSource"
+        },
+        {
+          "$ref": "#/$defs/CollectionOutgoingReturnSource"
+        },
+        {
+          "$ref": "#/$defs/DebtPurchaseApplicationFeesSource"
+        },
+        {
+          "$ref": "#/$defs/DebtPurchaseDisbursementSource"
+        },
+        {
+          "$ref": "#/$defs/DebtPurchaseInterestsSource"
+        },
+        {
+          "$ref": "#/$defs/DebtPurchaseRepaymentSource"
+        },
+        {
+          "$ref": "#/$defs/DiverseOperationSource"
+        },
+        {
+          "$ref": "#/$defs/InvestmentRedemptionOrderDTO"
+        },
+        {
+          "$ref": "#/$defs/InvestmentSubscriptionOrderDTO"
+        },
+        {
+          "$ref": "#/$defs/LoanApplicationFeesSource"
+        },
+        {
+          "$ref": "#/$defs/LoanDisbursementSource"
+        },
+        {
+          "$ref": "#/$defs/LoanGuaranteeFeeSource"
+        },
+        {
+          "$ref": "#/$defs/LoanReimbursementSource"
+        },
+        {
+          "$ref": "#/$defs/LoanRepaymentSource"
+        },
+        {
+          "$ref": "#/$defs/MaintenanceTransferSource"
+        },
+        {
+          "$ref": "#/$defs/MaintenanceWireTransferSource"
+        },
+        {
+          "$ref": "#/$defs/OverdraftAgiosSource"
+        },
+        {
+          "$ref": "#/$defs/OverdraftApplicationFeesSource"
+        },
+        {
+          "$ref": "#/$defs/RtgsTransferIncomingSource"
+        },
+        {
+          "$ref": "#/$defs/RtgsTransferIncomingReturnSource"
+        },
+        {
+          "$ref": "#/$defs/RtgsTransferOutgoingSource"
+        },
+        {
+          "$ref": "#/$defs/RtgsTransferOutgoingReturnSource"
+        },
+        {
+          "$ref": "#/$defs/SubscriptionSource"
+        },
+        {
+          "$ref": "#/$defs/SweepTransferIncomingSource"
+        },
+        {
+          "$ref": "#/$defs/SweepTransferOutgoingSource"
+        },
+        {
+          "$ref": "#/$defs/TermDepositClosureSourceDTO"
+        },
+        {
+          "$ref": "#/$defs/TermDepositCreationSourceDTO"
+        },
+        {
+          "$ref": "#/$defs/TermDepositInterestPaymentSourceDTO"
+        },
+        {
+          "$ref": "#/$defs/TermDepositWithdrawalSourceDTO"
+        },
+        {
+          "$ref": "#/$defs/TransferIncomingSource"
+        },
+        {
+          "$ref": "#/$defs/TransferOutgoingSource"
+        },
+        {
+          "$ref": "#/$defs/TransferIncomingReturnSource"
+        },
+        {
+          "$ref": "#/$defs/TransferOutgoingReturnSource"
+        },
+        {
+          "$ref": "#/$defs/WireTransferIncomingSource"
+        },
+        {
+          "$ref": "#/$defs/WireTransferOutgoingSource"
+        },
+        {
+          "$ref": "#/$defs/WireTransferOutgoingReturnSource"
+        }
+      ]
+    },
+    "TransactionSourceDiscriminator": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "bank_account_remuneration",
+            "card_credit",
+            "card_debit",
+            "card_deferred",
+            "card_withdrawal",
+            "collection_incoming",
+            "collection_outgoing",
+            "collection_incoming_return",
+            "collection_outgoing_return",
+            "collection_outgoing_return_fees",
+            "debt_purchase_application_fees",
+            "debt_purchase_disbursement",
+            "debt_purchase_interests",
+            "debt_purchase_repayment",
+            "diverse_operation",
+            "investment_redemption_order",
+            "investment_subscription_order",
+            "loan_application_fees",
+            "loan_disbursement",
+            "loan_guarantee_fee",
+            "loan_reimbursement",
+            "loan_repayment",
+            "maintenance_transfer",
+            "maintenance_wire_transfer",
+            "overdraft_agios",
+            "overdraft_application_fees",
+            "rtgs_transfer_incoming",
+            "rtgs_transfer_incoming_return",
+            "rtgs_transfer_outgoing",
+            "rtgs_transfer_outgoing_return",
+            "subscription",
+            "sweep_transfer_incoming",
+            "sweep_transfer_outgoing",
+            "term_deposit_closure",
+            "term_deposit_creation",
+            "term_deposit_interest_payment",
+            "term_deposit_withdrawal",
+            "transfer_incoming",
+            "transfer_outgoing",
+            "transfer_incoming_return",
+            "transfer_outgoing_return",
+            "wire_transfer_incoming",
+            "wire_transfer_outgoing",
+            "wire_transfer_outgoing_return"
+          ]
+        }
+      }
+    },
+    "TransferIncomingReturnSource": {
+      "required": [
+        "returned_transfer_reference",
+        "transfer_type",
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "transfer_type": {
+              "type": "string",
+              "description": "Type of the transfer.",
+              "enum": [
+                "standard",
+                "instant"
+              ]
+            },
+            "counterparty_iban": {
+              "type": "string",
+              "description": "IBAN of the counterparty. Can be null on old transactions for legacy reasons."
+            },
+            "counterparty_bank_bic": {
+              "type": "string",
+              "description": "BIC of the counterparty's bank. Can be null on old transactions for legacy reasons."
+            },
+            "message": {
+              "type": "string",
+              "description": "Message attached to this transfer, visible to all involved parties."
+            },
+            "end_to_end_id": {
+              "type": "string",
+              "description": "Unique identification to unambiguously identify the transfer. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the transfer. For example, if a transfer is returned, its return will share the same endToEndId."
+            },
+            "returned_transfer_reference": {
+              "type": "string",
+              "description": "Reference of the original transfer being returned."
+            },
+            "reason": {
+              "type": "string",
+              "description": "Reason for the return of the original transfer. Can be null on old transactions for legacy reasons.",
+              "enum": [
+                "bank_identifier_incorrect",
+                "blocked_account",
+                "closed_account",
+                "correspondent_bank_not_possible",
+                "creditor_bank_is_not_registered",
+                "creditor_psp_not_registered",
+                "customer_deceased",
+                "customer_disabled_direct_debit",
+                "debtor_psp_not_registered",
+                "disputed",
+                "duplication",
+                "end_customer_deceased",
+                "eri_option_not_supported",
+                "following_cancellation_request",
+                "fraudulent_originated",
+                "inactive_mandate",
+                "inconsistent_with_end_customer",
+                "incorrect_account_number",
+                "insufficient_funds",
+                "invalid_bank_operation_code",
+                "invalid_code_or_format",
+                "invalid_creditor_account_number",
+                "invalid_debtor_account",
+                "invalid_interbank_communication",
+                "invalid_transaction_code_or_invalid_file_format",
+                "mandate_mismatch",
+                "missing_creditors_name_or_address",
+                "missing_creditor_address",
+                "missing_creditor_name_or_address",
+                "missing_debtors_name_or_address",
+                "missing_debtor_account_or_identification",
+                "missing_debtor_name_or_address",
+                "missing_mandatory_information_mandate",
+                "no_mandate",
+                "no_mandate_on_scheme",
+                "not_specified_reason_agent_generated",
+                "not_specified_reason_customer_generated",
+                "psp_identifier_incorrect",
+                "refund_request_by_bank",
+                "refund_request_by_end_customer",
+                "regulatory_reason",
+                "requested_by_the_debtor",
+                "requested_by_customer",
+                "settlement_failed",
+                "specific_service_offered_by_debtor_psp",
+                "technical_problem",
+                "transaction_forbidden",
+                "transaction_unauthorized",
+                "unrecognized_initiating_party",
+                "wrong_amount"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "TransferIncomingSource": {
+      "required": [
+        "transfer_type",
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "transfer_type": {
+              "type": "string",
+              "description": "Type of the transfer.",
+              "enum": [
+                "standard",
+                "instant"
+              ]
+            },
+            "counterparty_iban": {
+              "type": "string",
+              "description": "IBAN of the counterparty. Can be null on old transactions for legacy reasons."
+            },
+            "counterparty_bank_bic": {
+              "type": "string",
+              "description": "BIC of the counterparty's bank. Can be null on old transactions for legacy reasons."
+            },
+            "message": {
+              "type": "string",
+              "description": "Message attached to this transfer, visible to all involved parties."
+            },
+            "end_to_end_id": {
+              "type": "string",
+              "description": "Unique identification to unambiguously identify the transfer. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the transfer. For example, if a transfer is returned, its return will share the same endToEndId."
+            }
+          }
+        }
+      ]
+    },
+    "TransferOutgoingReturnSource": {
+      "required": [
+        "returned_transfer_id",
+        "returned_transfer_reference",
+        "transfer_type",
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "transfer_type": {
+              "type": "string",
+              "description": "Type of the transfer.",
+              "enum": [
+                "standard",
+                "instant"
+              ]
+            },
+            "counterparty_iban": {
+              "type": "string",
+              "description": "IBAN of the counterparty. Can be null on old transactions for legacy reasons."
+            },
+            "counterparty_bank_bic": {
+              "type": "string",
+              "description": "BIC of the counterparty's bank. Can be null on old transactions for legacy reasons."
+            },
+            "message": {
+              "type": "string",
+              "description": "Message attached to this transfer, visible to all involved parties."
+            },
+            "end_to_end_id": {
+              "type": "string",
+              "description": "Unique identification to unambiguously identify the transfer. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the transfer. For example, if a transfer is returned, its return will share the same endToEndId."
+            },
+            "returned_transfer_id": {
+              "type": "string",
+              "description": "ID of the original transfer being returned.",
+              "format": "uuid"
+            },
+            "returned_transfer_reference": {
+              "type": "string",
+              "description": "Reference of the original transfer being returned."
+            },
+            "reason": {
+              "type": "string",
+              "description": "Reason for the return of the original transfer. Can be null on old transactions for legacy reasons.",
+              "enum": [
+                "bank_identifier_incorrect",
+                "blocked_account",
+                "closed_account",
+                "correspondent_bank_not_possible",
+                "creditor_bank_is_not_registered",
+                "creditor_psp_not_registered",
+                "customer_deceased",
+                "customer_disabled_direct_debit",
+                "debtor_psp_not_registered",
+                "disputed",
+                "duplication",
+                "end_customer_deceased",
+                "eri_option_not_supported",
+                "following_cancellation_request",
+                "fraudulent_originated",
+                "inactive_mandate",
+                "inconsistent_with_end_customer",
+                "incorrect_account_number",
+                "insufficient_funds",
+                "invalid_bank_operation_code",
+                "invalid_code_or_format",
+                "invalid_creditor_account_number",
+                "invalid_debtor_account",
+                "invalid_interbank_communication",
+                "invalid_transaction_code_or_invalid_file_format",
+                "mandate_mismatch",
+                "missing_creditors_name_or_address",
+                "missing_creditor_address",
+                "missing_creditor_name_or_address",
+                "missing_debtors_name_or_address",
+                "missing_debtor_account_or_identification",
+                "missing_debtor_name_or_address",
+                "missing_mandatory_information_mandate",
+                "no_mandate",
+                "no_mandate_on_scheme",
+                "not_specified_reason_agent_generated",
+                "not_specified_reason_customer_generated",
+                "psp_identifier_incorrect",
+                "refund_request_by_bank",
+                "refund_request_by_end_customer",
+                "regulatory_reason",
+                "requested_by_the_debtor",
+                "requested_by_customer",
+                "settlement_failed",
+                "specific_service_offered_by_debtor_psp",
+                "technical_problem",
+                "transaction_forbidden",
+                "transaction_unauthorized",
+                "unrecognized_initiating_party",
+                "wrong_amount"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "TransferOutgoingSource": {
+      "required": [
+        "transfer_id",
+        "transfer_type",
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "transfer_type": {
+              "type": "string",
+              "description": "Type of the transfer.",
+              "enum": [
+                "standard",
+                "instant"
+              ]
+            },
+            "counterparty_iban": {
+              "type": "string",
+              "description": "IBAN of the counterparty. Can be null on old transactions for legacy reasons."
+            },
+            "counterparty_bank_bic": {
+              "type": "string",
+              "description": "BIC of the counterparty's bank. Can be null on old transactions for legacy reasons."
+            },
+            "message": {
+              "type": "string",
+              "description": "Message attached to this transfer, visible to all involved parties."
+            },
+            "end_to_end_id": {
+              "type": "string",
+              "description": "Unique identification to unambiguously identify the transfer. This identification is passed on, unchanged, throughout the entire end-to-end chain. It can be used for reconciliation or to link tasks relating to the transfer. For example, if a transfer is returned, its return will share the same endToEndId."
+            },
+            "transfer_id": {
+              "type": "string",
+              "description": "ID of the transfer that created this transaction.",
+              "format": "uuid"
+            }
+          }
+        }
+      ]
+    },
+    "WireTransferIncomingSource": {
+      "required": [
+        "instructed_amount",
+        "instructed_currency",
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "counterparty_account_number": {
+              "type": "string",
+              "description": "Account number of the counterparty."
+            },
+            "message": {
+              "type": "string",
+              "description": "Message attached to this transfer, visible to all involved parties."
+            },
+            "instructed_amount": {
+              "type": "integer",
+              "description": "Instructed amount of the transaction, in the smallest unit of the instructed currency. The amount is always positive, use `direction` to give it a sign.",
+              "format": "int64"
+            },
+            "instructed_currency": {
+              "type": "string",
+              "description": "Instructed currency of the transaction amount, in ISO 4217 format."
+            }
+          }
+        }
+      ]
+    },
+    "WireTransferOutgoingReturnSource": {
+      "required": [
+        "returned_transfer_reference",
+        "type"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "counterparty_account_number": {
+              "type": "string",
+              "description": "Account number of the counterparty."
+            },
+            "message": {
+              "type": "string",
+              "description": "Message attached to this transfer, visible to all involved parties."
+            },
+            "returned_transfer_reference": {
+              "type": "string",
+              "description": "Reference of the original wire transfer being returned."
+            },
+            "reason": {
+              "type": "string",
+              "description": "Reason for the return of the original transfer. Can be null on old transactions for legacy reasons.",
+              "enum": [
+                "bank_identifier_incorrect",
+                "blocked_account",
+                "closed_account",
+                "correspondent_bank_not_possible",
+                "creditor_bank_is_not_registered",
+                "creditor_psp_not_registered",
+                "customer_deceased",
+                "customer_disabled_direct_debit",
+                "debtor_psp_not_registered",
+                "disputed",
+                "duplication",
+                "end_customer_deceased",
+                "eri_option_not_supported",
+                "following_cancellation_request",
+                "fraudulent_originated",
+                "inactive_mandate",
+                "inconsistent_with_end_customer",
+                "incorrect_account_number",
+                "insufficient_funds",
+                "invalid_bank_operation_code",
+                "invalid_code_or_format",
+                "invalid_creditor_account_number",
+                "invalid_debtor_account",
+                "invalid_interbank_communication",
+                "invalid_transaction_code_or_invalid_file_format",
+                "mandate_mismatch",
+                "missing_creditors_name_or_address",
+                "missing_creditor_address",
+                "missing_creditor_name_or_address",
+                "missing_debtors_name_or_address",
+                "missing_debtor_account_or_identification",
+                "missing_debtor_name_or_address",
+                "missing_mandatory_information_mandate",
+                "no_mandate",
+                "no_mandate_on_scheme",
+                "not_specified_reason_agent_generated",
+                "not_specified_reason_customer_generated",
+                "psp_identifier_incorrect",
+                "refund_request_by_bank",
+                "refund_request_by_end_customer",
+                "regulatory_reason",
+                "requested_by_the_debtor",
+                "requested_by_customer",
+                "settlement_failed",
+                "specific_service_offered_by_debtor_psp",
+                "technical_problem",
+                "transaction_forbidden",
+                "transaction_unauthorized",
+                "unrecognized_initiating_party",
+                "wrong_amount"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "WireTransferOutgoingSource": {
+      "required": [
+        "instructed_amount",
+        "instructed_currency",
+        "type",
+        "wire_transfer_id"
+      ],
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TransactionSourceDiscriminator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "counterparty_account_number": {
+              "type": "string",
+              "description": "Account number of the counterparty."
+            },
+            "message": {
+              "type": "string",
+              "description": "Message attached to this transfer, visible to all involved parties."
+            },
+            "instructed_amount": {
+              "type": "integer",
+              "description": "Instructed amount of the transaction, in the smallest unit of the instructed currency. The amount is always positive, use `direction` to give it a sign.",
+              "format": "int64"
+            },
+            "instructed_currency": {
+              "type": "string",
+              "description": "Instructed currency of the transaction amount, in ISO 4217 format."
+            },
+            "wire_transfer_id": {
+              "type": "string",
+              "description": "ID of the wire transfer that created this transaction.",
+              "format": "uuid"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

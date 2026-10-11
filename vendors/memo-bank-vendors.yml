@@ -1,0 +1,67 @@
+generated: '2026-10-12'
+method: probed
+source: pre-flight dossier (docs platform, portal detections) + CNAME chains and response headers of the hosts apis.yml names
+registry: all/0-working/vendors.yml
+areas_vocabulary:
+- documentation
+- developer-portal
+- api-gateway
+- cdn
+- hosting
+- sdk-generation
+- api-collections
+- status-page
+- support
+- community
+- identity
+- mcp-hosting
+vendors:
+- vendor: cloudflare
+  name: Cloudflare
+  area: cdn
+  host: docs.api.memo.bank
+  evidence: header:cf-ray
+  signal: header
+  confidence: high
+  kin_score:
+  - https_enforced
+  - hsts
+- vendor: cloudfront
+  name: Amazon CloudFront
+  area: cdn
+  host: memo.bank
+  evidence: header:x-amz-cf-id
+  signal: header
+  confidence: high
+  kin_score: []
+- vendor: helpscout
+  name: Help Scout
+  area: support
+  host: aide.memo.bank
+  evidence: cname:helpscoutdocs.com
+  signal: cname
+  confidence: high
+  kin_score:
+  - support_channel
+reliance:
+  areas_vendor_served:
+  - cdn
+  - support
+  vendor_count: 3
+  areas_observed: 12
+  share_of_observable_areas: 0.167
+  note: areas where a third party was DETECTED serving this provider; an area absent here was either self-run or not observed, and this script
+    cannot tell those apart
+checked:
+- 'docs-platform: not probed'
+- memo.bank (Website)
+- docs.api.memo.bank (DeveloperPortal)
+- docs.api.memo.bank (Documentation)
+- docs.api.memo.bank (APIReference)
+- docs.api.memo.bank (GettingStarted)
+- aide.memo.bank (Support)
+- memo.bank (SignUp)
+- client.memo.bank (Login)
+- status.memo.bank (StatusPage)
+- api.memo.bank (baseURL)
+- api.memo.bank (mcp)

@@ -1,23 +1,22 @@
 ---
-name: Initiate and track a SEPA transfer
-description: >-
-  Send a single SEPA credit transfer with Memo Bank, retry it safely with an idempotency key, choose the
-  standard/instant rail strategy, and follow it to a terminal state through webhooks and failure codes.
+name: memo-bank-initiate-a-sepa-transfer
+description: Send a single SEPA credit transfer with Memo Bank, retry it safely with an idempotency key, choose the standard/instant rail strategy, and follow it to a terminal state through webhooks and failure codes.
 api: openapi/memo-bank-premium-bank-api-openapi.yml
 operations:
-  - listAccounts
-  - listIbans
-  - createAccountAssessment
-  - getAccountAssessment
-  - createTransferV2
-  - getTransfer
-  - cancelTransfer
-  - getProofOfTransfer
+- listAccounts
+- listIbans
+- createAccountAssessment
+- getAccountAssessment
+- createTransferV2
+- getTransfer
+- cancelTransfer
+- getProofOfTransfer
 generated: '2026-08-17'
 method: generated
 source:
-  - https://docs.api.memo.bank/topic/topic-idempotent-requests
-  - openapi/memo-bank-premium-bank-api-openapi.yml
+- https://docs.api.memo.bank/topic/topic-idempotent-requests
+- openapi/memo-bank-premium-bank-api-openapi.yml
+title: Initiate and track a SEPA transfer
 ---
 
 # Initiate and track a SEPA transfer

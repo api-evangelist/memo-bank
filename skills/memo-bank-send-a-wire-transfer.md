@@ -1,21 +1,20 @@
 ---
-name: Send a cross-border wire transfer
-description: >-
-  Initiate a SWIFT/RTGS wire transfer with Memo Bank, satisfy the compliance attachment hold that can block
-  it, and interpret the wire-specific failure codes and UETR tracking reference.
+name: memo-bank-send-a-wire-transfer
+description: Initiate a SWIFT/RTGS wire transfer with Memo Bank, satisfy the compliance attachment hold that can block it, and interpret the wire-specific failure codes and UETR tracking reference.
 api: openapi/memo-bank-premium-bank-api-openapi.yml
 operations:
-  - listAccounts
-  - listIbans
-  - createWireTransfer
-  - getWireTransfer
-  - createWireTransferAttachment
-  - getProofOfWireTransfer
-  - createWebhook
+- listAccounts
+- listIbans
+- createWireTransfer
+- getWireTransfer
+- createWireTransferAttachment
+- getProofOfWireTransfer
+- createWebhook
 generated: '2026-08-17'
 method: generated
 source:
-  - openapi/memo-bank-premium-bank-api-openapi.yml
+- openapi/memo-bank-premium-bank-api-openapi.yml
+title: Send a cross-border wire transfer
 ---
 
 # Send a cross-border wire transfer

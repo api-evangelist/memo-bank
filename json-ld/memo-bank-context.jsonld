@@ -1,0 +1,818 @@
+{
+  "@context": {
+    "@vocab": "https://memo.bank/schema#",
+    "schema": "https://schema.org/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "dcterms": "http://purl.org/dc/terms/",
+    "memo": "https://memo.bank/schema#",
+    "CreateAccountAssessment": "memo:CreateAccountAssessment",
+    "iban": {
+      "@id": "memo:iban",
+      "@type": "xsd:string"
+    },
+    "identifications": {
+      "@id": "memo:identifications",
+      "@container": "@list"
+    },
+    "Capability": "memo:Capability",
+    "type": {
+      "@id": "memo:type",
+      "@type": "xsd:string"
+    },
+    "can_debit": {
+      "@id": "memo:can_debit",
+      "@type": "xsd:boolean"
+    },
+    "can_credit": {
+      "@id": "memo:can_credit",
+      "@type": "xsd:boolean"
+    },
+    "AccountAssessmentDiscriminator": "memo:AccountAssessmentDiscriminator",
+    "id": {
+      "@id": "memo:id",
+      "@type": "xsd:string"
+    },
+    "status": {
+      "@id": "memo:status",
+      "@type": "xsd:string"
+    },
+    "IdentificationMatchDiscriminator": "memo:IdentificationMatchDiscriminator",
+    "identification": {
+      "@id": "memo:identification",
+      "@type": "xsd:string"
+    },
+    "IdentificationDiscriminator": "memo:IdentificationDiscriminator",
+    "value": {
+      "@id": "memo:value",
+      "@type": "xsd:string"
+    },
+    "AccountPage": "memo:AccountPage",
+    "results": {
+      "@id": "memo:results",
+      "@container": "@list"
+    },
+    "has_prev": {
+      "@id": "memo:has_prev",
+      "@type": "xsd:boolean"
+    },
+    "has_next": {
+      "@id": "memo:has_next",
+      "@type": "xsd:boolean"
+    },
+    "next_page_token": {
+      "@id": "memo:next_page_token",
+      "@type": "xsd:string"
+    },
+    "prev_page_token": {
+      "@id": "memo:prev_page_token",
+      "@type": "xsd:string"
+    },
+    "Account": "memo:Account",
+    "name": {
+      "@id": "memo:name",
+      "@type": "xsd:string"
+    },
+    "balance": {
+      "@id": "memo:balance",
+      "@type": "xsd:integer"
+    },
+    "currency": {
+      "@id": "memo:currency",
+      "@type": "xsd:string"
+    },
+    "is_main": {
+      "@id": "memo:is_main",
+      "@type": "xsd:boolean"
+    },
+    "AccountDetailsResponse": "memo:AccountDetailsResponse",
+    "account": {
+      "@id": "memo:account",
+      "@type": "@id"
+    },
+    "AccountBalancesResponse": "memo:AccountBalancesResponse",
+    "balances": {
+      "@id": "memo:balances",
+      "@container": "@list"
+    },
+    "Balance": "memo:Balance",
+    "balanceAmount": {
+      "@id": "memo:balanceAmount",
+      "@type": "@id"
+    },
+    "balanceType": {
+      "@id": "memo:balanceType",
+      "@type": "xsd:string"
+    },
+    "creditLimitIncluded": {
+      "@id": "memo:creditLimitIncluded",
+      "@type": "xsd:boolean"
+    },
+    "referenceDate": {
+      "@id": "memo:referenceDate",
+      "@type": "xsd:date"
+    },
+    "Amount": "memo:Amount",
+    "amount": {
+      "@id": "memo:amount",
+      "@type": "xsd:string"
+    },
+    "TransactionExtras": "memo:TransactionExtras",
+    "counterpartyAndRemittanceInformationUnstructured": {
+      "@id": "memo:counterpartyAndRemittanceInformationUnstructured",
+      "@type": "xsd:string"
+    },
+    "CardAccountReport": "memo:CardAccountReport",
+    "_links": {
+      "@id": "memo:_links",
+      "@type": "@id"
+    },
+    "booked": {
+      "@id": "memo:booked",
+      "@container": "@list"
+    },
+    "pending": {
+      "@id": "memo:pending",
+      "@container": "@list"
+    },
+    "ReportExchangeRate": "memo:ReportExchangeRate",
+    "sourceCurrency": {
+      "@id": "memo:sourceCurrency",
+      "@type": "xsd:string"
+    },
+    "exchangeRate": {
+      "@id": "memo:exchangeRate",
+      "@type": "xsd:string"
+    },
+    "unitCurrency": {
+      "@id": "memo:unitCurrency",
+      "@type": "xsd:string"
+    },
+    "targetCurrency": {
+      "@id": "memo:targetCurrency",
+      "@type": "xsd:string"
+    },
+    "quotationDate": {
+      "@id": "memo:quotationDate",
+      "@type": "xsd:date"
+    },
+    "AccountDetails": "memo:AccountDetails",
+    "resourceId": {
+      "@id": "memo:resourceId",
+      "@type": "xsd:string"
+    },
+    "displayName": {
+      "@id": "memo:displayName",
+      "@type": "xsd:string"
+    },
+    "product": {
+      "@id": "memo:product",
+      "@type": "xsd:string"
+    },
+    "cashAccountType": {
+      "@id": "memo:cashAccountType",
+      "@type": "xsd:string"
+    },
+    "bic": {
+      "@id": "memo:bic",
+      "@type": "xsd:string"
+    },
+    "usage": {
+      "@id": "memo:usage",
+      "@type": "xsd:string"
+    },
+    "ownerName": {
+      "@id": "memo:ownerName",
+      "@type": "xsd:string"
+    },
+    "CardAccountTransactionListResponse": "memo:CardAccountTransactionListResponse",
+    "cardAccount": {
+      "@id": "memo:cardAccount",
+      "@type": "@id"
+    },
+    "debitAccounting": {
+      "@id": "memo:debitAccounting",
+      "@type": "xsd:boolean"
+    },
+    "cardTransactions": {
+      "@id": "memo:cardTransactions",
+      "@type": "@id"
+    },
+    "CardAccountBalancesResponse": "memo:CardAccountBalancesResponse",
+    "Transactions": "memo:Transactions",
+    "transactionAmount": {
+      "@id": "memo:transactionAmount",
+      "@type": "@id"
+    },
+    "transactionId": {
+      "@id": "memo:transactionId",
+      "@type": "xsd:string"
+    },
+    "endToEndId": {
+      "@id": "memo:endToEndId",
+      "@type": "xsd:string"
+    },
+    "batchIndicator": {
+      "@id": "memo:batchIndicator",
+      "@type": "xsd:boolean"
+    },
+    "batchNumberOfTransactions": {
+      "@id": "memo:batchNumberOfTransactions",
+      "@type": "xsd:integer"
+    },
+    "mandateId": {
+      "@id": "memo:mandateId",
+      "@type": "xsd:string"
+    },
+    "bookingDate": {
+      "@id": "memo:bookingDate",
+      "@type": "xsd:date"
+    },
+    "valueDate": {
+      "@id": "memo:valueDate",
+      "@type": "xsd:date"
+    },
+    "currencyExchange": {
+      "@id": "memo:currencyExchange",
+      "@container": "@list"
+    },
+    "creditorName": {
+      "@id": "memo:creditorName",
+      "@type": "xsd:string"
+    },
+    "creditorAccount": {
+      "@id": "memo:creditorAccount",
+      "@type": "@id"
+    },
+    "creditorAgent": {
+      "@id": "memo:creditorAgent",
+      "@type": "xsd:string"
+    },
+    "debtorName": {
+      "@id": "memo:debtorName",
+      "@type": "xsd:string"
+    },
+    "debtorAccount": {
+      "@id": "memo:debtorAccount",
+      "@type": "@id"
+    },
+    "debtorAgent": {
+      "@id": "memo:debtorAgent",
+      "@type": "xsd:string"
+    },
+    "remittanceInformationUnstructured": {
+      "@id": "memo:remittanceInformationUnstructured",
+      "@type": "xsd:string"
+    },
+    "_extras": {
+      "@id": "memo:_extras",
+      "@type": "@id"
+    },
+    "Address": "memo:Address",
+    "country": {
+      "@id": "memo:country",
+      "@type": "xsd:string"
+    },
+    "streetName": {
+      "@id": "memo:streetName",
+      "@type": "xsd:string"
+    },
+    "townName": {
+      "@id": "memo:townName",
+      "@type": "xsd:string"
+    },
+    "postCode": {
+      "@id": "memo:postCode",
+      "@type": "xsd:string"
+    },
+    "CardAccountDetails": "memo:CardAccountDetails",
+    "maskedPan": {
+      "@id": "memo:maskedPan",
+      "@type": "xsd:string"
+    },
+    "creditLimit": {
+      "@id": "memo:creditLimit",
+      "@type": "@id"
+    },
+    "CardTransaction": "memo:CardTransaction",
+    "cardTransactionId": {
+      "@id": "memo:cardTransactionId",
+      "@type": "xsd:string"
+    },
+    "transactionDate": {
+      "@id": "memo:transactionDate",
+      "@type": "xsd:date"
+    },
+    "originalAmount": {
+      "@id": "memo:originalAmount",
+      "@type": "@id"
+    },
+    "markupFee": {
+      "@id": "memo:markupFee",
+      "@type": "@id"
+    },
+    "markupFeePercentage": {
+      "@id": "memo:markupFeePercentage",
+      "@type": "xsd:string"
+    },
+    "cardAcceptorId": {
+      "@id": "memo:cardAcceptorId",
+      "@type": "xsd:string"
+    },
+    "cardAcceptorAddress": {
+      "@id": "memo:cardAcceptorAddress",
+      "@type": "@id"
+    },
+    "merchantCategoryCode": {
+      "@id": "memo:merchantCategoryCode",
+      "@type": "xsd:string"
+    },
+    "maskedPAN": {
+      "@id": "memo:maskedPAN",
+      "@type": "xsd:string"
+    },
+    "transactionDetails": {
+      "@id": "memo:transactionDetails",
+      "@type": "xsd:string"
+    },
+    "LinksAccountDetails": "memo:LinksAccountDetails",
+    "transactions": {
+      "@id": "memo:transactions",
+      "@type": "@id"
+    },
+    "AccountReport": "memo:AccountReport",
+    "HrefType": "memo:HrefType",
+    "href": {
+      "@id": "memo:href",
+      "@type": "xsd:string"
+    },
+    "LinksCardAccountReport": "memo:LinksCardAccountReport",
+    "next": {
+      "@id": "memo:next",
+      "@type": "@id"
+    },
+    "previous": {
+      "@id": "memo:previous",
+      "@type": "@id"
+    },
+    "TransactionDetailsResponse": "memo:TransactionDetailsResponse",
+    "transactionsDetails": {
+      "@id": "memo:transactionsDetails",
+      "@type": "@id"
+    },
+    "AccountListResponse": "memo:AccountListResponse",
+    "accounts": {
+      "@id": "memo:accounts",
+      "@container": "@list"
+    },
+    "TransactionListResponse": "memo:TransactionListResponse",
+    "CardAccountDetailsResponse": "memo:CardAccountDetailsResponse",
+    "CardAccountListResponse": "memo:CardAccountListResponse",
+    "cardAccounts": {
+      "@id": "memo:cardAccounts",
+      "@container": "@list"
+    },
+    "LinksAccountReport": "memo:LinksAccountReport",
+    "AccountReference": "memo:AccountReference",
+    "AttachmentPage": "memo:AttachmentPage",
+    "Attachment": "memo:Attachment",
+    "transaction_id": {
+      "@id": "memo:transaction_id",
+      "@type": "xsd:string"
+    },
+    "filename": {
+      "@id": "memo:filename",
+      "@type": "xsd:string"
+    },
+    "size": {
+      "@id": "memo:size",
+      "@type": "xsd:integer"
+    },
+    "mime_type": {
+      "@id": "memo:mime_type",
+      "@type": "xsd:string"
+    },
+    "date": {
+      "@id": "memo:date",
+      "@type": "xsd:dateTime"
+    },
+    "is_deleted": {
+      "@id": "memo:is_deleted",
+      "@type": "xsd:boolean"
+    },
+    "CollectionMandateDebtorAddress": "memo:CollectionMandateDebtorAddress",
+    "street": {
+      "@id": "memo:street",
+      "@type": "xsd:string"
+    },
+    "building_number": {
+      "@id": "memo:building_number",
+      "@type": "xsd:string"
+    },
+    "postal_code": {
+      "@id": "memo:postal_code",
+      "@type": "xsd:string"
+    },
+    "city": {
+      "@id": "memo:city",
+      "@type": "xsd:string"
+    },
+    "CollectionMandate": "memo:CollectionMandate",
+    "reference": {
+      "@id": "memo:reference",
+      "@type": "xsd:string"
+    },
+    "scheme": {
+      "@id": "memo:scheme",
+      "@type": "xsd:string"
+    },
+    "Collection": "memo:Collection",
+    "mandate": {
+      "@id": "memo:mandate",
+      "@type": "@id"
+    },
+    "scheduled_date": {
+      "@id": "memo:scheduled_date",
+      "@type": "xsd:date"
+    },
+    "local_iban": {
+      "@id": "memo:local_iban",
+      "@type": "xsd:string"
+    },
+    "account_id": {
+      "@id": "memo:account_id",
+      "@type": "xsd:string"
+    },
+    "failure_code": {
+      "@id": "memo:failure_code",
+      "@type": "xsd:string"
+    },
+    "message": {
+      "@id": "memo:message",
+      "@type": "xsd:string"
+    },
+    "end_to_end_id": {
+      "@id": "memo:end_to_end_id",
+      "@type": "xsd:string"
+    },
+    "internal_note": {
+      "@id": "memo:internal_note",
+      "@type": "xsd:string"
+    },
+    "custom_id": {
+      "@id": "memo:custom_id",
+      "@type": "xsd:string"
+    },
+    "custom_metadata": {
+      "@id": "memo:custom_metadata",
+      "@type": "xsd:string"
+    },
+    "return_transaction_id": {
+      "@id": "memo:return_transaction_id",
+      "@type": "xsd:string"
+    },
+    "CreateBulkCollections": "memo:CreateBulkCollections",
+    "collections": {
+      "@id": "memo:collections",
+      "@container": "@list"
+    },
+    "BulkCollections": "memo:BulkCollections",
+    "collections_total": {
+      "@id": "memo:collections_total",
+      "@type": "xsd:integer"
+    },
+    "collections_confirmed": {
+      "@id": "memo:collections_confirmed",
+      "@type": "xsd:integer"
+    },
+    "collections_canceled": {
+      "@id": "memo:collections_canceled",
+      "@type": "xsd:integer"
+    },
+    "collections_failed": {
+      "@id": "memo:collections_failed",
+      "@type": "xsd:integer"
+    },
+    "CreateCollection": "memo:CreateCollection",
+    "CollectionPage": "memo:CollectionPage",
+    "CollectionMandateDebtor": "memo:CollectionMandateDebtor",
+    "address": {
+      "@id": "memo:address",
+      "@type": "@id"
+    },
+    "CreateCollectionMandate": "memo:CreateCollectionMandate",
+    "signature_date": {
+      "@id": "memo:signature_date",
+      "@type": "xsd:date"
+    },
+    "debtor": {
+      "@id": "memo:debtor",
+      "@type": "@id"
+    },
+    "contract_reference": {
+      "@id": "memo:contract_reference",
+      "@type": "xsd:string"
+    },
+    "Iban": "memo:Iban",
+    "allow_collections": {
+      "@id": "memo:allow_collections",
+      "@type": "xsd:boolean"
+    },
+    "IbanPage": "memo:IbanPage",
+    "UpdateIban": "memo:UpdateIban",
+    "CreateIban": "memo:CreateIban",
+    "CreateMandateSignatureRequestDebtor": "memo:CreateMandateSignatureRequestDebtor",
+    "CreateMandateSignatureRequestDiscriminator": "memo:CreateMandateSignatureRequestDiscriminator",
+    "language": {
+      "@id": "memo:language",
+      "@type": "xsd:string"
+    },
+    "mode": {
+      "@id": "memo:mode",
+      "@type": "xsd:string"
+    },
+    "debtor_email": {
+      "@id": "memo:debtor_email",
+      "@type": "xsd:string"
+    },
+    "CreateMandateSignatureRequestDebtorAddress": "memo:CreateMandateSignatureRequestDebtorAddress",
+    "MandateSignatureRequestPage": "memo:MandateSignatureRequestPage",
+    "MandateSignatureRequestDiscriminator": "memo:MandateSignatureRequestDiscriminator",
+    "MandateSignatureRequestDebtor": "memo:MandateSignatureRequestDebtor",
+    "CreateOauth2TokenDTODiscriminator": "memo:CreateOauth2TokenDTODiscriminator",
+    "grant_type": {
+      "@id": "memo:grant_type",
+      "@type": "xsd:string"
+    },
+    "OAuth2Token": "memo:OAuth2Token",
+    "access_token": {
+      "@id": "memo:access_token",
+      "@type": "xsd:string"
+    },
+    "token_type": {
+      "@id": "memo:token_type",
+      "@type": "xsd:string"
+    },
+    "expires_in": {
+      "@id": "memo:expires_in",
+      "@type": "xsd:integer"
+    },
+    "refresh_token": {
+      "@id": "memo:refresh_token",
+      "@type": "xsd:string"
+    },
+    "scope": {
+      "@id": "memo:scope",
+      "@type": "xsd:string"
+    },
+    "connection_id": {
+      "@id": "memo:connection_id",
+      "@type": "xsd:string"
+    },
+    "LinksPaymentInitiation": "memo:LinksPaymentInitiation",
+    "self": {
+      "@id": "memo:self",
+      "@type": "@id"
+    },
+    "PaymentInitiationCancelResponseMinus202": "memo:PaymentInitiationCancelResponseMinus202",
+    "transactionStatus": {
+      "@id": "memo:transactionStatus",
+      "@type": "xsd:string"
+    },
+    "PaymentInitiationJson": "memo:PaymentInitiationJson",
+    "instructedAmount": {
+      "@id": "memo:instructedAmount",
+      "@type": "@id"
+    },
+    "endToEndIdentification": {
+      "@id": "memo:endToEndIdentification",
+      "@type": "xsd:string"
+    },
+    "creditorAddress": {
+      "@id": "memo:creditorAddress",
+      "@type": "@id"
+    },
+    "requestedExecutionDate": {
+      "@id": "memo:requestedExecutionDate",
+      "@type": "xsd:date"
+    },
+    "PaymentInitationRequestResponseMinus201": "memo:PaymentInitationRequestResponseMinus201",
+    "paymentId": {
+      "@id": "memo:paymentId",
+      "@type": "xsd:string"
+    },
+    "psuMessage": {
+      "@id": "memo:psuMessage",
+      "@type": "xsd:string"
+    },
+    "tppMessages": {
+      "@id": "memo:tppMessages",
+      "@container": "@list"
+    },
+    "BulkPaymentInitiationWithStatusResponse": "memo:BulkPaymentInitiationWithStatusResponse",
+    "payments": {
+      "@id": "memo:payments",
+      "@container": "@list"
+    },
+    "PaymentInitiationBulkElementJson": "memo:PaymentInitiationBulkElementJson",
+    "PaymentInitiationWithStatusResponse": "memo:PaymentInitiationWithStatusResponse",
+    "PaymentInitiationStatusResponseMinus200Json": "memo:PaymentInitiationStatusResponseMinus200Json",
+    "tppMessage": {
+      "@id": "memo:tppMessage",
+      "@container": "@list"
+    },
+    "BulkPaymentInitiationJson": "memo:BulkPaymentInitiationJson",
+    "TppMessage": "memo:TppMessage",
+    "category": {
+      "@id": "memo:category",
+      "@type": "xsd:string"
+    },
+    "code": {
+      "@id": "memo:code",
+      "@type": "xsd:string"
+    },
+    "path": {
+      "@id": "memo:path",
+      "@type": "xsd:string"
+    },
+    "text": {
+      "@id": "memo:text",
+      "@type": "xsd:string"
+    },
+    "CreateIncomingCollectionMandateCreditor": "memo:CreateIncomingCollectionMandateCreditor",
+    "sepa_identifier": {
+      "@id": "memo:sepa_identifier",
+      "@type": "xsd:string"
+    },
+    "CreateIncomingCollectionMandate": "memo:CreateIncomingCollectionMandate",
+    "creditor": {
+      "@id": "memo:creditor",
+      "@type": "@id"
+    },
+    "CreateIncomingTransfer": "memo:CreateIncomingTransfer",
+    "counterparty_name": {
+      "@id": "memo:counterparty_name",
+      "@type": "xsd:string"
+    },
+    "counterparty_iban": {
+      "@id": "memo:counterparty_iban",
+      "@type": "xsd:string"
+    },
+    "CreateIncomingCollection": "memo:CreateIncomingCollection",
+    "TransactionPage": "memo:TransactionPage",
+    "Transaction": "memo:Transaction",
+    "link": {
+      "@id": "memo:link",
+      "@type": "xsd:string"
+    },
+    "direction": {
+      "@id": "memo:direction",
+      "@type": "xsd:string"
+    },
+    "request_date": {
+      "@id": "memo:request_date",
+      "@type": "xsd:dateTime"
+    },
+    "execution_date": {
+      "@id": "memo:execution_date",
+      "@type": "xsd:dateTime"
+    },
+    "accounting_date": {
+      "@id": "memo:accounting_date",
+      "@type": "xsd:dateTime"
+    },
+    "batch_id": {
+      "@id": "memo:batch_id",
+      "@type": "xsd:string"
+    },
+    "attachment_count": {
+      "@id": "memo:attachment_count",
+      "@type": "xsd:integer"
+    },
+    "source": {
+      "@id": "memo:source",
+      "@type": "@id"
+    },
+    "TransactionSourceDiscriminator": "memo:TransactionSourceDiscriminator",
+    "TransferBeneficiaryAddress": "memo:TransferBeneficiaryAddress",
+    "CreateTransferV2": "memo:CreateTransferV2",
+    "beneficiary_name": {
+      "@id": "memo:beneficiary_name",
+      "@type": "xsd:string"
+    },
+    "beneficiary_address": {
+      "@id": "memo:beneficiary_address",
+      "@type": "@id"
+    },
+    "beneficiary_iban": {
+      "@id": "memo:beneficiary_iban",
+      "@type": "xsd:string"
+    },
+    "type_strategy": {
+      "@id": "memo:type_strategy",
+      "@type": "xsd:string"
+    },
+    "BulkTransfers": "memo:BulkTransfers",
+    "transfers_total": {
+      "@id": "memo:transfers_total",
+      "@type": "xsd:integer"
+    },
+    "transfers_confirmed": {
+      "@id": "memo:transfers_confirmed",
+      "@type": "xsd:integer"
+    },
+    "transfers_canceled": {
+      "@id": "memo:transfers_canceled",
+      "@type": "xsd:integer"
+    },
+    "transfers_failed": {
+      "@id": "memo:transfers_failed",
+      "@type": "xsd:integer"
+    },
+    "TransferV2Page": "memo:TransferV2Page",
+    "CreateBulkTransfers": "memo:CreateBulkTransfers",
+    "transfers": {
+      "@id": "memo:transfers",
+      "@container": "@list"
+    },
+    "TransferV2": "memo:TransferV2",
+    "transfer_type": {
+      "@id": "memo:transfer_type",
+      "@type": "xsd:string"
+    },
+    "Event": "memo:Event",
+    "event_type": {
+      "@id": "memo:event_type",
+      "@type": "xsd:string"
+    },
+    "resource_type": {
+      "@id": "memo:resource_type",
+      "@type": "xsd:string"
+    },
+    "resource_id": {
+      "@id": "memo:resource_id",
+      "@type": "xsd:string"
+    },
+    "WebhookPage": "memo:WebhookPage",
+    "Webhook": "memo:Webhook",
+    "url": {
+      "@id": "memo:url",
+      "@type": "xsd:string"
+    },
+    "bearer_token": {
+      "@id": "memo:bearer_token",
+      "@type": "xsd:string"
+    },
+    "CreateWebhook": "memo:CreateWebhook",
+    "TransferBeneficiary": "memo:TransferBeneficiary",
+    "account_identifier": {
+      "@id": "memo:account_identifier",
+      "@type": "@id"
+    },
+    "bank_country": {
+      "@id": "memo:bank_country",
+      "@type": "xsd:string"
+    },
+    "lei": {
+      "@id": "memo:lei",
+      "@type": "xsd:string"
+    },
+    "CreateWireTransfer": "memo:CreateWireTransfer",
+    "instructed_amount": {
+      "@id": "memo:instructed_amount",
+      "@type": "xsd:integer"
+    },
+    "instructed_currency": {
+      "@id": "memo:instructed_currency",
+      "@type": "xsd:string"
+    },
+    "beneficiary": {
+      "@id": "memo:beneficiary",
+      "@type": "@id"
+    },
+    "purpose": {
+      "@id": "memo:purpose",
+      "@type": "xsd:string"
+    },
+    "AccountIdentifierDiscriminator": "memo:AccountIdentifierDiscriminator",
+    "WireTransfer": "memo:WireTransfer",
+    "beneficiary_account_identifier": {
+      "@id": "memo:beneficiary_account_identifier",
+      "@type": "@id"
+    },
+    "uetr": {
+      "@id": "memo:uetr",
+      "@type": "xsd:string"
+    }
+  },
+  "@type": "schema:Dataset",
+  "schema:name": "Memo Bank API JSON-LD context",
+  "schema:description": "A JSON-LD @context for the objects Memo Bank's own API contract declares: one class per component schema, one property per declared field, typed from the contract. Derived by script (derive-json-ld.py, 2026-10-12) from openapi/memo-bank-account-assessments-api-openapi.yml, openapi/memo-bank-accounts-api-openapi.yml, openapi/memo-bank-ais-api-openapi.yml.",
+  "dcterms:created": "2026-10-12",
+  "dcterms:source": [
+    "openapi/memo-bank-account-assessments-api-openapi.yml",
+    "openapi/memo-bank-accounts-api-openapi.yml",
+    "openapi/memo-bank-ais-api-openapi.yml",
+    "openapi/memo-bank-attachments-api-openapi.yml",
+    "openapi/memo-bank-collections-api-openapi.yml"
+  ]
+}

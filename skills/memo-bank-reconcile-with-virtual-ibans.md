@@ -1,27 +1,26 @@
 ---
-name: Reconcile incoming payments with virtual IBANs
-description: >-
-  Use Memo Bank virtual IBANs to identify who paid you without parsing payment references - provision one per
-  customer, match incoming transactions on local_iban, and attach supporting documents.
+name: memo-bank-reconcile-with-virtual-ibans
+description: Use Memo Bank virtual IBANs to identify who paid you without parsing payment references - provision one per customer, match incoming transactions on local_iban, and attach supporting documents.
 api: openapi/memo-bank-premium-bank-api-openapi.yml
 operations:
-  - listAccounts
-  - createIban
-  - listIbans
-  - getIban
-  - updateIban
-  - deleteIban
-  - listTransactions
-  - getTransaction
-  - createWebhook
-  - listAttachments
-  - createAttachment
-  - getAttachment
+- listAccounts
+- createIban
+- listIbans
+- getIban
+- updateIban
+- deleteIban
+- listTransactions
+- getTransaction
+- createWebhook
+- listAttachments
+- createAttachment
+- getAttachment
 generated: '2026-08-17'
 method: generated
 source:
-  - openapi/memo-bank-premium-bank-api-openapi.yml
-  - https://memo.bank/en/product/api/
+- openapi/memo-bank-premium-bank-api-openapi.yml
+- https://memo.bank/en/product/api/
+title: Reconcile incoming payments with virtual IBANs
 ---
 
 # Reconcile incoming payments with virtual IBANs
