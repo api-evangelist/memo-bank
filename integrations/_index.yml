@@ -609,8 +609,8 @@
   type: claimed
   evidence: https://memo.bank/en/integrations
   source: edge
-  status: pending-generation
-  arazzo: null
+  arazzo: memo-bank-pennylane-transaction-feed.yml
+  status: arazzo
 - slug: memo-bank-pulceo
   label: Pulceo
   partner_name: Pulceo
@@ -650,8 +650,8 @@
   type: claimed
   evidence: https://memo.bank/en/integrations
   source: edge
-  status: pending-generation
-  arazzo: null
+  arazzo: memo-bank-sage-bank-account-mirror.yml
+  status: arazzo
 - slug: memo-bank-sage-1000
   label: Sage 1000
   partner_name: Sage 1000

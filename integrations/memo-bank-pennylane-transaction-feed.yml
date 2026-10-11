@@ -1,0 +1,84 @@
+arazzo: 1.0.1
+info:
+  title: Memo Bank to Pennylane Transaction Feed
+  summary: Push a Memo Bank account's transactions into Pennylane as banking transactions.
+  description: >-
+    Lists the Memo Bank accounts, pulls the transactions for one account over a date window,
+    and creates the transaction in Pennylane so the accounting ledger reflects the bank feed.
+    Memo Bank lists this connection (via Bridge) on its integrations page.
+  version: 1.0.0
+x-integration:
+  partner: pennylane
+  template: null
+  edge_evidence: https://memo.bank/en/integrations
+  edge_type: claimed
+  method: generated
+  generated: '2026-10-12'
+  generator: pipeline step 25b (payments-integration-arazzo)
+sourceDescriptions:
+  - name: memoBankAccounts
+    url: https://raw.githubusercontent.com/api-evangelist/memo-bank/refs/heads/main/openapi/memo-bank-accounts-api-openapi.yml
+    type: openapi
+  - name: memoBankTransactions
+    url: https://raw.githubusercontent.com/api-evangelist/memo-bank/refs/heads/main/openapi/memo-bank-transactions-api-openapi.yml
+    type: openapi
+  - name: pennylaneTransactions
+    url: https://raw.githubusercontent.com/api-evangelist/pennylane/refs/heads/main/openapi/pennylane-transactions-api-openapi.yml
+    type: openapi
+workflows:
+  - workflowId: memoBankTransactionsToPennylane
+    summary: Sync Memo Bank transactions into Pennylane.
+    inputs:
+      type: object
+      properties:
+        start_date: {type: string}
+        end_date: {type: string}
+    steps:
+      - stepId: listAccounts
+        operationId: $sourceDescriptions.memoBankAccounts.listAccounts
+        parameters:
+          - name: size
+            in: query
+            value: 100
+        successCriteria:
+          - condition: $statusCode == 200
+        outputs:
+          accountId: $response.body#/results/0/id
+          iban: $response.body#/results/0/iban
+      - stepId: listTransactions
+        operationId: $sourceDescriptions.memoBankTransactions.listTransactions
+        parameters:
+          - name: account_id
+            in: query
+            value: $steps.listAccounts.outputs.accountId
+          - name: start_date
+            in: query
+            value: $inputs.start_date
+          - name: end_date
+            in: query
+            value: $inputs.end_date
+        successCriteria:
+          - condition: $statusCode == 200
+        outputs:
+          transactionId: $response.body#/results/0/id
+          amount: $response.body#/results/0/amount
+          currency: $response.body#/results/0/currency
+          executionDate: $response.body#/results/0/execution_date
+          label: $response.body#/results/0/counterparty_name
+      - stepId: createPennylaneTransaction
+        operationId: $sourceDescriptions.pennylaneTransactions.createTransaction
+        requestBody:
+          contentType: application/json
+          payload:
+            date: $steps.listTransactions.outputs.executionDate
+            amount: $steps.listTransactions.outputs.amount
+            currency: $steps.listTransactions.outputs.currency
+            label: $steps.listTransactions.outputs.label
+            external_reference: $steps.listTransactions.outputs.transactionId
+        successCriteria:
+          - condition: $statusCode == 201
+        outputs:
+          pennylaneTransactionId: $response.body#/id
+    outputs:
+      memoBankTransactionId: $steps.listTransactions.outputs.transactionId
+      pennylaneTransactionId: $steps.createPennylaneTransaction.outputs.pennylaneTransactionId

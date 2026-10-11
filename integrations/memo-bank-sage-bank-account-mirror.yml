@@ -1,0 +1,53 @@
+arazzo: 1.0.1
+info:
+  title: Memo Bank to Sage Bank Account Mirror
+  summary: Register a Memo Bank account as a bank account in Sage Business Cloud Accounting.
+  description: >-
+    Reads the Memo Bank accounts and creates the matching bank account record in Sage so the
+    bank feed (EBICS, as listed on Memo Bank's integrations page) has a ledger account to land in.
+  version: 1.0.0
+x-integration:
+  partner: sage
+  template: null
+  edge_evidence: https://memo.bank/en/integrations
+  edge_type: claimed
+  method: generated
+  generated: '2026-10-12'
+  generator: pipeline step 25b (payments-integration-arazzo)
+sourceDescriptions:
+  - name: memoBankAccounts
+    url: https://raw.githubusercontent.com/api-evangelist/memo-bank/refs/heads/main/openapi/memo-bank-accounts-api-openapi.yml
+    type: openapi
+  - name: sageBankAccounts
+    url: https://raw.githubusercontent.com/api-evangelist/sage/refs/heads/main/openapi/sage-bank-accounts-api-openapi.yml
+    type: openapi
+workflows:
+  - workflowId: mirrorMemoBankAccountInSage
+    summary: Create a Sage bank account for a Memo Bank account.
+    steps:
+      - stepId: listAccounts
+        operationId: $sourceDescriptions.memoBankAccounts.listAccounts
+        parameters:
+          - name: size
+            in: query
+            value: 100
+        successCriteria:
+          - condition: $statusCode == 200
+        outputs:
+          accountId: $response.body#/results/0/id
+          accountName: $response.body#/results/0/name
+      - stepId: createSageBankAccount
+        operationId: $sourceDescriptions.sageBankAccounts.createBankAccount
+        requestBody:
+          contentType: application/json
+          payload:
+            bank_account:
+              name: $steps.listAccounts.outputs.accountName
+              bank_account_type_id: BANK
+        successCriteria:
+          - condition: $statusCode == 201
+        outputs:
+          sageBankAccountId: $response.body#/id
+    outputs:
+      memoBankAccountId: $steps.listAccounts.outputs.accountId
+      sageBankAccountId: $steps.createSageBankAccount.outputs.sageBankAccountId
