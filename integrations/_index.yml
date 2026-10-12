@@ -15,14 +15,13 @@
   arazzo: null
 - slug: memo-bank-accountable
   label: Accountable
-  partner: accountable
   partner_name: Accountable
   category: accounting-treasury bank feed
   use_case: Bank feed connection via Powens (channel as listed on the Memo Bank integrations page)
   type: claimed
   evidence: https://memo.bank/en/integrations
   source: edge
-  status: pending-generation
+  status: pending-partner-spec
   arazzo: null
 - slug: memo-bank-acd
   label: ACD
