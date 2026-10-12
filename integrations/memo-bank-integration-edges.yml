@@ -747,3 +747,26 @@ edges:
   use_case: Bank feed connection via Ponto (channel as listed on the Memo Bank integrations page)
   operations: []
 templates: []
+skips:
+- label: accountable
+  cause: catalog
+  why: all/accountable is a crypto proof-of-reserves/NAV provider, not the Accountable bookkeeping app Memo Bank
+    lists. Wrong entity, so no suitable operation.
+- label: adp
+  cause: partner-contract
+  why: The ADP specs cover only payroll/HR worker operations. None takes a bank feed or bank transactions.
+- label: agicap
+  cause: partner-contract
+  why: BankFiles_PushBankFile takes a binary bank statement file, but Memo Bank's specs have no operation that exports
+    a statement file. The formats don't match.
+- label: odoo
+  cause: partner-contract
+  why: The only object operation is a generic XML-RPC call (postXmlrpc2Object). Any model or method chosen would
+    be invented.
+- label: zapier
+  cause: partner-contract
+  why: The Zapier specs are platform metadata APIs (apps, actions, zap templates). None takes a bank-feed import.
+- label: zoho-books
+  cause: partner-contract
+  why: The Zoho Books specs cover only contacts, invoices, items and organizations. There is no bank-transaction
+    or bank-account operation.
