@@ -1,0 +1,97 @@
+# DERIVED by derive-integration-map.py (roadmap#949): each integration workflow, step by step,
+# resolved to spec file -> tag -> business capability (Turbo EA, CC BY 4.0) and the operation's
+# phrasing intent. Read from our own files; an unmapped link says why.
+slug: memo-bank
+workflows:
+- file: memo-bank-pennylane-transaction-feed.yml
+  title: Memo Bank to Pennylane Transaction Feed
+  partner: pennylane
+  template: null
+  repos:
+  - memo-bank
+  - pennylane
+  steps:
+  - step: listAccounts
+    repo: memo-bank
+    spec_file: memo-bank-accounts-api-openapi.yml
+    operationId: listAccounts
+    tag: Accounts
+    capability_id: null
+    capability: null
+    capability_l1: null
+    intent: null
+    effect: null
+    unmapped: no capability edge for this spec file
+  - step: listTransactions
+    repo: memo-bank
+    spec_file: memo-bank-transactions-api-openapi.yml
+    operationId: listTransactions
+    tag: Transactions
+    capability_id: null
+    capability: null
+    capability_l1: null
+    intent: null
+    effect: null
+    unmapped: no capability edge for this spec file
+  - step: createPennylaneTransaction
+    repo: pennylane
+    spec_file: pennylane-transactions-api-openapi.yml
+    operationId: createTransaction
+    tag: Transactions
+    capability_id: null
+    capability: null
+    capability_l1: null
+    intent: null
+    effect: null
+    unmapped: no capability edge for this spec file
+  connects:
+    memo-bank:
+      capabilities: []
+      tags:
+      - Accounts
+      - Transactions
+    pennylane:
+      capabilities: []
+      tags:
+      - Transactions
+  intents: []
+- file: memo-bank-sage-bank-account-mirror.yml
+  title: Memo Bank to Sage Bank Account Mirror
+  partner: sage
+  template: null
+  repos:
+  - memo-bank
+  - sage
+  steps:
+  - step: listAccounts
+    repo: memo-bank
+    spec_file: memo-bank-accounts-api-openapi.yml
+    operationId: listAccounts
+    tag: Accounts
+    capability_id: null
+    capability: null
+    capability_l1: null
+    intent: null
+    effect: null
+    unmapped: no capability edge for this spec file
+  - step: createSageBankAccount
+    repo: sage
+    spec_file: sage-bank-accounts-api-openapi.yml
+    operationId: createBankAccount
+    tag: Bank Accounts
+    capability_id: null
+    capability: null
+    capability_l1: null
+    intent: null
+    effect: null
+    unmapped: no capability edge for this spec file
+  connects:
+    memo-bank:
+      capabilities: []
+      tags:
+      - Accounts
+    sage:
+      capabilities: []
+      tags:
+      - Bank Accounts
+  intents: []
