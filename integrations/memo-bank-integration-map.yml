@@ -38,12 +38,12 @@ workflows:
     spec_file: pennylane-transactions-api-openapi.yml
     operationId: createTransaction
     tag: Transactions
-    capability_id: null
-    capability: null
-    capability_l1: null
+    capability_id: BC-200
+    capability: Financial Management
+    capability_l1: BC-200
     intent: null
     effect: null
-    unmapped: no capability edge for this spec file
+    unmapped: null
   connects:
     memo-bank:
       capabilities: []
@@ -51,7 +51,8 @@ workflows:
       - Accounts
       - Transactions
     pennylane:
-      capabilities: []
+      capabilities:
+      - BC-200
       tags:
       - Transactions
   intents: []
