@@ -12,6 +12,8 @@ checked:
 - https://n8n.io/integrations/memo-bank/
 - https://www.make.com/en/integrations/memo-bank
 - https://zapier.com/apps/memo-bank/integrations
+- https://www.amf-france.org/fr/espace-epargnants/proteger-son-epargne/listes-blanches
+- https://www.regafi.fr/
 summary: 81 accounting/treasury tools named on Memo Bank's own integrations page, each connected through a listed
   channel (EBICS, Bridge, Powens, Ponto, Jedeclare.com, Salt Edge). No Zapier/n8n/Make app listing found (Zapier
   404, n8n 404, Make 403).
@@ -746,6 +748,40 @@ edges:
   category: accounting-treasury bank feed
   use_case: Bank feed connection via Ponto (channel as listed on the Memo Bank integrations page)
   operations: []
+- partner_name: REGAFI (ACPR / Banque de France register of authorised financial firms)
+  partner: null
+  partner_match: register
+  type: register
+  channel: regulator-register
+  relationship: standard-participant
+  direction: partner-built
+  evidence: https://www.regafi.fr/
+  category: French financial supervisory authorisation (ACPR, REGAFI)
+  contract_reference:
+    register: REGAFI (ACPR / Banque de France register of authorised financial firms)
+    spec_file: null
+    standard: null
+    role: acpr-authorised
+    registrations:
+    - registered_name: MEMO BANK
+      role: acpr-authorised
+      licences:
+      - Établissement de Crédit (Banque)
+      register_country: FR
+      matched_domain: memo.bank
+      matched_by: domain
+      register_id: '87553'
+      lei: 969500151TTK0D1U6N42
+      siren: '829226760'
+      since: '2020-07-23'
+      identity: wikidata Q97119297 (LEI P1278) P856 https://memo.bank
+    signal_note: 'participation only: a supervisory authorisation / passport notification; no API conformance is
+      published by this register'
+    detected_by: sweep-france-regafi-acpr.py
+    detected: '2026-10-22'
+    identity_source: wikidata P856 (LEI P1278 or name; labelled provenance step; Kin 2026-10-15 decision 1)
+  detected_by: sweep-france-regafi-acpr.py
+  first_seen: '2026-10-22'
 templates: []
 skips:
 - label: accountable

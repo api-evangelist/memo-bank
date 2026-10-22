@@ -823,3 +823,37 @@
   source: edge
   status: pending-generation
   arazzo: null
+- slug: memo-bank-regafi-acpr-banque-de-france-register-of-authorised-financial-firms
+  label: REGAFI (ACPR / Banque de France register of authorised financial firms)
+  partner_name: REGAFI (ACPR / Banque de France register of authorised financial firms)
+  category: French financial supervisory authorisation (ACPR, REGAFI)
+  type: register
+  channel: regulator-register
+  evidence: https://www.regafi.fr/
+  source: edge
+  relationship: standard-participant
+  contract_reference:
+    register: REGAFI (ACPR / Banque de France register of authorised financial firms)
+    spec_file: null
+    standard: null
+    role: acpr-authorised
+    registrations:
+    - registered_name: MEMO BANK
+      role: acpr-authorised
+      licences:
+      - Établissement de Crédit (Banque)
+      register_country: FR
+      matched_domain: memo.bank
+      matched_by: domain
+      register_id: '87553'
+      lei: 969500151TTK0D1U6N42
+      siren: '829226760'
+      since: '2020-07-23'
+      identity: wikidata Q97119297 (LEI P1278) P856 https://memo.bank
+    signal_note: 'participation only: a supervisory authorisation / passport notification; no API conformance is
+      published by this register'
+    detected_by: sweep-france-regafi-acpr.py
+    detected: '2026-10-22'
+    identity_source: wikidata P856 (LEI P1278 or name; labelled provenance step; Kin 2026-10-15 decision 1)
+  status: not-a-workflow
+  arazzo: null
