@@ -199,3 +199,9 @@ x-topics:
     When using the [Webhooks endpoints](https://docs.api.memo.bank/group/endpoint-webhooks), managed webhooks will be tied to the connection linked to the OAuth2 access token when making the call. This allows you to configure a  different URL for each connection. We can also configure a global  webhook tied to your application if you only need one URL or do not want to use these endpoints.
 
     '
+x-provenance:
+  method: harvested
+  publisher: Memo Bank
+  source: https://docs-marketplace.api.memo.bank/topic/marketplace-openapi-source.yaml
+  note: split by refine-openapis from the provider's own published document, verified by fetch (openapi/_original/*.fetch.json);
+    stamped by stamp-openapi-provenance.py (roadmap#793)
