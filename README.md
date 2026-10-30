@@ -64,6 +64,201 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Memo Bank is a company surfaced as a portfolio company of serena and added to the API Evangelist network as a stub for enrichment. Sector: fintech-insurtech. This profile is a lead awaiting the enrichment pipeline.
+Memo Bank is an independent French commercial bank, accredited as a credit institution by the European Central Bank and supervised by the ACPR, that serves small and mid-sized companies with current accounts, loans, savings and an API-first payments platform. Its Premium Bank API is a REST/JSON contract authenticated with RS256-signed JWT/JWS request tokens, covering accounts, transactions, bi-directional virtual IBANs, SEPA credit transfers, SEPA Direct Debit collections and mandate signature requests, SWIFT/RTGS wire transfers, bulk payment batches, attachments and account assessments, with 34 webhook event types for asynchronous reconciliation. A Marketplace API adds an OAuth 2.0 layer so third-party developers can act on customer resources, a NextGenPSD2 API implements the Berlin Group AIS/PIS interface for licensed third-party providers, and a hosted MCP server exposes read-only banking data plus attachment upload to AI assistants.
 
-Source: portfolio company of [serena](https://github.com/api-evangelist/serena) — https://memo.bank/
+**Areas:** Company · Fintech Insurtech · Banking · Business Banking · Payments · SEPA · SEPA Direct Debit · virtual-iban · Wire Transfers · Open Banking · PSD2 · Berlin Group
+
+## Memo Bank on APIs.io
+
+Everything profiled for Memo Bank is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/memo-bank/](https://apis.io/providers/memo-bank/)** — or go straight to one of the APIs or properties below.
+
+### APIs (15)
+
+- [Memo Bank Account assessments API](https://apis.io/apis/memo-bank/memo-bank-account-assessments-api/) — Account assessments allow you to assess SEPA counterparty accounts before initiating transactions with them. An assessment provides: * **Risk indicators**:…
+- [Memo Bank Accounts API](https://apis.io/apis/memo-bank/memo-bank-accounts-api/) — Accounts are any bank account that your company owns: current account, ring-fenced account, settlement account, specially dedicated account, trust account,…
+- [Memo Bank AIS API](https://apis.io/apis/memo-bank/memo-bank-ais-api/) — Account Information Service. Consent is given using the **OAuth2 as a pre-step** authentication flow described in NextGenPSD2 specifications. This means you…
+- [Memo Bank Attachments API](https://apis.io/apis/memo-bank/memo-bank-attachments-api/) — Documents attached to transactions.
+- [Memo Bank Collections API](https://apis.io/apis/memo-bank/memo-bank-collections-api/) — Collections are SEPA direct debit collections, including SEPA CORE direct debits and SEPA B2B direct debits. To initiate a direct debit, a **mandate**…
+- [Memo Bank Mandate signature requests API](https://apis.io/apis/memo-bank/memo-bank-mandate-signature-requests-api/) — Mandate signature requests are a way to prepare and send collection mandates for signature. The mandate debtor receives an email with a link so they can…
+- [Memo Bank PIS API](https://apis.io/apis/memo-bank/memo-bank-pis-api/) — Payment Initiation Service. Payment initiation is done using the **integrated OAuth2** authentication flow described in NextGenPSD2 specifications. This…
+- [Memo Bank Sandbox API](https://apis.io/apis/memo-bank/memo-bank-sandbox-api/) — Sandbox only endpoints.
+- [Memo Bank Transactions API](https://apis.io/apis/memo-bank/memo-bank-transactions-api/) — Transactions are any debit and credit operations on an account. <img src="https://assets.memo.bank/memobankapi/transactions-lifecycle-api-v2.png"…
+- [Memo Bank Transfers API](https://apis.io/apis/memo-bank/memo-bank-transfers-api/) — Transfers are transfers within the SEPA-zone, including SEPA standard transfers, SEPA instant transfers and Target 2 transfers. They can be initiated…
+- [Memo Bank Webhook API](https://apis.io/apis/memo-bank/memo-bank-webhook-api/) — # Events When something interesting happens on your Memo Bank workspace, such as a new transaction being created, Memo Bank can reach out to your…
+- [Memo Bank Webhooks API](https://apis.io/apis/memo-bank/memo-bank-webhooks-api/) — Manage webhooks for your application. Webhooks allow you to receive real-time notifications when events occur on your Memo Bank workspace. Please refer to…
+- [Memo Bank Wire Transfers API](https://apis.io/apis/memo-bank/memo-bank-wire-transfers-api/) — Wire transfers are transfers going through Swift. They allow you to send funds outside the SEPA network and to transfer money in foreign currencies.…
+- [Memo Bank IBA Ns API](https://apis.io/apis/memo-bank/memo-bank-ibans-api/) — IBANs are identifiers for bank accounts. There are two types of IBANs at Memo Bank: * Main IBANs, which act as primary identifiers for a bank account. There…
+- [Memo Bank O Auth2 API](https://apis.io/apis/memo-bank/memo-bank-oauth2-api/) — OAuth2 token management endpoints.
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### AsyncAPI (1)
+
+Event-driven and webhook contracts.
+
+- [Memo Bank Webhooks](https://apis.io/asyncapis/memo-bank/memo-bank-webhooks/)
+
+#### MCP servers (1)
+
+Model Context Protocol servers that expose the API to agents.
+
+- [memo-bank-mcp.yml](https://apis.io/servers/memo-bank/memo-bank-mcp-yml/)
+
+#### Agentic access (1)
+
+Which operations an agent can call, which act, and which need a human in the loop.
+
+- [Memo Bank Agentic Access](https://apis.io/agentic-access/memo-bank/memo-bank-agentic-access/)
+
+#### JSON Schema (44)
+
+The data models the API reads and writes.
+
+- [Account](https://apis.io/schemas/memo-bank/memo-bank-account/)
+- [AccountPage](https://apis.io/schemas/memo-bank/memo-bank-account-page/)
+- [Attachment](https://apis.io/schemas/memo-bank/memo-bank-attachment/)
+- [AttachmentPage](https://apis.io/schemas/memo-bank/memo-bank-attachment-page/)
+- [AuthorizationCodeGrant](https://apis.io/schemas/memo-bank/memo-bank-authorization-code-grant/)
+- [BulkCollections](https://apis.io/schemas/memo-bank/memo-bank-bulk-collections/)
+- [BulkPaymentInitiationJson](https://apis.io/schemas/memo-bank/memo-bank-bulk-payment-initiation-json/)
+- [BulkPaymentInitiationWithStatusResponse](https://apis.io/schemas/memo-bank/memo-bank-bulk-payment-initiation-with-status-response/)
+- [BulkTransfers](https://apis.io/schemas/memo-bank/memo-bank-bulk-transfers/)
+- [Collection](https://apis.io/schemas/memo-bank/memo-bank-collection/)
+- [CollectionPage](https://apis.io/schemas/memo-bank/memo-bank-collection-page/)
+- [CompletedAccountAssessment](https://apis.io/schemas/memo-bank/memo-bank-completed-account-assessment/)
+- [CreateAccountAssessment](https://apis.io/schemas/memo-bank/memo-bank-create-account-assessment/)
+- [CreateBulkCollections](https://apis.io/schemas/memo-bank/memo-bank-create-bulk-collections/)
+- [CreateBulkTransfers](https://apis.io/schemas/memo-bank/memo-bank-create-bulk-transfers/)
+- [CreateCollection](https://apis.io/schemas/memo-bank/memo-bank-create-collection/)
+- [CreateEmailMandateSignatureRequest](https://apis.io/schemas/memo-bank/memo-bank-create-email-mandate-signature-request/)
+- [CreateIban](https://apis.io/schemas/memo-bank/memo-bank-create-iban/)
+- [CreateIncomingCollection](https://apis.io/schemas/memo-bank/memo-bank-create-incoming-collection/)
+- [CreateIncomingTransfer](https://apis.io/schemas/memo-bank/memo-bank-create-incoming-transfer/)
+- [CreateRedirectMandateSignatureRequest](https://apis.io/schemas/memo-bank/memo-bank-create-redirect-mandate-signature-request/)
+- [CreateTransferV2](https://apis.io/schemas/memo-bank/memo-bank-create-transfer-v2/)
+- [CreateWebhook](https://apis.io/schemas/memo-bank/memo-bank-create-webhook/)
+- [CreateWireTransfer](https://apis.io/schemas/memo-bank/memo-bank-create-wire-transfer/)
+- [EmailMandateSignatureRequest](https://apis.io/schemas/memo-bank/memo-bank-email-mandate-signature-request/)
+- …and 19 more published on APIs.io
+
+#### JSON-LD (1)
+
+Linked-data contexts for the provider's vocabulary.
+
+- [Memo Bank Context](https://apis.io/jsonld/memo-bank/memo-bank-context/)
+
+#### Overlays (3)
+
+OpenAPI overlays, including conversational phrasing for each operation.
+
+- [Memo Bank Marketplace Api Overlay](https://apis.io/overlays/memo-bank/memo-bank-marketplace-api-overlay/)
+- [Memo Bank Nextgenpsd2 Api Overlay](https://apis.io/overlays/memo-bank/memo-bank-nextgenpsd2-api-overlay/)
+- [Memo Bank Premium Bank Api Overlay](https://apis.io/overlays/memo-bank/memo-bank-premium-bank-api-overlay/)
+
+#### Governance rules (1)
+
+Spectral rulesets for the provider's contracts.
+
+- [Memo Bank API Rules](https://apis.io/rules/memo-bank/memo-bank-rules/)
+
+#### Security (3)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Memo Bank Authentication](https://apis.io/security/memo-bank/memo-bank-authentication/)
+- [Memo Bank Domain Security](https://apis.io/security/memo-bank/memo-bank-domain-security/)
+- [Memo Bank Vulnerability Disclosure](https://apis.io/security/memo-bank/memo-bank-vulnerability-disclosure/)
+
+#### OAuth scopes (1)
+
+The permissions the API asks for.
+
+- [Memo Bank Scopes](https://apis.io/scopes/memo-bank/memo-bank-scopes/)
+
+#### Plans and pricing (1)
+
+Published plans, tiers and prices.
+
+- [Memo Bank Plans Pricing](https://apis.io/plans/memo-bank/memo-bank-plans-pricing/)
+
+#### Rate limits (1)
+
+Published request limits.
+
+- [Memo Bank Rate Limits](https://apis.io/rate-limits/memo-bank/memo-bank-rate-limits/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://memo.bank/)
+- [Documentation](https://docs.api.memo.bank/)
+- [Getting started](https://docs.api.memo.bank/topic/topic-getting-started)
+- [API reference](https://docs.api.memo.bank/version-2/)
+- [Pricing](https://memo.bank/en/pricing/)
+- [Sign up](https://memo.bank/en/sign-up/)
+- [Support](https://aide.memo.bank/)
+- [Changelog](https://docs.api.memo.bank/changes)
+- [Blog](https://memo.bank/en/magazine/)
+- [Compliance](https://memo.bank/en/about/security-operations/)
+- [Terms of service](https://memo.bank/en/agreement/)
+- [Privacy policy](https://memo.bank/en/personal-data/)
+- [GitHub](https://github.com/memobank)
+- [Status](https://status.memo.bank/)
+
+## API Evangelist rating
+
+**Kin Score 68.8** — exemplar · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 81.7 |
+| Contract quality | 68.9 |
+| Contract governance | 35.6 |
+| Operational transparency | 52.6 |
+| Developer ergonomics | 66.1 |
+| Access clarity | 73.7 |
+
+**Agent readiness 62.3** — agent-native
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | derived (partial credit) |
+| Reversibility Documented | documented (partial credit) |
+| MCP Server | verified |
+| Auth Clarity | served (partial credit) |
+| Idempotency | documented (partial credit) |
+| Error Semantics | documented (partial credit) |
+| OpenAPI Examples | partial |
+| Rate Limit Signal | documented (partial credit) |
+| Event Surface Described | yes |
+| Agent Skills | derived (partial credit) |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | served (partial credit) |
+| Protected Resource Metadata | verified |
+| Dynamic Client Registration | yes |
+| Agentic Commerce | — |
+| Pagination Ratio | paginated |
+| Operation Distinctiveness | distinct |
+
+**Regulatory alignment 54.3** — Banking & Open Finance
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/memo-bank/](https://apis.io/providers/memo-bank/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Memo Bank: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/memo-bank/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
